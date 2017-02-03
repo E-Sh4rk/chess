@@ -2,8 +2,7 @@ import swing._
 import swing.event._
 import java.awt.Dimension
 
-// TODO : Write public function that list every possible move. Use it for chkmate detection and AI
-// TODO : Upgrade AI (random, + eat piece when possible ?)
+// TODO : Upgrade AI (eat piece when possible ?)
 // TODO : Graphical improvements : effect when mouse is down on a case,...
 // TODO : Image in panel when no game
 

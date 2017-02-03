@@ -143,8 +143,9 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         return true
     }
 
-    private def hasPossibleMove : Boolean =
+    def possibleMoves : scala.collection.mutable.MutableList[(Int,Int,Int,Int)] =
     {
+        val lst = new scala.collection.mutable.MutableList[(Int,Int,Int,Int)]
         for (i<-0 to 7)
         {
             for (j<-0 to 7)
@@ -156,13 +157,13 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                         for (l<-0 to 7)
                         {
                             if (canMove(i,j,k,l))
-                                return true
+                                lst += ((i,j,k,l))
                         }
                     }
                 }
             }
         }
-        return false
+        return lst
     }
     private def callPlayer : Unit =
     {
@@ -201,7 +202,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
 
         // Check/Checkmate/Stalemate detection
         val check = getKing(round).isCheck
-        val endOfGame = !hasPossibleMove
+        val endOfGame = possibleMoves.isEmpty
 
         if (check && endOfGame)
             canvas.setMessage ("Checkmate ! " + Round.adv(round).toString + " wins !")
