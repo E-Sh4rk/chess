@@ -2,10 +2,6 @@ import swing._
 import swing.event._
 import java.awt.Dimension
 
-// TODO : Upgrade AI (eat piece when possible ?)
-// TODO : Graphical improvements : effect when mouse is down on a case,...
-// TODO : Image in panel when no game
-
 object MyApp extends SimpleSwingApplication {
 	def top = new MainFrame {
 
