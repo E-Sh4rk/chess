@@ -64,32 +64,38 @@ class Board (private val _b:Board)
 
     def this () = { this (null) }
 
-    def pieceAtPosition(x:Int,y:Int) = { board(x)(y) }
+    def pieceAtPosition(x:Int,y:Int) = { board.synchronized { board(x)(y) } }
     def move(fromX:Int,fromY:Int,toX:Int,toY:Int) : Unit =
     {
-        val piece = pieceAtPosition(fromX,fromY)
-        if (piece != null)
+        board.synchronized
         {
-            // Do the move
-            piece.move(toX, toY)
-            board(toX)(toY) = piece
-            board(fromX)(fromY) = null
+            val piece = pieceAtPosition(fromX,fromY)
+            if (piece != null)
+            {
+                // Do the move
+                piece.move(toX, toY)
+                board(toX)(toY) = piece
+                board(fromX)(fromY) = null
+            }
         }
     }
     def getKing(t:Round.Round):Piece =
     {
-        for (i<-0 to 7)
+        board.synchronized
         {
-            for (j<-0 to 7)
+            for (i<-0 to 7)
             {
-                val piece = pieceAtPosition(i,j)
-                if (piece != null)
-                    if (piece.team == t)
-                        if (piece.king)
-                            return piece
+                for (j<-0 to 7)
+                {
+                    val piece = pieceAtPosition(i,j)
+                    if (piece != null)
+                        if (piece.team == t)
+                            if (piece.king)
+                                return piece
+                }
             }
+            return null
         }
-        return null
     }
 }
 
@@ -115,55 +121,63 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         callPlayer
     }
 
-    def getRound = {round}
+    def getRound = { round.synchronized{ round } }
 
     def canMove(x:Int,y:Int):Boolean =
     {
-        val piece = pieceAtPosition(x,y)
-        if (piece != null)
-            if (piece.team == round)
-                return true
-        return false
+        round.synchronized
+        {
+            val piece = pieceAtPosition(x,y)
+            if (piece != null)
+                if (piece.team == round)
+                    return true
+            return false
+        }
     }
 
     def canMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Boolean =
     {
-        if (!canMove(fromX,fromY))
-            return false
-        val p = pieceAtPosition(fromX,fromY)
-        if (!p.canMove(toX, toY))
-            return false
+        round.synchronized
+        {
+            if (!canMove(fromX,fromY))
+                return false
+            val p = pieceAtPosition(fromX,fromY)
+            if (!p.canMove(toX, toY))
+                return false
 
-        // Check if the king become check
-        val cboard = new Board(this)
-        cboard.move(fromX,fromY,toX,toY)
-        if (cboard.getKing(round).isCheck)
-            return false
-
-        return true
+            // Check if the king become check
+            val cboard = new Board(this)
+            cboard.move(fromX,fromY,toX,toY)
+            if (cboard.getKing(round).isCheck)
+                return false
+            return true
+        }
     }
 
     def possibleMoves : scala.collection.mutable.MutableList[(Int,Int,Int,Int)] =
     {
-        val lst = new scala.collection.mutable.MutableList[(Int,Int,Int,Int)]
-        for (i<-0 to 7)
+        round.synchronized
         {
-            for (j<-0 to 7)
+            val lst = new scala.collection.mutable.MutableList[(Int,Int,Int,Int)]
+            for (i<-0 to 7)
             {
-                if (canMove(i,j))
+                for (j<-0 to 7)
                 {
-                     for (k<-0 to 7)
+                    if (canMove(i,j))
                     {
-                        for (l<-0 to 7)
+                        for (k<-0 to 7)
                         {
-                            if (canMove(i,j,k,l))
-                                lst += ((i,j,k,l))
+                            for (l<-0 to 7)
+                            {
+                                if (canMove(i,j,k,l))
+                                    lst += ((i,j,k,l))
+                            }
                         }
                     }
                 }
             }
+            return lst
         }
-        return lst
     }
     private def callPlayer : Unit =
     {
@@ -193,28 +207,31 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             });
             return
         }
+            
+        round.synchronized
+        {
+            if (!canMove(fromX,fromY,toX,toY))
+                return
 
-        if (!canMove(fromX,fromY,toX,toY))
-            return
+            super.move (fromX,fromY,toX,toY)
+            round = Round.adv(round)
+        
+            // Check/Checkmate/Stalemate detection
+            val check = getKing(round).isCheck
+            val endOfGame = possibleMoves.isEmpty
 
-        super.move (fromX,fromY,toX,toY)
-        round = Round.adv(round)
+            if (check && endOfGame)
+                canvas.setMessage ("Checkmate ! " + Round.adv(round).toString + " wins !")
+            else if (check)
+                canvas.setMessage ("Check !")
+            else if (endOfGame)
+                canvas.setMessage ("Stalemate !")
+            else
+                canvas.clearMessage
 
-        // Check/Checkmate/Stalemate detection
-        val check = getKing(round).isCheck
-        val endOfGame = possibleMoves.isEmpty
-
-        if (check && endOfGame)
-            canvas.setMessage ("Checkmate ! " + Round.adv(round).toString + " wins !")
-        else if (check)
-            canvas.setMessage ("Check !")
-        else if (endOfGame)
-            canvas.setMessage ("Stalemate !")
-        else
-            canvas.clearMessage
-
-        if (endOfGame)
-            round = Round.Finished
+            if (endOfGame)
+                round = Round.Finished
+        }
         
         canvas.repaint
         callPlayer

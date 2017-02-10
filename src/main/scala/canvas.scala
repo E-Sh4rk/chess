@@ -5,6 +5,9 @@ import java.awt.Color
 import java.awt.Font
 import java.awt.FontMetrics
 import java.awt.Rectangle
+import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
 import scala.swing.event._
 import swing._
 
@@ -31,11 +34,18 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
     def stop : Unit = { canPlay = false }
 
     this.preferredSize = new Dimension(width, height)
+
+    private val introImage = ImageIO.read(new File("img/Chess_intro.png"))
     override def paintComponent(g: Graphics2D) : Unit = {
         super.paintComponent(g)
 
         if (game == null)
+        {
+            g.setColor(new Color(100,100,100))
+            drawCenteredString(g, "Checks", new Rectangle(0,0,width/2,3*height/4), g.getFont().deriveFont(g.getFont().getSize() * 5.0F))
+            g.drawImage(introImage,0,0,width,height,null)
             return
+        }
         
         // Coloring the board
         for (i<-0 to 7)
@@ -45,7 +55,7 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
                 if ((i+j) % 2 == 0)
                 {
                     // White case
-                    g.setColor(new Color(255,255,255)/**Color.white*/);
+                    g.setColor(Color.white);
                     g.fillRect(i*width/8,j*height/8,width/8,height/8);
                 }
                 if (Some(i,j) == selectedCase)
@@ -67,7 +77,7 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
 
         // Draw the grid
         g.setStroke(new BasicStroke(5));
-        g.setColor(new Color(200,200,200)/**Color.grey*/);
+        g.setColor(new Color(200,200,200));
         for (i<-0 to 8)
         {
             g.drawLine(0,i*height/8,width,i*height/8);

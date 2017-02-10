@@ -5,7 +5,7 @@ import java.awt.Dimension
 object MyApp extends SimpleSwingApplication {
 	def top = new MainFrame {
 
-		title = "AChess"
+		title = "Checks"
 
         val canvas = new Canvas(500,500)
         var game:Game = null//new Game(canvas, canvas, canvas)
