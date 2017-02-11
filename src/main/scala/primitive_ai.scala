@@ -1,4 +1,6 @@
-
+/**
+A primitive AI that play random (legal) moves.
+*/
 class PrimitiveAI extends SynchPlayer
 {
     override def synchPlay : (Int,Int,Int,Int) =

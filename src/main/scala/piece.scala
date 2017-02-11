@@ -3,20 +3,30 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
+/**
+Enumeration that represents a direction (diagonals included).
+*/
 object Direction extends Enumeration {
     type Direction = Value
     val Up, Down, Left, Right, UpRight, UpLeft, DownRight, DownLeft, NoDirection = Value
 
+    /**
+    Indicate whether a direction is straight (not diagonal) or not.
+    */
     def isStraight (dir:Direction.Direction) : Boolean =
     {
         return dir == Direction.Up || dir == Direction.Down || dir == Direction.Left || dir == Direction.Right
     }
-
+    /**
+    Indicate whether a direction is diagonal or not.
+    */
     def isDiag (dir:Direction.Direction) : Boolean =
     {
         return dir == Direction.UpLeft || dir == Direction.DownLeft || dir == Direction.UpRight || dir == Direction.DownRight
     }
-
+    /**
+    Return the direction that has been applied to go from the first position to the second.
+    */
     def directionApplied (fromX:Int, fromY:Int, toX:Int, toY:Int) : Direction.Direction =
     {
         if (fromX == toX)
@@ -49,7 +59,9 @@ object Direction extends Enumeration {
         }
         return Direction.NoDirection
     }
-
+    /**
+    Return the position obtained by moving a case in the given direction from the given position.
+    */
     def applyDirection (fromX:Int, fromY:Int, dir:Direction.Direction):(Int,Int) =
     {
         if (dir == Direction.Up)
@@ -72,6 +84,9 @@ object Direction extends Enumeration {
     }
 }
 
+/**
+    Companion object for piece, in order to have a cache for the loading of images.
+*/
 object Piece
 {
     private val images = scala.collection.mutable.HashMap.empty[String,BufferedImage]
@@ -87,10 +102,15 @@ object Piece
         }
     }
 }
-
+/**
+    Represents a piece on the chessboard.
+*/
 abstract class Piece(val team:Round.Round, protected val board:Board, protected var x:Int, protected var y:Int)
 {
     protected var image_path = ""
+    /**
+    Indicate whether the piece is a king or not.
+    */
     val king = false
 
     protected def noObstacleTo (toX:Int,toY:Int):Boolean =
@@ -109,10 +129,19 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
         return true
     }
 
+    /**
+    Return the current position of the piece on the chessboard.
+    */
     def getPosition = { (x,y) }
 
+    /**
+    Return the buffered image that represents the piece.
+    */
     def getImage = { Piece.loadImage(image_path) }
 
+    /**
+    Return whether the piece is check or not.
+    */
     def isCheck : Boolean =
     {
         for (i<-0 to 7)
@@ -129,7 +158,10 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
         return false
     }
 
-    // This function does not take into account the fact that the king is or will be check
+    /**
+    Return whether the piece can move to the given position.
+    DOES NOT TAKE INTO ACCOUNT THE FACT THAT THE MOVE CAN'T CHECK THE KING OF THE PLAYING TEAM.
+    */
     def canMove(toX:Int,toY:Int): Boolean =
     {
         if (toX < 0 || toY < 0 || toX > 7 || toY > 7)
@@ -142,9 +174,14 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
         return true;
     }
 
-    // This function does not verify that the movement is valid
+    /**
+    Move the piece to the given position.
+    DO NOT VERIFY THAT THE MOVE IS LEGAL OR NOT.
+    */
     def move(toX:Int,toY:Int): Unit = {x=toX ; y=toY}
 
+    /**
+    Make a copy of this piece on the new given board.
+    */
     def copy(b:Board) : Piece
-
 }

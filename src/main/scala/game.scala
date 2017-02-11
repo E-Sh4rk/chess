@@ -1,6 +1,9 @@
 
 import javax.swing.SwingUtilities
 
+/**
+Enumeration that represents a round : White, Black, Finished.
+*/
 object Round extends Enumeration {
     type Round = Value
     val White, Black, Finished = Value
@@ -14,10 +17,16 @@ object Round extends Enumeration {
     }
 }
 
+/**
+Implements a simple chessboard, without any rule.
+
+All methods are thread-safe.
+
+@param _b The board to copy. If null or not present, initilize a new chessboard.
+*/
 class Board (private val _b:Board)
 {
     private val board = Array.ofDim[Piece](8,8)
-
     private def addPiece(p:Piece):Unit =
     {
         val (x,y) = p.getPosition
@@ -64,7 +73,13 @@ class Board (private val _b:Board)
 
     def this () = { this (null) }
 
+    /**
+    Return the piece at the given position. Return null if there is no piece at this position.
+    */
     def pieceAtPosition(x:Int,y:Int) = { board.synchronized { board(x)(y) } }
+    /**
+    Move a piece from a position to another position.
+    */
     def move(fromX:Int,fromY:Int,toX:Int,toY:Int) : Unit =
     {
         board.synchronized
@@ -79,6 +94,9 @@ class Board (private val _b:Board)
             }
         }
     }
+    /**
+    Return the king of the given team. Return null if not found.
+    */
     def getKing(t:Round.Round):Piece =
     {
         board.synchronized
@@ -99,6 +117,15 @@ class Board (private val _b:Board)
     }
 }
 
+/**
+Implements a chessboard with all rules (logic of moves, rounds, end of the game...).
+
+All methods are thread-safe.
+
+@param canvas The canvas that will display the game.
+@param playerWhite The player of the white team.
+@param playerBlack The player of the black team.
+*/
 class Game(private val canvas:Canvas, private val playerWhite:Player, private val playerBlack:Player) extends Board
 {
     private var round = Round.White
@@ -109,20 +136,32 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     callPlayer
 
     private var suspended = false
+    /**
+    Suspend the game and every running thread. Game can be resumed later.
+    */
     def suspend =
     {
         suspended = true
         playerWhite.stop
         playerBlack.stop
     }
+    /**
+    Resume a suspended game.
+    */
     def resume =
     {
         suspended = false
         callPlayer
     }
 
+    /**
+    Return the current round.
+    */
     def getRound = { round.synchronized{ round } }
 
+    /**
+    Indicate whether the piece at the given position can be moved or not.
+    */
     def canMove(x:Int,y:Int):Boolean =
     {
         round.synchronized
@@ -134,7 +173,9 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             return false
         }
     }
-
+    /**
+    Indicate whether the piece at the first position can be moved to the second position or not.
+    */
     def canMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Boolean =
     {
         round.synchronized
@@ -153,7 +194,9 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             return true
         }
     }
-
+    /**
+    Return a list of every possible moves.
+    */
     def possibleMoves : scala.collection.mutable.MutableList[(Int,Int,Int,Int)] =
     {
         round.synchronized
@@ -179,37 +222,48 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             return lst
         }
     }
+
     private def callPlayer : Unit =
     {
-        if (suspended || round == Round.Finished)
-            return
-        SwingUtilities.invokeLater(new Runnable() {
-            override def run : Unit =
-            { 
-                if (suspended || round == Round.Finished)
-                    return
-                if (round == Round.White)
-                    playerWhite.mustPlay
-                if (round == Round.Black)
-                    playerBlack.mustPlay
-            }
-        });
-    }
-    override def move(fromX:Int,fromY:Int,toX:Int,toY:Int):Unit =
-    {
-        if (suspended || round == Round.Finished)
-            return
-
-        if (!SwingUtilities.isEventDispatchThread())
-        {
-            SwingUtilities.invokeLater(new Runnable() {
-                override def run  : Unit = { move(fromX,fromY,toX,toY) }
-            });
-            return
-        }
-            
         round.synchronized
         {
+            if (suspended || round == Round.Finished)
+                return
+            SwingUtilities.invokeLater(new Runnable() {
+                override def run : Unit =
+                {
+                    round.synchronized
+                    {
+                        if (suspended || round == Round.Finished)
+                            return
+                        if (round == Round.White)
+                            playerWhite.mustPlay
+                        if (round == Round.Black)
+                            playerBlack.mustPlay
+                    }
+                }
+            });
+        }
+    }
+    /**
+    Play the given move. The move must be legal.
+    */
+    override def move(fromX:Int,fromY:Int,toX:Int,toY:Int):Unit =
+    {
+        round.synchronized
+        {
+            if (suspended || round == Round.Finished)
+                return
+
+            // We must be on the main thread before making some modifications.
+            if (!SwingUtilities.isEventDispatchThread())
+            {
+                SwingUtilities.invokeLater(new Runnable() {
+                    override def run  : Unit = { move(fromX,fromY,toX,toY) }
+                });
+                return
+            }
+            
             if (!canMove(fromX,fromY,toX,toY))
                 return
 

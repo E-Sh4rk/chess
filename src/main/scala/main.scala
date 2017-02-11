@@ -8,7 +8,7 @@ object MyApp extends SimpleSwingApplication {
 		title = "Checks"
 
         val canvas = new Canvas(500,500)
-        var game:Game = null//new Game(canvas, canvas, canvas)
+        var game:Game = null
 
         val human = new Button("Human Fight !")
         val human_AI = new Button("Human vs AI !")

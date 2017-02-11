@@ -11,6 +11,12 @@ import javax.imageio.ImageIO
 import scala.swing.event._
 import swing._
 
+/**
+Canvas that draw the chessboard and catch user clicks.
+
+It is the only interface bewteen the current game and the user.
+It can be used either as a panel (to show the chessboard) and as a player.
+*/
 class Canvas(val width:Int, val height:Int) extends Panel with Player
 {
     private var selectedCase : Option[(Int,Int)] = None
@@ -18,6 +24,9 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
     private var canPlay : Boolean = false
     private var message : String = null
 
+    /**
+    Initialize the canvas for a new game.
+    */
     def newGame (g:Game) : Unit =
     {
         selectedCase = None
@@ -26,21 +35,31 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
         game = g
         repaint
     }
+    /**
+    Print a message in the center of the chessboard.
+    Repaint must be called after.
+    */
     def setMessage (s:String) : Unit = { message = s }
+    /**
+    Clear the message.
+    Repaint must be called after.
+    */
     def clearMessage : Unit = { message = null }
 
-    def init (g:Game) : Unit = { } // The canvas use the same game for playing as for drawing : use newGame to init the canvas
+    // Player methods
+    def init (g:Game) : Unit = { } // The canvas use the same game for drawing as for playing
     def mustPlay : Unit = { canPlay = true }
     def stop : Unit = { canPlay = false }
 
+    // Drawing (output)
     this.preferredSize = new Dimension(width, height)
-
     private val introImage = ImageIO.read(new File("img/Chess_intro.png"))
     override def paintComponent(g: Graphics2D) : Unit = {
         super.paintComponent(g)
 
         if (game == null)
         {
+            // Draw the intro image
             g.setColor(new Color(100,100,100))
             drawCenteredString(g, "Checks", new Rectangle(0,0,width/2,3*height/4), g.getFont().deriveFont(g.getFont().getSize() * 5.0F))
             g.drawImage(introImage,0,0,width,height,null)
@@ -111,6 +130,7 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
         g.drawString(text, x, y);
     }
 
+    // Events (input)
     listenTo(mouse.clicks)
     reactions +=
     {
@@ -130,6 +150,7 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
                             selectedCase = Some(x,y)
                         else if (selectedCase != None)
                         {
+                            // Play the move if possible
                             val Some ((sel_x, sel_y)) = selectedCase
                             if (game.canMove(sel_x, sel_y, x, y))
                             {
