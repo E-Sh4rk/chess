@@ -118,7 +118,7 @@ class Board (private val _b:Board)
 }
 
 /**
-Implements a chessboard with all rules (logic of moves, rounds, end of the game...).
+Implements a chessboard with all rules (logic of moves, rounds, end of the game, etc).
 
 All methods are thread-safe.
 

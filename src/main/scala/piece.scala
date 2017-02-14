@@ -103,7 +103,7 @@ object Piece
     }
 }
 /**
-    Represents a piece on the chessboard.
+Represents a piece on the chessboard.
 */
 abstract class Piece(val team:Round.Round, protected val board:Board, protected var x:Int, protected var y:Int)
 {
@@ -160,6 +160,7 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
 
     /**
     Return whether the piece can move to the given position.
+
     DOES NOT TAKE INTO ACCOUNT THE FACT THAT THE MOVE CAN'T CHECK THE KING OF THE PLAYING TEAM.
     */
     def canMove(toX:Int,toY:Int): Boolean =
@@ -176,6 +177,7 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
 
     /**
     Move the piece to the given position.
+    
     DO NOT VERIFY THAT THE MOVE IS LEGAL OR NOT.
     */
     def move(toX:Int,toY:Int): Unit = {x=toX ; y=toY}

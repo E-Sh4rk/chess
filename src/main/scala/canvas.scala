@@ -37,11 +37,13 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
     }
     /**
     Print a message in the center of the chessboard.
+
     Repaint must be called after.
     */
     def setMessage (s:String) : Unit = { message = s }
     /**
     Clear the message.
+    
     Repaint must be called after.
     */
     def clearMessage : Unit = { message = null }

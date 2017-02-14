@@ -1,23 +1,26 @@
 
 /**
-Represents a player (local, AI, network...).
+Represents a player (local, AI, network, etc).
 */
 trait Player {
 
     /**
     Initialize the player.
+
     This function must be called just once, before the first move.
     */
     def init (game:Game) : Unit
 
     /**
     Indicate to the player that it's his turn.
+
     This function must terminate QUICLKY. Then, Game.move must be called by the player (on the current thread or on another thread).
     */
     def mustPlay : Unit
 
     /**
     Indicate to the player that the game has been suspended.
+
     The move for the current round must be aborted, and every running threads of the player must be stopped.
     */
     def stop : Unit
@@ -25,15 +28,17 @@ trait Player {
 }
 
 /**
-A simple class to extends that represent a synchronous player.
+A simple class to extends that simplify the player implementation.
+
 You need to implement synchPlay when you extend this class. Every other method of player is implemented.
 */
 abstract class SynchPlayer extends Player with Runnable {
 
     protected var game:Game = null
     /**
-    Function that is called when the player must play. It must return a (legal) move to play.
-    The current game can be accessed through the variable "game".
+    Synchronous function that is called when the player must play.
+    
+    It must return a (legal) move to play. The current game can be accessed through the variable "game".
     */
     protected def synchPlay : (Int,Int,Int,Int)
 
