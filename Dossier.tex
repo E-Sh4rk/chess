@@ -1,0 +1,48 @@
+\documentclass[11pt]{article}
+\usepackage[francais]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools,amssymb,amsthm,thmtools}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\title{Projet Programmation 2}
+\author{Mickaël LAURENT, Maher MALLEM}
+%\date{2017}
+%\author{}
+\date{}
+\begin{document}
+\renewcommand{\labelitemi}{-}
+\maketitle
+
+\section{Structure générale}
+
+Le code se divise en plusieurs fichiers :\newline
+\begin{itemize}
+\item player.scala : Décrit le trait Player qui correspond à un joueur. Cette définition permet de s'adapter à plusieurs types de joueurs : joueur local, IA, joueur réseau... Une classe SynchPlayer est également définie, elle simplifie l'implémentation du trait Player dans certains cas.\newline
+
+\item primitive\_ai.scala : Implémente une IA primitive (mouvements aléatoires parmi les mouvements légaux). La classe PrimitiveAI hérite de SynchPlayer.\newline
+
+\item canvas.scala : Composant qui dessine l'échiquier et traite les clics (mouvements des joueurs). De ce fait, la classe Canvas hérite à la fois de la classe Panel et du trait Player.\newline
+
+\item piece.scala : Défini le comportement général d'une pièce sur l'échiquier. En plus de la classe Piece, une classe utilitaire Direction est également implémentée ici.\newline
+
+\item pieces.scala : Défini plus spécifiquement pour chaque type de pièce existant ses caractéristiques (image la representant, déplacements possibles...). Les différentes classes décrites dans ce fichier héritent donc de Piece.\newline
+
+\item game.scala : Défini dans un premier temps la classe Board qui représente un échiquier et les opérations de base (rechercher une pièce, la déplacer) mais sans les règles du jeu (système de tours, légalité des déplacements, conditions de fin...). Dans un second temps, défini la classe Game qui hérite de Board et qui y ajoute les règles et la logique du jeu.\newline
+
+\item main.scala : Gère la fenêtre de l'application (dispose les différents éléments, s'occupe des boutons de l'interface...)
+\end{itemize}
+\-
+
+\section{Le trait Player}
+S'adapter, canvas, threads...
+
+\section{Board, Game}
+Permet de modifier très facilement la structure de donnée utilisée pour représenter un échiquier.
+
+\begin{lstlisting}
+code
+\end{lstlisting}
+
+\end{document}

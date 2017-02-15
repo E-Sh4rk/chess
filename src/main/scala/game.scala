@@ -151,6 +151,8 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     def resume =
     {
         suspended = false
+        playerWhite.init(this)
+        playerBlack.init(this)
         callPlayer
     }
 

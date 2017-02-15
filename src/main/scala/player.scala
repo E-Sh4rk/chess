@@ -7,7 +7,7 @@ trait Player {
     /**
     Initialize the player.
 
-    This function must be called just once, before the first move.
+    This function must be called when the game starts, before the first move, or when the game resume after being suspended.
     */
     def init (game:Game) : Unit
 
