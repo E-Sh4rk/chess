@@ -21,9 +21,9 @@ Le code se divise en plusieurs fichiers :\newline
 \begin{itemize}
 \item player.scala : Décrit le trait Player qui correspond à un joueur. Cette définition permet de s'adapter à plusieurs types de joueurs : joueur local, IA, joueur réseau... Une classe SynchPlayer est également définie, elle simplifie l'implémentation du trait Player dans certains cas.\newline
 
-\item primitive\_ai.scala : Implémente une IA primitive (mouvements aléatoires parmi les mouvements légaux). La classe PrimitiveAI hérite de SynchPlayer.\newline
+\item primitive\_ai.scala : Implémente une IA primitive (déplacements aléatoires parmi les mouvements légaux). La classe PrimitiveAI hérite de SynchPlayer.\newline
 
-\item canvas.scala : Composant qui dessine l'échiquier et traite les clics (mouvements des joueurs). De ce fait, la classe Canvas hérite à la fois de la classe Panel et du trait Player.\newline
+\item canvas.scala : Composant qui dessine l'échiquier et traite les clics (déplacements des joueurs). De ce fait, la classe Canvas hérite à la fois de la classe Panel et du trait Player.\newline
 
 \item piece.scala : Défini le comportement général d'une pièce sur l'échiquier. En plus de la classe Piece, une classe utilitaire Direction est également implémentée ici.\newline
 
@@ -35,11 +35,20 @@ Le code se divise en plusieurs fichiers :\newline
 \end{itemize}
 \-
 
-\section{Le trait Player}
-S'adapter, canvas, threads...
-
 \section{Board, Game}
 Permet de modifier très facilement la structure de donnée utilisée pour représenter un échiquier.
+
+\section{Le trait Player}
+
+Afin de pouvoir facilement s'adapter à différents types de joueurs (aussi bien local, IA ou réseau), la classe Game prend en argument deux objets implémentants le trait Player : un correspondant au joueur blanc et l'autre au joueur noir.
+La classe game appelle d'abord la méthode init des deux objets pour leur indiquer que le jeu commence et leur en fournir un accès.
+Puis, à chaque début de tour, elle appelle la méthode mustPlay du joueur correspondant. Ce dernier devra alors appeler la méthode move du jeu et indiquer le déplacement qu'il souhaite faire. Il peut mettre le temps qu'il veut avant d'appeler cette méthode, et il peut même l'appeler à partir d'un autre thread, mais il est important qu'il ne bloque pas l'exécution du thread principal et donc la méthode mustPlay doit terminer rapidement.
+Le trait player possède également une méthode stop qui indique que le jeu est terminé ou temporairement suspendu.\newline
+
+
+Cette structure permet de s'adapter aussi bien à un joueur local qu'à une IA ou un joueur réseau. Pour un joueur réseau par exemple, on peut imaginer ouvrir la connexion dans init et l'écouter sur un nouveau thread, et lors de l'appel à mustPlay, on indique au thread d'appeler move sur les prochaines données de mouvement recues. On ferme la connexion lors de l'appel à la méthode stop.
+
+\section{La gestion des déplacements}
 
 \begin{lstlisting}
 code

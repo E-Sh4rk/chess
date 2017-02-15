@@ -243,19 +243,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="SynchPlayer#game" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="game:Game"></a>
-      <a id="game:Game"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">game</span><span class="result">: <a href="Game.html" class="extype" name="Game">Game</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="SynchPlayer.html" class="extype" name="SynchPlayer">SynchPlayer</a></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -390,18 +377,18 @@
       <p class="shortcomment cmt">    Indicate to the player that the game has been suspended.</p><div class="fullcomment"><div class="comment cmt"><p>    Indicate to the player that the game has been suspended.</p><p>    The move for the current round must be aborted, and every running threads of the player must be stopped.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SynchPlayer.html" class="extype" name="SynchPlayer">SynchPlayer</a> → <a href="Player.html" class="extype" name="Player">Player</a></dd></dl></div>
     </li><li name="PrimitiveAI#synchPlay" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="synchPlay:(Int,Int,Int,Int)"></a>
-      <a id="synchPlay:(Int,Int,Int,Int)"></a>
+      <a id="synchPlay(game:Game):(Int,Int,Int,Int)"></a>
+      <a id="synchPlay(Game):(Int,Int,Int,Int)"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">synchPlay</span><span class="result">: (<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>)</span>
+        <span class="name">synchPlay</span><span class="params">(<span name="game">game: <a href="Game.html" class="extype" name="Game">Game</a></span>)</span><span class="result">: (<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>)</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Synchronous function that is called when the player must play.</p><div class="fullcomment"><div class="comment cmt"><p>    Synchronous function that is called when the player must play.</p><p>    It must return a (legal) move to play. The current game can be accessed through the variable &quot;game&quot;.
+      <p class="shortcomment cmt">    Synchronous function that is called when the player must play.</p><div class="fullcomment"><div class="comment cmt"><p>    Synchronous function that is called when the player must play.</p><p>    It must return a (legal) move to play for the game given as parameter.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="PrimitiveAI">PrimitiveAI</a> → <a href="SynchPlayer.html" class="extype" name="SynchPlayer">SynchPlayer</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>

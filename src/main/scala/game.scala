@@ -129,31 +129,46 @@ All methods are thread-safe.
 class Game(private val canvas:Canvas, private val playerWhite:Player, private val playerBlack:Player) extends Board
 {
     private var round = Round.White
+    private var suspended = false
 
     canvas.newGame(this)
     playerWhite.init(this)
     playerBlack.init(this)
-    callPlayer
+    playerWhite.mustPlay
 
-    private var suspended = false
     /**
     Suspend the game and every running thread. Game can be resumed later.
     */
     def suspend =
     {
-        suspended = true
-        playerWhite.stop
-        playerBlack.stop
+        round.synchronized
+        {
+            if (!suspended && round != Round.Finished)
+            {
+                suspended = true
+                playerWhite.stop
+                playerBlack.stop
+            }
+        }
     }
     /**
     Resume a suspended game.
     */
     def resume =
     {
-        suspended = false
-        playerWhite.init(this)
-        playerBlack.init(this)
-        callPlayer
+        round.synchronized
+        {
+            if (suspended && round != Round.Finished)
+            {
+                suspended = false
+                playerWhite.init(this)
+                playerBlack.init(this)
+                if (round == Round.White)
+                    playerWhite.mustPlay
+                if (round == Round.Black)
+                    playerBlack.mustPlay
+            }
+        }
     }
 
     /**
@@ -225,46 +240,24 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         }
     }
 
-    private def callPlayer : Unit =
-    {
-        round.synchronized
-        {
-            if (suspended || round == Round.Finished)
-                return
-            SwingUtilities.invokeLater(new Runnable() {
-                override def run : Unit =
-                {
-                    round.synchronized
-                    {
-                        if (suspended || round == Round.Finished)
-                            return
-                        if (round == Round.White)
-                            playerWhite.mustPlay
-                        if (round == Round.Black)
-                            playerBlack.mustPlay
-                    }
-                }
-            });
-        }
-    }
     /**
     Play the given move. The move must be legal.
     */
     override def move(fromX:Int,fromY:Int,toX:Int,toY:Int):Unit =
     {
+        // We must be on the main thread before making some modifications.
+        // if (!SwingUtilities.isEventDispatchThread())
+        // Even if we are already on the main thread, we must reinvoke this function later (avoid interlaced turns).
+        SwingUtilities.invokeLater(new Runnable() {
+            override def run  : Unit = { _move(fromX,fromY,toX,toY) }
+        });
+    }
+    private def _move(fromX:Int,fromY:Int,toX:Int,toY:Int):Unit =
+    {
         round.synchronized
         {
             if (suspended || round == Round.Finished)
                 return
-
-            // We must be on the main thread before making some modifications.
-            if (!SwingUtilities.isEventDispatchThread())
-            {
-                SwingUtilities.invokeLater(new Runnable() {
-                    override def run  : Unit = { move(fromX,fromY,toX,toY) }
-                });
-                return
-            }
             
             if (!canMove(fromX,fromY,toX,toY))
                 return
@@ -286,11 +279,18 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                 canvas.clearMessage
 
             if (endOfGame)
+            {
                 round = Round.Finished
+                playerWhite.stop
+                playerBlack.stop
+            }
+
+            canvas.repaint
+            if (round == Round.White)
+                playerWhite.mustPlay
+            if (round == Round.Black)
+                playerBlack.mustPlay
         }
-        
-        canvas.repaint
-        callPlayer
     }
 
 }

@@ -34,14 +34,14 @@ You need to implement synchPlay when you extend this class. Every other method o
 */
 abstract class SynchPlayer extends Player with Runnable {
 
-    protected var game:Game = null
     /**
     Synchronous function that is called when the player must play.
     
-    It must return a (legal) move to play. The current game can be accessed through the variable "game".
+    It must return a (legal) move to play for the game given as parameter.
     */
-    protected def synchPlay : (Int,Int,Int,Int)
+    protected def synchPlay (game:Game) : (Int,Int,Int,Int)
 
+    private var game:Game = null
     private var thread : Thread = null
     def init (g:Game) : Unit = { game = g }
     def mustPlay : Unit = { if (thread == null) {thread = new Thread(this) ; thread.start} }
@@ -49,7 +49,7 @@ abstract class SynchPlayer extends Player with Runnable {
     {
         try
         {
-            val (fromX,fromY,toX,toY) = synchPlay
+            val (fromX,fromY,toX,toY) = synchPlay(game)
             thread = null
             game.move(fromX,fromY,toX,toY)
         }
