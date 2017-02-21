@@ -114,7 +114,7 @@
         <span class="name">copy</span><span class="params">(<span name="b">b: <a href="Board.html" class="extype" name="Board">Board</a></span>)</span><span class="result">: <a href="" class="extype" name="Piece">Piece</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Make a copy of this piece on the new given board.</p>
+      <p class="shortcomment cmt">    Makes a copy of this piece on the new given board.</p>
     </li></ol>
             </div>
 
@@ -223,7 +223,7 @@
         <span class="name">canMove</span><span class="params">(<span name="toX">toX: <span class="extype" name="scala.Int">Int</span></span>, <span name="toY">toY: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Return whether the piece can move to the given position.</p><div class="fullcomment"><div class="comment cmt"><p>    Return whether the piece can move to the given position.</p><p>    DOES NOT TAKE INTO ACCOUNT THE FACT THAT THE MOVE CAN'T CHECK THE KING OF THE PLAYING TEAM.
+      <p class="shortcomment cmt">    Returns whether the piece can move to the given position.</p><div class="fullcomment"><div class="comment cmt"><p>    Returns whether the piece can move to the given position.</p><p>    DOES NOT TAKE INTO ACCOUNT THE FACT THAT THE MOVE CAN'T CHECK THE KING OF THE PLAYING TEAM.
 </p></div></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
@@ -314,7 +314,7 @@
         <span class="name">getImage</span><span class="result">: <span class="extype" name="java.awt.image.BufferedImage">BufferedImage</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Return the buffered image that represents the piece.</p>
+      <p class="shortcomment cmt">    Returns the buffered image that represents the piece.</p>
     </li><li name="Piece#getPosition" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getPosition:(Int,Int)"></a>
       <a id="getPosition:(Int,Int)"></a>
@@ -327,7 +327,7 @@
         <span class="name">getPosition</span><span class="result">: (<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>)</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Return the current position of the piece on the chessboard.</p>
+      <p class="shortcomment cmt">    Returns the current position of the piece on the chessboard.</p>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -366,7 +366,7 @@
         <span class="name">isCheck</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Return whether the piece is check or not.</p>
+      <p class="shortcomment cmt">    Returns whether the other player is checked.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -392,7 +392,7 @@
         <span class="name">king</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Indicate whether the piece is a king or not.</p>
+      <p class="shortcomment cmt">    Indicates whether the piece is a king.</p>
     </li><li name="Piece#move" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="move(toX:Int,toY:Int):Unit"></a>
       <a id="move(Int,Int):Unit"></a>
@@ -405,7 +405,7 @@
         <span class="name">move</span><span class="params">(<span name="toX">toX: <span class="extype" name="scala.Int">Int</span></span>, <span name="toY">toY: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Move the piece to the given position.</p><div class="fullcomment"><div class="comment cmt"><p>    Move the piece to the given position.</p><p>    DO NOT VERIFY THAT THE MOVE IS LEGAL OR NOT.
+      <p class="shortcomment cmt">    Moves the piece to the given position.</p><div class="fullcomment"><div class="comment cmt"><p>    Moves the piece to the given position.</p><p>    DOES NOT VERIFY THAT THE MOVE IS LEGAL OR NOT.
 </p></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>

@@ -12,10 +12,10 @@ import scala.swing.event._
 import swing._
 
 /**
-Canvas that draw the chessboard and catch user clicks.
+Canvas that draws the chessboard and catches user clicks.
 
-It is the only interface bewteen the current game and the user.
-It can be used either as a panel (to show the chessboard) and as a player.
+It is the only interface between the current game and the user.
+It can either be used as a panel (to show the chessboard) or as a player.
 */
 class Canvas(val width:Int, val height:Int) extends Panel with Player
 {
@@ -25,7 +25,7 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
     private var message : String = null
 
     /**
-    Initialize the canvas for a new game.
+    Initializes the canvas for a new game.
     */
     def newGame (g:Game) : Unit =
     {
@@ -36,15 +36,15 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
         repaint
     }
     /**
-    Print a message in the center of the chessboard.
+    Prints a message in the center of the chessboard.
 
-    Repaint must be called after.
+    repaint must be called after.
     */
     def setMessage (s:String) : Unit = { message = s }
     /**
-    Clear the message.
+    Clears the message.
     
-    Repaint must be called after.
+    repaint must be called after.
     */
     def clearMessage : Unit = { message = null }
 
@@ -61,7 +61,7 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
 
         if (game == null)
         {
-            // Draw the intro image
+            // Drawing the intro image
             g.setColor(new Color(100,100,100))
             drawCenteredString(g, "Checks", new Rectangle(0,0,width/2,3*height/4), g.getFont().deriveFont(g.getFont().getSize() * 5.0F))
             g.drawImage(introImage,0,0,width,height,null)
@@ -96,7 +96,7 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
             }
         }
 
-        // Draw the grid
+        // Drawing the grid
         g.setStroke(new BasicStroke(5));
         g.setColor(new Color(200,200,200));
         for (i<-0 to 8)
@@ -105,7 +105,7 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
             g.drawLine(i*width/8,0,i*width/8,height);
         }
 
-        // Draw each piece in game
+        // Drawing each piece in game
         for (i<-0 to 7)
         {
             for (j<-0 to 7)
@@ -116,7 +116,7 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
             }
         }
 
-        // Print message !
+        // Prints a message !
         if (message != null)
         {
             g.setColor(Color.red)
@@ -152,7 +152,7 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
                             selectedCase = Some(x,y)
                         else if (selectedCase != None)
                         {
-                            // Play the move if possible
+                            // Playing the move if possible
                             val Some ((sel_x, sel_y)) = selectedCase
                             if (game.canMove(sel_x, sel_y, x, y))
                             {

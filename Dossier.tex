@@ -19,19 +19,19 @@
 
 Le code se divise en plusieurs fichiers :\newline
 \begin{itemize}
-\item player.scala : Décrit le trait Player qui correspond à un joueur. Cette définition permet de s'adapter à plusieurs types de joueurs : joueur local, IA, joueur réseau... Une classe SynchPlayer est également définie, elle simplifie l'implémentation du trait Player dans certains cas.\newline
+\item player.scala : décrit le trait Player qui correspond à un joueur. Cette définition permet de s'adapter à plusieurs types de joueurs : joueur local, IA, joueur réseau... Une classe SynchPlayer est également définie, elle simplifie l'implémentation du trait Player dans certains cas.\newline
 
-\item primitive\_ai.scala : Implémente une IA primitive (déplacements aléatoires parmi les mouvements légaux). La classe PrimitiveAI hérite de SynchPlayer.\newline
+\item primitive\_ai.scala : implémente une IA primitive (déplacements aléatoires parmi les mouvements légaux). La classe PrimitiveAI hérite de SynchPlayer.\newline
 
-\item canvas.scala : Composant qui dessine l'échiquier et traite les clics (déplacements des joueurs). De ce fait, la classe Canvas hérite à la fois de la classe Panel et du trait Player.\newline
+\item canvas.scala : composant qui dessine l'échiquier et traite les clics (déplacements des joueurs). De ce fait, la classe Canvas hérite à la fois de la classe Panel et du trait Player.\newline
 
-\item piece.scala : Défini le comportement général d'une pièce sur l'échiquier. En plus de la classe Piece, une classe utilitaire Direction est également implémentée ici.\newline
+\item piece.scala : définit le comportement général d'une pièce sur l'échiquier. En plus de la classe Piece, une classe utilitaire Direction est également implémentée ici.\newline
 
-\item pieces.scala : Défini plus spécifiquement pour chaque type de pièce existant ses caractéristiques (image la representant, déplacements possibles...). Les différentes classes décrites dans ce fichier héritent donc de Piece.\newline
+\item pieces.scala : définit plus spécifiquement pour chaque type de pièce existant ses caractéristiques (image la représentant, déplacements possibles...). Les différentes classes décrites dans ce fichier héritent donc de Piece.\newline
 
-\item game.scala : Défini dans un premier temps la classe Board qui représente un échiquier et les opérations de base (rechercher une pièce, la déplacer) mais sans les règles du jeu (système de tours, légalité des déplacements, conditions de fin...). Dans un second temps, défini la classe Game qui hérite de Board et qui y ajoute les règles et la logique du jeu.\newline
+\item game.scala : définit dans un premier temps la classe Board qui représente un échiquier et les opérations de base (rechercher une pièce, la déplacer) mais sans les règles du jeu (système de tours, légalité des déplacements, conditions de fin...). Dans un second temps : définit la classe Game qui hérite de Board et qui y ajoute les règles et la logique du jeu.\newline
 
-\item main.scala : Gère la fenêtre de l'application (dispose les différents éléments, s'occupe des boutons de l'interface...)
+\item main.scala : gère la fenêtre de l'application (dispose les différents éléments, s'occupe des boutons de l'interface...)
 \end{itemize}
 \-
 
@@ -39,30 +39,30 @@ Le code se divise en plusieurs fichiers :\newline
 
 La vérification de la légalité d'un déplacement se fait en deux étapes : une au niveau de la classe Piece, et une au niveau de la classe Game.\newline
 
-La classe Piece (et les classes en héritant) fourni une méthode permettant de savoir si une pièce peut se déplacer vers une case donnée. Cela prend en compte les autres pièces présentes sur l'échiquier, mais pas le système de tour ni la règle spécifiant qu'un joueur ne peut pas être en échec à la fin de son tour.\newline
+La classe Piece (et les classes en héritant) fournit une méthode permettant de savoir si une pièce peut se déplacer vers une case donnée. Cela prend en compte les autres pièces présentes sur l'échiquier, mais pas le système de tour ni la règle spécifiant qu'un joueur ne peut pas être en échec à la fin de son tour.\newline
 
-La classe Game, quant à elle, permet de vérifier la légalité d'un mouvement en prenant en compte toutes les règles. Pour cela, elle vérifie que la pièce est de la couleur correspondant au tour actuel, elle utilise la méthode de la classe Piece pour vérifier que le mouvement est possible, puis elle vérifie qu'après le mouvement, le roi de l'équipe qui joue ne sera pas en échec (une copie de l'échiquier est utilisée pour ca, voir la partie suivante).
+La classe Game, quant à elle, permet de vérifier la légalité d'un mouvement en prenant en compte toutes les règles. Pour cela, elle vérifie que la pièce est de la couleur correspondant au tour actuel, elle utilise la méthode de la classe Piece pour vérifier que le mouvement est possible, puis elle vérifie qu'après le mouvement, le roi de l'équipe qui joue ne sera pas en échec (une copie de l'échiquier est alors utilisée, voir la partie suivante).
 
 \section{La classe Board}
 
-La classe Board s'occupe uniquement de représenter un échiquier : elle permet d'initialiser l'échiquier, d'accéder à une pièce à une position donnée, de bouger une pièce, de rechercher le roi, etc. Le fait de faire une classe Board séparée de la classe Game permet de pouvoir facilement changer la structure de donnée représentant l'échiquier. Actuellement, nous avons opté pour un tableau de Piece de taille 8x8 (null representant une case vide). Cette structure est cachée par la classe Board, et ainsi, en cas de changement, la seule classe à modifier est la classe Board.\newline
+La classe Board s'occupe uniquement de représenter un échiquier : elle permet d'initialiser l'échiquier, d'accéder à une pièce à une position donnée, de bouger une pièce, de rechercher le roi, etc. Le fait de faire une classe Board séparée de la classe Game permet de pouvoir facilement changer la structure de données représentant l'échiquier. Actuellement, nous avons opté pour un tableau de Piece de taille 8x8 (null representant une case vide). Cette structure est cachée par la classe Board, et ainsi, en cas de changement, la seule classe à modifier est la classe Board.\newline
 
-Un autre avantage est celui de pouvoir facilement faire une copie de l'échiquier. En effet, si la classe Board et la classe Game n'étaient qu'une seule et même classe, il aurait été plus compliqué de faire proprement une copie de l'échiquier : il aurait également fallu copier les objets Players, le Canvas, etc.
-Faire une copie de l'échiquier peut s'avérer pratique lorsque l'on souhaite vérifier qu'un mouvement ne mettrait pas son propre roi en échec. Il suffit alors de copier l'échiquier, de faire le mouvement sur la copie, et de vérifier que le roi n'est pas en échec. Une autre méthode serai de pouvoir annuler un mouvement, ou alors d'avoir une structure d'échiquier non mutable. Mais nous avons éliminé cette dernière option car les objets Piece sont eux-mêmes mutables.
+Un autre avantage est celui de pouvoir facilement faire une copie de l'échiquier. En effet, si la classe Board et la classe Game n'étaient qu'une seule et même classe, il aurait été plus compliqué de faire proprement une copie de l'échiquier : il aurait également fallu copier les objets Player, le Canvas, etc.
+Faire une copie de l'échiquier peut s'avérer pratique lorsque l'on souhaite vérifier qu'un mouvement ne mettrait pas son propre roi en échec. Il suffit alors de copier l'échiquier, de faire le mouvement sur la copie, et de vérifier que le roi n'est pas en échec. Une autre méthode serait de pouvoir annuler un mouvement, ou alors d'avoir une structure d'échiquier non mutable. Mais nous avons éliminé cette dernière option car les objets Piece sont eux-mêmes mutables.
 
 \section{Le trait Player}
 
-Afin de pouvoir facilement s'adapter à différents types de joueurs (aussi bien local, IA ou réseau), la classe Game prend en argument deux objets implémentants le trait Player : un correspondant au joueur blanc et l'autre au joueur noir.
-La classe game appelle d'abord la méthode init des deux objets pour leur indiquer que le jeu commence et leur en fournir un accès.
+Afin de pouvoir facilement s'adapter à différents types de joueurs (aussi bien local, IA ou réseau), la classe Game prend en argument deux objets implémentant le trait Player : un correspondant au joueur blanc et l'autre au joueur noir.
+La classe Game appelle d'abord la méthode init des deux objets pour leur indiquer que le jeu commence et leur en fournir un accès.
 Puis, à chaque début de tour, elle appelle la méthode mustPlay du joueur correspondant. Ce dernier devra alors appeler la méthode move du jeu et indiquer le déplacement qu'il souhaite faire. Il peut mettre le temps qu'il veut avant d'appeler cette méthode, et il peut même l'appeler à partir d'un autre thread, mais il est important qu'il ne bloque pas l'exécution du thread principal et donc la méthode mustPlay doit terminer rapidement.
-Le trait player possède également une méthode stop qui indique que le jeu est terminé ou temporairement suspendu.\newline
+Le trait Player possède également une méthode stop qui indique que le jeu est terminé ou temporairement suspendu.\newline
 
-Cette structure permet de s'adapter aussi bien à un joueur local qu'à une IA ou un joueur réseau. Pour un joueur réseau par exemple, on peut imaginer ouvrir la connexion dans init et l'écouter sur un nouveau thread, et lors de l'appel à mustPlay, on indique au thread d'appeler move sur les prochaines données de mouvement recues. On ferme la connexion lors de l'appel à la méthode stop.
+Cette structure permet de s'adapter aussi bien à un joueur local qu'à une IA ou un joueur réseau. Pour un joueur réseau par exemple, on peut imaginer ouvrir la connexion dans init et l'écouter sur un nouveau thread, et lors de l'appel à mustPlay, on indique au thread d'appeler move sur les prochaines données de mouvement reçues. On ferme la connexion lors de l'appel à la méthode stop.
 
 \section{Le canvas}
 
 Pour représenter graphiquement l'échiquier et pour déterminer les actions du joueur local, nous avons opté pour un composant héritant de Panel et pour lequel nous avons redéfini la méthode paintComponent. Cela permet de donner à l'échiquier l'allure que l'on souhaite, puisque la méthode paintComponent nous permet de dessiner ce que l'on veut : des formes géométriques, du texte, une image... On peut également facilement déterminer la case sur laquelle le joueur clique en indiquant que l'on écoute les clics de souris et en ajoutant la réaction correspondante.\newline
 
-Une autre solution aurait été de considérer l'échiquier comme une grille 8x8 de boutons. Il aurait été également facile de dessiner une pièce sur un bouton (en changeant l'icone correspondante) et de déterminer la case sur laquelle le joueur clique. En revanche, il aurait été compliqué de faire un rendu graphique plus poussé tel que des animations de déplacement pour les pièces (amélioration possible avec notre méthode).
+Une autre solution aurait été de considérer l'échiquier comme une grille 8x8 de boutons. Il aurait été également facile de dessiner une pièce sur un bouton (en changeant l'icone correspondante) et de déterminer la case sur laquelle le joueur clique. En revanche, il aurait été compliqué de faire un rendu graphique plus poussé tel que des animations de déplacement pour les pièces — amélioration possible avec notre méthode.
 
 \end{document}

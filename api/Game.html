@@ -192,7 +192,7 @@
         <span class="name">canMove</span><span class="params">(<span name="fromX">fromX: <span class="extype" name="scala.Int">Int</span></span>, <span name="fromY">fromY: <span class="extype" name="scala.Int">Int</span></span>, <span name="toX">toX: <span class="extype" name="scala.Int">Int</span></span>, <span name="toY">toY: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Indicate whether the piece at the first position can be moved to the second position or not.</p>
+      <p class="shortcomment cmt">    Indicates whether the piece at the first position can be moved to the second position.</p>
     </li><li name="Game#canMove" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="canMove(x:Int,y:Int):Boolean"></a>
       <a id="canMove(Int,Int):Boolean"></a>
@@ -205,7 +205,7 @@
         <span class="name">canMove</span><span class="params">(<span name="x">x: <span class="extype" name="scala.Int">Int</span></span>, <span name="y">y: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Indicate whether the piece at the given position can be moved or not.</p>
+      <p class="shortcomment cmt">    Indicates whether the piece at the given position can be moved.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -295,7 +295,7 @@
         <span class="name">getKing</span><span class="params">(<span name="t">t: <a href="Round$.html#Round=Round.Value" class="extmbr" name="Round.Round">Round</a></span>)</span><span class="result">: <a href="Piece.html" class="extype" name="Piece">Piece</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Return the king of the given team.</p><div class="fullcomment"><div class="comment cmt"><p>    Return the king of the given team. Return null if not found.
+      <p class="shortcomment cmt">    Returns the king of the given team.</p><div class="fullcomment"><div class="comment cmt"><p>    Returns the king of the given team. Return null if not found.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Board.html" class="extype" name="Board">Board</a></dd></dl></div>
     </li><li name="Game#getRound" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getRound:Round.Value"></a>
@@ -309,7 +309,7 @@
         <span class="name">getRound</span><span class="result">: <a href="Round$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="Round.Value">Round.Value</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Return the current round.</p>
+      <p class="shortcomment cmt">    Returns the current round.</p>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -348,7 +348,7 @@
         <span class="name">move</span><span class="params">(<span name="fromX">fromX: <span class="extype" name="scala.Int">Int</span></span>, <span name="fromY">fromY: <span class="extype" name="scala.Int">Int</span></span>, <span name="toX">toX: <span class="extype" name="scala.Int">Int</span></span>, <span name="toY">toY: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Play the given move.</p><div class="fullcomment"><div class="comment cmt"><p>    Play the given move. The move must be legal.
+      <p class="shortcomment cmt">    Plays the given move.</p><div class="fullcomment"><div class="comment cmt"><p>    Plays the given move. The move must be legal.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="Game">Game</a> → <a href="Board.html" class="extype" name="Board">Board</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
@@ -401,7 +401,7 @@
         <span class="name">pieceAtPosition</span><span class="params">(<span name="x">x: <span class="extype" name="scala.Int">Int</span></span>, <span name="y">y: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="Piece.html" class="extype" name="Piece">Piece</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Return the piece at the given position.</p><div class="fullcomment"><div class="comment cmt"><p>    Return the piece at the given position. Return null if there is no piece at this position.
+      <p class="shortcomment cmt">    Returns the piece at the given position.</p><div class="fullcomment"><div class="comment cmt"><p>    Returns the piece at the given position. Return null if there is no piece at this position.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Board.html" class="extype" name="Board">Board</a></dd></dl></div>
     </li><li name="Game#possibleMoves" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="possibleMoves:scala.collection.mutable.MutableList[(Int,Int,Int,Int)]"></a>
@@ -415,7 +415,7 @@
         <span class="name">possibleMoves</span><span class="result">: <span class="extype" name="scala.collection.mutable.MutableList">MutableList</span>[(<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>)]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Return a list of every possible moves.</p>
+      <p class="shortcomment cmt">    Returns a list of all the possible moves.</p>
     </li><li name="Game#resume" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="resume:Unit"></a>
       <a id="resume:Unit"></a>
@@ -428,7 +428,7 @@
         <span class="name">resume</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Resume a suspended game.</p>
+      <p class="shortcomment cmt">    Resumes a suspended game.</p>
     </li><li name="Game#suspend" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="suspend:Unit"></a>
       <a id="suspend:Unit"></a>
@@ -441,7 +441,7 @@
         <span class="name">suspend</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Suspend the game and every running thread.</p><div class="fullcomment"><div class="comment cmt"><p>    Suspend the game and every running thread. Game can be resumed later.
+      <p class="shortcomment cmt">    Suspends the game and every running thread.</p><div class="fullcomment"><div class="comment cmt"><p>    Suspends the game and every running thread. Game can be resumed later.
 </p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>

@@ -5,21 +5,21 @@ Represents a player (local, AI, network, etc).
 trait Player {
 
     /**
-    Initialize the player.
+    Initializes the player.
 
-    This function must be called when the game starts, before the first move, or when the game resume after being suspended.
+    This function must be called when the game starts, before the first move, or when the game resumes after being suspended.
     */
     def init (game:Game) : Unit
 
     /**
-    Indicate to the player that it's his turn.
+    Indicates to the player that it is his turn.
 
-    This function must terminate QUICLKY. Then, Game.move must be called by the player (on the current thread or on another thread).
+    This function must terminate QUICLKY. Then Game.move must be called by the player (on the current thread or on another thread).
     */
     def mustPlay : Unit
 
     /**
-    Indicate to the player that the game has been suspended.
+    Indicates to the player that the game has been suspended.
 
     The move for the current round must be aborted, and every running threads of the player must be stopped.
     */
@@ -28,9 +28,9 @@ trait Player {
 }
 
 /**
-A simple class to extends that simplify the player implementation.
+A simple class to extend Player which simplifies the player implementation.
 
-You need to implement synchPlay when you extend this class. Every other method of player is implemented.
+You need to implement synchPlay when you extend this class. Every other method of SynchPlayer is implemented.
 */
 abstract class SynchPlayer extends Player with Runnable {
 

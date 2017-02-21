@@ -39,7 +39,7 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A primitive AI that play random (legal) moves.</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A primitive AI that plays random (legal) moves.</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="SynchPlayer.html" class="extype" name="SynchPlayer">SynchPlayer</a>, <span class="extype" name="java.lang.Runnable">Runnable</span>, <a href="Player.html" class="extype" name="Player">Player</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -281,7 +281,7 @@
         <span class="name">init</span><span class="params">(<span name="g">g: <a href="Game.html" class="extype" name="Game">Game</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Initialize the player.</p><div class="fullcomment"><div class="comment cmt"><p>    Initialize the player.</p><p>    This function must be called when the game starts, before the first move, or when the game resume after being suspended.
+      <p class="shortcomment cmt">    Initializes the player.</p><div class="fullcomment"><div class="comment cmt"><p>    Initializes the player.</p><p>    This function must be called when the game starts, before the first move, or when the game resumes after being suspended.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SynchPlayer.html" class="extype" name="SynchPlayer">SynchPlayer</a> → <a href="Player.html" class="extype" name="Player">Player</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -308,7 +308,7 @@
         <span class="name">mustPlay</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Indicate to the player that it's his turn.</p><div class="fullcomment"><div class="comment cmt"><p>    Indicate to the player that it's his turn.</p><p>    This function must terminate QUICLKY. Then, Game.move must be called by the player (on the current thread or on another thread).
+      <p class="shortcomment cmt">    Indicates to the player that it is his turn.</p><div class="fullcomment"><div class="comment cmt"><p>    Indicates to the player that it is his turn.</p><p>    This function must terminate QUICLKY. Then Game.move must be called by the player (on the current thread or on another thread).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SynchPlayer.html" class="extype" name="SynchPlayer">SynchPlayer</a> → <a href="Player.html" class="extype" name="Player">Player</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
@@ -374,7 +374,7 @@
         <span class="name">stop</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Indicate to the player that the game has been suspended.</p><div class="fullcomment"><div class="comment cmt"><p>    Indicate to the player that the game has been suspended.</p><p>    The move for the current round must be aborted, and every running threads of the player must be stopped.
+      <p class="shortcomment cmt">    Indicates to the player that the game has been suspended.</p><div class="fullcomment"><div class="comment cmt"><p>    Indicates to the player that the game has been suspended.</p><p>    The move for the current round must be aborted, and every running threads of the player must be stopped.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SynchPlayer.html" class="extype" name="SynchPlayer">SynchPlayer</a> → <a href="Player.html" class="extype" name="Player">Player</a></dd></dl></div>
     </li><li name="PrimitiveAI#synchPlay" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchPlay(game:Game):(Int,Int,Int,Int)"></a>

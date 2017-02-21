@@ -1,5 +1,5 @@
 /**
-A primitive AI that play random (legal) moves.
+A primitive AI that plays random (legal) moves.
 */
 class PrimitiveAI extends SynchPlayer
 {

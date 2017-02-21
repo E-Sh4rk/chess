@@ -11,21 +11,21 @@ object Direction extends Enumeration {
     val Up, Down, Left, Right, UpRight, UpLeft, DownRight, DownLeft, NoDirection = Value
 
     /**
-    Indicate whether a direction is straight (not diagonal) or not.
+    Indicates whether a direction is straight (not diagonal).
     */
     def isStraight (dir:Direction.Direction) : Boolean =
     {
         return dir == Direction.Up || dir == Direction.Down || dir == Direction.Left || dir == Direction.Right
     }
     /**
-    Indicate whether a direction is diagonal or not.
+    Indicates whether a direction is diagonal.
     */
     def isDiag (dir:Direction.Direction) : Boolean =
     {
         return dir == Direction.UpLeft || dir == Direction.DownLeft || dir == Direction.UpRight || dir == Direction.DownRight
     }
     /**
-    Return the direction that has been applied to go from the first position to the second.
+    Returns the direction that has been applied to go from the first position to the second.
     */
     def directionApplied (fromX:Int, fromY:Int, toX:Int, toY:Int) : Direction.Direction =
     {
@@ -60,7 +60,7 @@ object Direction extends Enumeration {
         return Direction.NoDirection
     }
     /**
-    Return the position obtained by moving a case in the given direction from the given position.
+    Returns the position obtained by moving a case in the given direction from the given position.
     */
     def applyDirection (fromX:Int, fromY:Int, dir:Direction.Direction):(Int,Int) =
     {
@@ -85,7 +85,7 @@ object Direction extends Enumeration {
 }
 
 /**
-    Companion object for piece, in order to have a cache for the loading of images.
+Companion object for piece in order to have a cache for the loading of the images.
 */
 object Piece
 {
@@ -109,7 +109,7 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
 {
     protected var image_path = ""
     /**
-    Indicate whether the piece is a king or not.
+    Indicates whether the piece is a king.
     */
     val king = false
 
@@ -130,17 +130,17 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
     }
 
     /**
-    Return the current position of the piece on the chessboard.
+    Returns the current position of the piece on the chessboard.
     */
     def getPosition = { (x,y) }
 
     /**
-    Return the buffered image that represents the piece.
+    Returns the buffered image that represents the piece.
     */
     def getImage = { Piece.loadImage(image_path) }
 
     /**
-    Return whether the piece is check or not.
+    Returns whether the other player is checked.
     */
     def isCheck : Boolean =
     {
@@ -159,7 +159,7 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
     }
 
     /**
-    Return whether the piece can move to the given position.
+    Returns whether the piece can move to the given position.
 
     DOES NOT TAKE INTO ACCOUNT THE FACT THAT THE MOVE CAN'T CHECK THE KING OF THE PLAYING TEAM.
     */
@@ -176,14 +176,14 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
     }
 
     /**
-    Move the piece to the given position.
+    Moves the piece to the given position.
     
-    DO NOT VERIFY THAT THE MOVE IS LEGAL OR NOT.
+    DOES NOT VERIFY THAT THE MOVE IS LEGAL OR NOT.
     */
     def move(toX:Int,toY:Int): Unit = {x=toX ; y=toY}
 
     /**
-    Make a copy of this piece on the new given board.
+    Makes a copy of this piece on the new given board.
     */
     def copy(b:Board) : Piece
 }

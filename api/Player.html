@@ -98,7 +98,7 @@
         <span class="name">init</span><span class="params">(<span name="game">game: <a href="Game.html" class="extype" name="Game">Game</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Initialize the player.</p><div class="fullcomment"><div class="comment cmt"><p>    Initialize the player.</p><p>    This function must be called when the game starts, before the first move, or when the game resume after being suspended.
+      <p class="shortcomment cmt">    Initializes the player.</p><div class="fullcomment"><div class="comment cmt"><p>    Initializes the player.</p><p>    This function must be called when the game starts, before the first move, or when the game resumes after being suspended.
 </p></div></div>
     </li><li name="Player#mustPlay" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="mustPlay:Unit"></a>
@@ -112,7 +112,7 @@
         <span class="name">mustPlay</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Indicate to the player that it's his turn.</p><div class="fullcomment"><div class="comment cmt"><p>    Indicate to the player that it's his turn.</p><p>    This function must terminate QUICLKY. Then, Game.move must be called by the player (on the current thread or on another thread).
+      <p class="shortcomment cmt">    Indicates to the player that it is his turn.</p><div class="fullcomment"><div class="comment cmt"><p>    Indicates to the player that it is his turn.</p><p>    This function must terminate QUICLKY. Then Game.move must be called by the player (on the current thread or on another thread).
 </p></div></div>
     </li><li name="Player#stop" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="stop:Unit"></a>
@@ -126,7 +126,7 @@
         <span class="name">stop</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">    Indicate to the player that the game has been suspended.</p><div class="fullcomment"><div class="comment cmt"><p>    Indicate to the player that the game has been suspended.</p><p>    The move for the current round must be aborted, and every running threads of the player must be stopped.
+      <p class="shortcomment cmt">    Indicates to the player that the game has been suspended.</p><div class="fullcomment"><div class="comment cmt"><p>    Indicates to the player that the game has been suspended.</p><p>    The move for the current round must be aborted, and every running threads of the player must be stopped.
 </p></div></div>
     </li></ol>
             </div>

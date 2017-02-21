@@ -18,11 +18,11 @@ object Round extends Enumeration {
 }
 
 /**
-Implements a simple chessboard, without any rule.
+Implements a simple chessboard without any rule.
 
 All methods are thread-safe.
 
-@param _b The board to copy. If null or not present, initilize a new chessboard.
+@param _b The board to copy. If null or not present : initializes a new chessboard.
 */
 class Board (private val _b:Board)
 {
@@ -34,7 +34,7 @@ class Board (private val _b:Board)
     }
     if (_b == null)
     {
-        // Set up the board
+        // Setting up the board
         for (x<-0 to 7)
         {
             addPiece(new Pawn(Round.Black, this, x, 1))
@@ -74,11 +74,11 @@ class Board (private val _b:Board)
     def this () = { this (null) }
 
     /**
-    Return the piece at the given position. Return null if there is no piece at this position.
+    Returns the piece at the given position. Return null if there is no piece at this position.
     */
     def pieceAtPosition(x:Int,y:Int) = { board.synchronized { board(x)(y) } }
     /**
-    Move a piece from a position to another position.
+    Moves a piece from a position to another position.
     */
     def move(fromX:Int,fromY:Int,toX:Int,toY:Int) : Unit =
     {
@@ -87,7 +87,7 @@ class Board (private val _b:Board)
             val piece = pieceAtPosition(fromX,fromY)
             if (piece != null)
             {
-                // Do the move
+                // Doing the move
                 piece.move(toX, toY)
                 board(toX)(toY) = piece
                 board(fromX)(fromY) = null
@@ -95,7 +95,7 @@ class Board (private val _b:Board)
         }
     }
     /**
-    Return the king of the given team. Return null if not found.
+    Returns the king of the given team. Return null if not found.
     */
     def getKing(t:Round.Round):Piece =
     {
@@ -137,7 +137,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     playerWhite.mustPlay
 
     /**
-    Suspend the game and every running thread. Game can be resumed later.
+    Suspends the game and every running thread. Game can be resumed later.
     */
     def suspend =
     {
@@ -152,7 +152,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         }
     }
     /**
-    Resume a suspended game.
+    Resumes a suspended game.
     */
     def resume =
     {
@@ -172,12 +172,12 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     }
 
     /**
-    Return the current round.
+    Returns the current round.
     */
     def getRound = { round.synchronized{ round } }
 
     /**
-    Indicate whether the piece at the given position can be moved or not.
+    Indicates whether the piece at the given position can be moved.
     */
     def canMove(x:Int,y:Int):Boolean =
     {
@@ -191,7 +191,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         }
     }
     /**
-    Indicate whether the piece at the first position can be moved to the second position or not.
+    Indicates whether the piece at the first position can be moved to the second position.
     */
     def canMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Boolean =
     {
@@ -203,7 +203,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             if (!p.canMove(toX, toY))
                 return false
 
-            // Check if the king become check
+            // Checking if the king become check
             val cboard = new Board(this)
             cboard.move(fromX,fromY,toX,toY)
             if (cboard.getKing(round).isCheck)
@@ -212,7 +212,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         }
     }
     /**
-    Return a list of every possible moves.
+    Returns a list of all the possible moves.
     */
     def possibleMoves : scala.collection.mutable.MutableList[(Int,Int,Int,Int)] =
     {
@@ -241,7 +241,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     }
 
     /**
-    Play the given move. The move must be legal.
+    Plays the given move. The move must be legal.
     */
     override def move(fromX:Int,fromY:Int,toX:Int,toY:Int):Unit =
     {
