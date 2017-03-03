@@ -20,13 +20,14 @@ object MyApp extends SimpleSwingApplication {
             contents += AI
         }
 
-        contents = new BorderPanel
+        val content = new BorderPanel
         {
             add (canvas, BorderPanel.Position.North)
             add (buttons, BorderPanel.Position.South)
         }
+        contents = content
 
-        listenTo(human, human_AI, AI)
+        listenTo(human, human_AI, AI, this)
         reactions += {
             case ButtonClicked (source) => {
                     if (source == human)
@@ -46,6 +47,15 @@ object MyApp extends SimpleSwingApplication {
                     }
                 }
             case WindowClosing(_) => { if (game != null) game.suspend }
+            case UIElementResized (source) =>
+            {
+                if (this == source)
+                {
+                    content.revalidate
+                    if (canvas != null)
+                        canvas.resize(content.size.width, content.size.height-buttons.size.height);
+                }
+            }
             case _ => {}
         }
 	}

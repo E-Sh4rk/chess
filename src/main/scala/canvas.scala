@@ -17,7 +17,7 @@ Canvas that draws the chessboard and catches user clicks.
 It is the only interface between the current game and the user.
 It can either be used as a panel (to show the chessboard) or as a player.
 */
-class Canvas(val width:Int, val height:Int) extends Panel with Player
+class Canvas(private var width:Int, private var height:Int) extends Panel with Player
 {
     private var selectedCase : Option[(Int,Int)] = None
     private var game : Game = null
@@ -55,6 +55,16 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
 
     // Drawing (output)
     this.preferredSize = new Dimension(width, height)
+    /**
+    Resize the canvas.
+    */
+    def resize(w:Int, h:Int)
+    {
+        width = w ; height = h
+        this.preferredSize = new Dimension(width, height)
+        repaint
+    }
+
     private val introImage = ImageIO.read(new File("img/Chess_intro.png"))
     override def paintComponent(g: Graphics2D) : Unit = {
         super.paintComponent(g)
@@ -97,11 +107,12 @@ class Canvas(val width:Int, val height:Int) extends Panel with Player
         }
 
         // Drawing the grid
-        g.setStroke(new BasicStroke(5));
         g.setColor(new Color(200,200,200));
         for (i<-0 to 8)
         {
+            g.setStroke(new BasicStroke(1+height/100));
             g.drawLine(0,i*height/8,width,i*height/8);
+            g.setStroke(new BasicStroke(1+width/100));
             g.drawLine(i*width/8,0,i*width/8,height);
         }
 
