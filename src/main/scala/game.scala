@@ -228,11 +228,18 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                 return None
             if (round == Round.Black && toY-fromY != 1)
                 return None
+
+            // Not check
+            val cboard = new Board(this)
+            cboard.move(fromX,fromY,toX,toY)
+            cboard.remove(toX,fromY)
+            if (cboard.getKing(round).isCheck)
+                return None
             return Some (toX,fromY)
         }
     }
     /**
-    Return None if the move is not a castling move. Otherwise, return the move implied for the rook.
+    Return None if the move is not a valid castling move. Otherwise, return the move implied for the rook.
     */
     def castlingMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Option[(Int,Int,Int,Int)] =
     {
@@ -264,16 +271,15 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             if (!p.noObstacleTo(rookX, rookY))
                 return None
 
-            // 3. No check at the first/intermediate/last case
-            if (getKing(round).isCheck)
+            // 3. Not check at the first/intermediate/last position
+            val cboard = new Board(this)
+            if (cboard.getKing(round).isCheck)
                 return None
             val (intermediateX, intermediateY) = Direction.applyDirection(fromX, fromY, dir)
-            var cboard = new Board(this)
             cboard.move(fromX,fromY,intermediateX,intermediateY)
             if (cboard.getKing(round).isCheck)
                 return None
-            cboard = new Board(this)
-            cboard.move(fromX,fromY,toX,toY)
+            cboard.move(intermediateX,intermediateY,toX,toY)
             if (cboard.getKing(round).isCheck)
                 return None
 
@@ -290,13 +296,15 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         {
             if (!canMove(fromX,fromY))
                 return false
+
+            // Special move : Castling, 'En Passant'
+            if (castlingMove(fromX,fromY,toX,toY) != None || enPassantMove(fromX,fromY,toX,toY) != None)
+                return true
+                
+            // Regular move
             val p = pieceAtPosition(fromX,fromY)
             if (!p.canMove(toX, toY))
-            {
-                // Exception for special moves : Castling, 'En Passant'
-                if (castlingMove(fromX,fromY,toX,toY) == None && enPassantMove(fromX,fromY,toX,toY) == None)
-                    return false
-            }
+                return false
 
             // Checking if the king become check
             val cboard = new Board(this)
