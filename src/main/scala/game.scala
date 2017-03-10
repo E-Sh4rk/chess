@@ -95,6 +95,16 @@ class Board (private val _b:Board)
         }
     }
     /**
+    Remove the piece at a given position.
+    */
+    def remove(fromX:Int,fromY:Int) : Unit =
+    {
+        board.synchronized
+        {
+            board(fromX)(fromY) = null
+        }
+    }
+    /**
     Returns the king of the given team. Return null if not found.
     */
     def getKing(t:Round.Round):Piece =
@@ -194,15 +204,31 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         }
     }
 
+    private var enPassantPosition : Option[(Int,Int)] = None
     /**
-    Determine whether a move is a valid 'En Passant' move or not.
+    Return None if the move is not a valid 'en passant' move. Otherwise, return the position of the eaten piece.
     */
-    def isEnPassantMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Boolean =
+    def enPassantMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Option[(Int,Int)] =
     {
         round.synchronized
         {
-            // TODO
-            return false
+            enPassantPosition match
+            {
+                case None => {return None}
+                case Some ((fX,fY)) => { if (fX != toX || fY != toY) return None }
+            }
+            if (!canMove(fromX,fromY))
+                return None
+            val p = pieceAtPosition(fromX,fromY)
+            if (p.pieceType != PieceType.Pawn)
+                return None
+            if (math.abs(fromX-toX) != 1)
+                return None
+            if (round == Round.White && fromY-toY != 1)
+                return None
+            if (round == Round.Black && toY-fromY != 1)
+                return None
+            return Some (toX,fromY)
         }
     }
     /**
@@ -268,7 +294,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             if (!p.canMove(toX, toY))
             {
                 // Exception for special moves : Castling, 'En Passant'
-                if (castlingMove(fromX,fromY,toX,toY) == None && !isEnPassantMove(fromX,fromY,toX,toY))
+                if (castlingMove(fromX,fromY,toX,toY) == None && enPassantMove(fromX,fromY,toX,toY) == None)
                     return false
             }
 
@@ -323,7 +349,6 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     }
     private def _move(fromX:Int,fromY:Int,toX:Int,toY:Int):Unit =
     {
-        // TODO : Cas du castling et en passant : Faire la deuxième action
         round.synchronized
         {
             if (suspended || round == Round.Finished)
@@ -350,6 +375,14 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                 case None => {}
                 case Some ((fX,fY,tX,tY)) => {super.move (fX,fY,tX,tY)}
             }
+            enPassantMove(fromX,fromY,toX,toY) match
+            {
+                case None => {}
+                case Some ((fX,fY)) => {super.remove (fX,fY)}
+            }
+            enPassantPosition = None
+            if (pieceAtPosition(fromX,fromY).pieceType == PieceType.Pawn && math.abs(toY-fromY) == 2)
+                enPassantPosition = Some (fromX+(toX-fromX)/2, fromY+(toY-fromY)/2)
             super.move (fromX,fromY,toX,toY)
             round = Round.adv(round)
         
@@ -383,5 +416,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                 playerBlack.mustPlay
         }
     }
+
+    override def remove(fromX:Int,fromY:Int) : Unit = { }
 
 }
