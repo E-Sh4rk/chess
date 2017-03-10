@@ -110,9 +110,9 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         g.setColor(new Color(200,200,200));
         for (i<-0 to 8)
         {
-            g.setStroke(new BasicStroke(1+height/100));
+            g.setStroke(new BasicStroke(1+height/200));
             g.drawLine(0,i*height/8,width,i*height/8);
-            g.setStroke(new BasicStroke(1+width/100));
+            g.setStroke(new BasicStroke(1+width/200));
             g.drawLine(i*width/8,0,i*width/8,height);
         }
 
