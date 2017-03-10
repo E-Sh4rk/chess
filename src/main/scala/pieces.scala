@@ -6,7 +6,7 @@ class Pawn(private val _team:Round.Round, private val _board:Board, private val 
     if(team == Round.Black)
         image_path = "img/Chess_pdt60.png"
 
-    private var firstMove = true
+    override val pieceType = PieceType.Pawn
 
     override def canMove(toX:Int,toY:Int): Boolean =
     {
@@ -55,18 +55,12 @@ class Pawn(private val _team:Round.Round, private val _board:Board, private val 
         }
         return true;
     }
-    override def move(toX:Int,toY:Int): Unit =
-    {
-        super.move(toX,toY);
-        firstMove = false;
-    }
     override def copy(b:Board) : Piece =
     {
         val p = new Pawn(team, b, x, y)
         p.firstMove = this.firstMove
         return p
     }
-
 }
 
 class Rook(private val _team:Round.Round, private val _board:Board, private val _x:Int, private val _y:Int) extends Piece(_team, _board, _x, _y)
@@ -75,6 +69,8 @@ class Rook(private val _team:Round.Round, private val _board:Board, private val 
         image_path = "img/Chess_rlt60.png"
     if(team == Round.Black)
         image_path = "img/Chess_rdt60.png"
+
+    override val pieceType = PieceType.Rook
 
     override def canMove(toX:Int,toY:Int): Boolean =
     {
@@ -89,7 +85,12 @@ class Rook(private val _team:Round.Round, private val _board:Board, private val 
         }
         return false
     }
-    override def copy(b:Board) : Piece = { new Rook(team, b, x, y) }
+    override def copy(b:Board) : Piece =
+    {
+        val p = new Rook(team, b, x, y)
+        p.firstMove = this.firstMove
+        return p
+    }
 }
 
 class Bishop(private val _team:Round.Round, private val _board:Board, private val _x:Int, private val _y:Int) extends Piece(_team, _board, _x, _y)
@@ -98,6 +99,8 @@ class Bishop(private val _team:Round.Round, private val _board:Board, private va
         image_path = "img/Chess_blt60.png"
     if(team == Round.Black)
         image_path = "img/Chess_bdt60.png"
+
+    override val pieceType = PieceType.Bishop
 
     override def canMove(toX:Int,toY:Int): Boolean =
     {
@@ -112,7 +115,12 @@ class Bishop(private val _team:Round.Round, private val _board:Board, private va
         }
         return false
     }
-    override def copy(b:Board) : Piece = { new Bishop(team, b, x, y) }
+    override def copy(b:Board) : Piece =
+    {
+        val p = new Bishop(team, b, x, y)
+        p.firstMove = this.firstMove
+        return p
+    }
 }
 
 class Knight(private val _team:Round.Round, private val _board:Board, private val _x:Int, private val _y:Int) extends Piece(_team, _board, _x, _y)
@@ -121,6 +129,8 @@ class Knight(private val _team:Round.Round, private val _board:Board, private va
         image_path = "img/Chess_nlt60.png"
     if(team == Round.Black)
         image_path = "img/Chess_ndt60.png"
+
+    override val pieceType = PieceType.Knight
 
     override def canMove(toX:Int,toY:Int): Boolean =
     {
@@ -137,7 +147,12 @@ class Knight(private val _team:Round.Round, private val _board:Board, private va
 
         return false
     }
-    override def copy(b:Board) : Piece = { new Knight(team, b, x, y) }
+    override def copy(b:Board) : Piece =
+    {
+        val p = new Knight(team, b, x, y)
+        p.firstMove = this.firstMove
+        return p
+    }
 }
 
 class King(private val _team:Round.Round, private val _board:Board, private val _x:Int, private val _y:Int) extends Piece(_team, _board, _x, _y)
@@ -147,7 +162,7 @@ class King(private val _team:Round.Round, private val _board:Board, private val 
     if(team == Round.Black)
         image_path = "img/Chess_kdt60.png"
         
-    override val king = true
+    override val pieceType = PieceType.King
 
     override def canMove(toX:Int,toY:Int): Boolean =
     {
@@ -159,7 +174,12 @@ class King(private val _team:Round.Round, private val _board:Board, private val 
 
         return false
     }
-    override def copy(b:Board) : Piece = { new King(team, b, x, y) }
+    override def copy(b:Board) : Piece =
+    {
+        val p = new King(team, b, x, y)
+        p.firstMove = this.firstMove
+        return p
+    }
 }
 
 class Queen(private val _team:Round.Round, private val _board:Board, private val _x:Int, private val _y:Int) extends Piece(_team, _board, _x, _y)
@@ -168,6 +188,8 @@ class Queen(private val _team:Round.Round, private val _board:Board, private val
         image_path = "img/Chess_qlt60.png"
     if(team == Round.Black)
         image_path = "img/Chess_qdt60.png"
+
+    override val pieceType = PieceType.Queen
 
     override def canMove(toX:Int,toY:Int): Boolean =
     {
@@ -182,6 +204,11 @@ class Queen(private val _team:Round.Round, private val _board:Board, private val
         }
         return false
     }
-    override def copy(b:Board) : Piece = { new Queen(team, b, x, y) }
+    override def copy(b:Board) : Piece =
+    {
+        val p = new Queen(team, b, x, y)
+        p.firstMove = this.firstMove
+        return p
+    }
 }
 

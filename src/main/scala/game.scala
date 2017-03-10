@@ -108,7 +108,7 @@ class Board (private val _b:Board)
                     val piece = pieceAtPosition(i,j)
                     if (piece != null)
                         if (piece.team == t)
-                            if (piece.king)
+                            if (piece.pieceType == PieceType.King)
                                 return piece
                 }
             }
@@ -190,6 +190,69 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             return false
         }
     }
+
+    /**
+    Determine whether a move is a valid 'En Passant' move or not.
+    */
+    def isEnPassantMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Boolean =
+    {
+        round.synchronized
+        {
+            // TODO
+            return true
+        }
+    }
+    /**
+    Determine whether a move is a valid castling move or not.
+    */
+    def isCastlingMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Boolean =
+    {
+        round.synchronized
+        {
+            // 0. General move verifications
+            if (!canMove(fromX,fromY))
+                return false
+            val p = pieceAtPosition(fromX,fromY)
+            if (p.pieceType != PieceType.King || p.hasMoved)
+                return false
+            if (fromY != toY || math.abs(toX-fromX) != 2)
+                return false
+            val dir = Direction.directionApplied(fromX,fromY,toX,toY)
+
+            // 1. King and rook have not moved previously in this game
+            var rookX = fromX
+            var rookY = fromY
+            if (dir == Direction.Left)
+                rookX = 0
+            if (dir == Direction.Right)
+                rookX = 7
+            if (!canMove(rookX,rookY))
+                return false
+            val rook = pieceAtPosition(fromX,fromY)
+            if (rook.pieceType != PieceType.Rook || rook.hasMoved)
+                return false
+
+            // 2. No piece between king and rook
+            if (!p.noObstacleTo(rookX, rookY))
+                return false
+
+            // 3. No check at the first/intermediate/last case
+            if (getKing(round).isCheck)
+                return false
+            val (intermediateX, intermediateY) = Direction.applyDirection(fromX, fromY, dir)
+            var cboard = new Board(this)
+            cboard.move(fromX,fromY,intermediateX,intermediateY)
+            if (cboard.getKing(round).isCheck)
+                return false
+            cboard = new Board(this)
+            cboard.move(fromX,fromY,toX,toY)
+            if (cboard.getKing(round).isCheck)
+                return false
+
+            return true
+        }
+    }
+
     /**
     Indicates whether the piece at the first position can be moved to the second position.
     */
@@ -201,7 +264,11 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                 return false
             val p = pieceAtPosition(fromX,fromY)
             if (!p.canMove(toX, toY))
-                return false
+            {
+                // Exception for special moves : Castling, 'En Passant'
+                if (!isCastlingMove(fromX,fromY,toX,toY) && !isEnPassantMove(fromX,fromY,toX,toY))
+                    return false
+            }
 
             // Checking if the king become check
             val cboard = new Board(this)
@@ -254,6 +321,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     }
     private def _move(fromX:Int,fromY:Int,toX:Int,toY:Int):Unit =
     {
+        // TODO : Cas du castling et en passant : Faire la deuxième action
         round.synchronized
         {
             if (suspended || round == Round.Finished)

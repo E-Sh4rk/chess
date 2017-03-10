@@ -84,6 +84,11 @@ object Direction extends Enumeration {
     }
 }
 
+object PieceType extends Enumeration {
+    type PieceType = Value
+    val Pawn, Rook, Bishop, Knight, King, Queen, Unknown = Value
+}
+
 /**
 Companion object for piece in order to have a cache for the loading of the images.
 */
@@ -109,11 +114,14 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
 {
     protected var image_path = ""
     /**
-    Indicates whether the piece is a king.
+    Indicates the type of the piece.
     */
-    val king = false
+    val pieceType = PieceType.Unknown
 
-    protected def noObstacleTo (toX:Int,toY:Int):Boolean =
+    /**
+    Indicates whether there is an obstacle between the piece and the position given (excluded).
+    */
+    def noObstacleTo (toX:Int,toY:Int):Boolean =
     {
         val dir = Direction.directionApplied(x,y,toX,toY)
         if (dir == Direction.NoDirection)
@@ -175,12 +183,23 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
         return true;
     }
 
+    protected var firstMove = true
+
     /**
     Moves the piece to the given position.
     
     DOES NOT VERIFY THAT THE MOVE IS LEGAL OR NOT.
     */
-    def move(toX:Int,toY:Int): Unit = {x=toX ; y=toY}
+    def move(toX:Int,toY:Int): Unit =
+    {
+        x=toX ; y=toY
+        firstMove = false
+    }
+
+    /**
+    Indicates whether the piece has already moved in this game.
+    */
+    def hasMoved : Boolean = { return !firstMove }
 
     /**
     Makes a copy of this piece on the new given board.
