@@ -202,24 +202,24 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         round.synchronized
         {
             // TODO
-            return true
+            return false
         }
     }
     /**
-    Determine whether a move is a valid castling move or not.
+    Return None if the move is not a castling move. Otherwise, return the move implied for the rook.
     */
-    def isCastlingMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Boolean =
+    def castlingMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Option[(Int,Int,Int,Int)] =
     {
         round.synchronized
         {
             // 0. General move verifications
             if (!canMove(fromX,fromY))
-                return false
+                return None
             val p = pieceAtPosition(fromX,fromY)
             if (p.pieceType != PieceType.King || p.hasMoved)
-                return false
+                return None
             if (fromY != toY || math.abs(toX-fromX) != 2)
-                return false
+                return None
             val dir = Direction.directionApplied(fromX,fromY,toX,toY)
 
             // 1. King and rook have not moved previously in this game
@@ -230,29 +230,29 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             if (dir == Direction.Right)
                 rookX = 7
             if (!canMove(rookX,rookY))
-                return false
+                return None
             val rook = pieceAtPosition(fromX,fromY)
             if (rook.pieceType != PieceType.Rook || rook.hasMoved)
-                return false
+                return None
 
             // 2. No piece between king and rook
             if (!p.noObstacleTo(rookX, rookY))
-                return false
+                return None
 
             // 3. No check at the first/intermediate/last case
             if (getKing(round).isCheck)
-                return false
+                return None
             val (intermediateX, intermediateY) = Direction.applyDirection(fromX, fromY, dir)
             var cboard = new Board(this)
             cboard.move(fromX,fromY,intermediateX,intermediateY)
             if (cboard.getKing(round).isCheck)
-                return false
+                return None
             cboard = new Board(this)
             cboard.move(fromX,fromY,toX,toY)
             if (cboard.getKing(round).isCheck)
-                return false
+                return None
 
-            return true
+            return Some(rookX,rookY,intermediateX,intermediateY)
         }
     }
 
@@ -269,7 +269,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             if (!p.canMove(toX, toY))
             {
                 // Exception for special moves : Castling, 'En Passant'
-                if (!isCastlingMove(fromX,fromY,toX,toY) && !isEnPassantMove(fromX,fromY,toX,toY))
+                if (castlingMove(fromX,fromY,toX,toY) == None && !isEnPassantMove(fromX,fromY,toX,toY))
                     return false
             }
 
@@ -345,7 +345,12 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                 fmRule(round) += 1
             }
 
-
+            // Do the move !!!
+            castlingMove(fromX,fromY,toX,toY) match
+            {
+                case None => {}
+                case Some ((fX,fY,tX,tY)) => {super.move (fX,fY,tX,tY)}
+            }
             super.move (fromX,fromY,toX,toY)
             round = Round.adv(round)
         

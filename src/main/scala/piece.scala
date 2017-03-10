@@ -132,7 +132,7 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
         {
             if (board.pieceAtPosition(ix,iy) != null)
                 return false
-            Direction.applyDirection(ix,iy,dir) match { case (nx,ny) => ix = nx; iy = ny }
+            Direction.applyDirection(ix,iy,dir) match { case (nx,ny) => { ix = nx; iy = ny } }
         }
         return true
     }
