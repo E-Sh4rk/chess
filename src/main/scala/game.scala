@@ -130,7 +130,10 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
 {
     private var round = Round.White
     private var suspended = false
+    private val fmRule = scala.collection.mutable.Map[Round.Round, Int]()
 
+    fmRule(Round.White) = 0
+    fmRule(Round.Black) = 0
     canvas.newGame(this)
     playerWhite.init(this)
     playerBlack.init(this)
@@ -261,6 +264,19 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             
             if (!canMove(fromX,fromY,toX,toY))
                 return
+            
+            // fifty-move rule updating
+            // TODO : detect if the piece moved is a pawn
+            if (pieceAtPosition(toX,toY) != null)
+            {
+                fmRule(Round.White) = 0
+                fmRule(Round.Black) = 0
+            }
+            else
+            {
+                fmRule(round) += 1
+            }
+
 
             super.move (fromX,fromY,toX,toY)
             round = Round.adv(round)
@@ -268,6 +284,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             // Check/Checkmate/Stalemate detection
             val check = getKing(round).isCheck
             val endOfGame = possibleMoves.isEmpty
+            val fmRulePossible = fmRule(round) >= 50
 
             if (check && endOfGame)
                 canvas.setMessage ("Checkmate ! " + Round.adv(round).toString + " wins !")
@@ -275,6 +292,8 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                 canvas.setMessage ("Check !")
             else if (endOfGame)
                 canvas.setMessage ("Stalemate !")
+            else if (fmRulePossible)
+                canvas.setMessage ("Fifty-move rule !")
             else
                 canvas.clearMessage
 
