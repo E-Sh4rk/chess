@@ -212,7 +212,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     {
         round.synchronized
         {
-            // 0. General move verifications
+            // 1. King and rook have not moved previously in this game
             if (!canMove(fromX,fromY))
                 return None
             val p = pieceAtPosition(fromX,fromY)
@@ -222,7 +222,6 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                 return None
             val dir = Direction.directionApplied(fromX,fromY,toX,toY)
 
-            // 1. King and rook have not moved previously in this game
             var rookX = fromX
             var rookY = fromY
             if (dir == Direction.Left)
@@ -231,7 +230,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                 rookX = 7
             if (!canMove(rookX,rookY))
                 return None
-            val rook = pieceAtPosition(fromX,fromY)
+            val rook = pieceAtPosition(rookX,rookY)
             if (rook.pieceType != PieceType.Rook || rook.hasMoved)
                 return None
 
