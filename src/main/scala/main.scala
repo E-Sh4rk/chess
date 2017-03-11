@@ -7,7 +7,7 @@ object MyApp extends SimpleSwingApplication {
 
 		title = "Checks"
 
-        val canvas = new Canvas(500,500)
+        val canvas = new Canvas(750,750)
         var game:Game = null
 
         val human = new Button("Human Fight !")
@@ -56,7 +56,6 @@ object MyApp extends SimpleSwingApplication {
                         canvas.resize(content.size.width, content.size.height-buttons.size.height);
                 }
             }
-            case _ => {}
         }
 	}
 }

@@ -20,6 +20,7 @@ It can either be used as a panel (to show the chessboard) or as a player.
 class Canvas(private var width:Int, private var height:Int) extends Panel with Player
 {
     private var selectedCase : Option[(Int,Int)] = None
+    private var selectedCase2 : Option[(Int,Int)] = None // Used for promotion
     private var game : Game = null
     private var canPlay : Boolean = false
     private var message : String = null
@@ -30,6 +31,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     def newGame (g:Game) : Unit =
     {
         selectedCase = None
+        selectedCase2 = None
         canPlay = false
         message = null
         game = g
@@ -66,15 +68,34 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     }
 
     private val introImage = ImageIO.read(new File("img/Chess_intro.png"))
+    private val promoQueen = ImageIO.read(new File("img/tux_queen.png"))
+    private val promoKnight = ImageIO.read(new File("img/tux_knight.png"))
+    private val promoBishop = ImageIO.read(new File("img/tux_bishop.png"))
+    private val promoRook = ImageIO.read(new File("img/tux_rook.png"))
     override def paintComponent(g: Graphics2D) : Unit = {
         super.paintComponent(g)
 
         if (game == null)
         {
             // Drawing the intro image
-            g.setColor(new Color(100,100,100))
-            drawCenteredString(g, "Checks", new Rectangle(0,0,width/2,3*height/4), g.getFont().deriveFont(g.getFont().getSize() * 5.0F))
-            g.drawImage(introImage,0,0,width,height,null)
+            g.setColor(Color.black)
+            if (width*2 <= height*3)
+                drawCenteredString(g, "Checks", new Rectangle(0,0,width,height-width/2), g.getFont().deriveFont(g.getFont().getSize() * 2F * width / 100F))
+            g.drawImage(introImage,0,height-width/2,width,width/2,null)
+            return
+        }
+
+        if (selectedCase2 != None)
+        {
+            // Promotion !
+            g.setColor(Color.white)
+            g.fillRect(0,0,width,height);
+            val max_height = math.min(height,width*3/2)
+            val max_width = max_height*2/3
+            g.drawImage(promoQueen,(width-(max_width/2))/2,0,max_width/2,max_height/2,null)
+            g.drawImage(promoRook,(width/3-(max_width/3))/2,height/2,max_width/3,max_height/3,null)
+            g.drawImage(promoKnight,width/3+(width/3-(max_width/3))/2,height/2,max_width/3,max_height/3,null)
+            g.drawImage(promoBishop,2*width/3+(width/3-(max_width/3))/2,height/2,max_width/3,max_height/3,null)
             return
         }
         
@@ -149,8 +170,6 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         g.drawString(text, x, y);
     }
 
-    // TODO : Promotion : choice for the user
-
     // Events (input)
     listenTo(mouse.clicks)
     reactions +=
@@ -163,7 +182,27 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
 
                 if (game != null && canPlay)
                 {
-                    if (selectedCase == Some(x,y))
+                    if (selectedCase2 != None)
+                    {
+                        var ptype = PieceType.Unknown
+                        // Promotion ! Choosing a piece type
+                        if (pt.y <= height/2)
+                            ptype = PieceType.Queen
+                        else if (pt.x <= height/3)
+                            ptype = PieceType.Rook
+                        else if (pt.x <= 2*height/3)
+                            ptype = PieceType.Knight
+                        else if (pt.x <= height)
+                            ptype = PieceType.Bishop
+                        // Do the promotion move
+                        val Some ((sel_x, sel_y)) = selectedCase
+                        val Some ((sel_x2, sel_y2)) = selectedCase2
+                        selectedCase = None
+                        selectedCase2 = None
+                        canPlay = false
+                        game.move(sel_x, sel_y, sel_x2, sel_y2, ptype)
+                    }
+                    else if (selectedCase == Some(x,y))
                         selectedCase = None
                     else
                     {
@@ -175,9 +214,16 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                             val Some ((sel_x, sel_y)) = selectedCase
                             if (game.canMove(sel_x, sel_y, x, y))
                             {
-                                selectedCase = None
-                                canPlay = false
-                                game.move(sel_x, sel_y, x, y)
+                                if (game.pieceAtPosition(sel_x,sel_y).pieceType == PieceType.Pawn && (y == 0 || y == 7))
+                                    // Promotion move
+                                    selectedCase2 = Some(x, y)
+                                else
+                                {
+                                    // Not a promotion move
+                                    selectedCase = None
+                                    canPlay = false
+                                    game.move(sel_x, sel_y, x, y)
+                                } 
                             }
                         }
                     }
@@ -185,7 +231,6 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                 }
             }
         }
-        case _ => {}
     }
 
 }
