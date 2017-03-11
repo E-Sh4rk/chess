@@ -27,11 +27,13 @@ All methods are thread-safe.
 class Board (private val _b:Board)
 {
     private val board = Array.ofDim[Piece](8,8)
+
     private def addPiece(p:Piece):Unit =
     {
         val (x,y) = p.getPosition
         board(x)(y) = p
     }
+
     if (_b == null)
     {
         // Setting up the board
@@ -64,7 +66,7 @@ class Board (private val _b:Board)
         {
             for (j<-0 to 7)
             {
-                val p = _b.pieceAtPosition(i,j)
+                val p = _b.board(i)(j)
                 if (p != null)
                     board(i)(j) = p.copy(this)
             }
@@ -84,7 +86,7 @@ class Board (private val _b:Board)
     {
         board.synchronized
         {
-            val piece = pieceAtPosition(fromX,fromY)
+            val piece = board(fromX)(fromY)
             if (piece != null)
             {
                 // Doing the move
@@ -95,14 +97,18 @@ class Board (private val _b:Board)
         }
     }
     /**
+    Add a piece to the board.
+    */
+    def add(p:Piece):Unit =
+    {
+        board.synchronized { addPiece(p) }
+    }
+    /**
     Remove the piece at a given position.
     */
     def remove(fromX:Int,fromY:Int) : Unit =
     {
-        board.synchronized
-        {
-            board(fromX)(fromY) = null
-        }
+        board.synchronized { board(fromX)(fromY) = null }
     }
     /**
     Returns the king of the given team. Return null if not found.
@@ -115,7 +121,7 @@ class Board (private val _b:Board)
             {
                 for (j<-0 to 7)
                 {
-                    val piece = pieceAtPosition(i,j)
+                    val piece = board(i)(j)
                     if (piece != null)
                         if (piece.team == t)
                             if (piece.pieceType == PieceType.King)
@@ -141,6 +147,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     private var round = Round.White
     private var suspended = false
     private var fmRule = 0
+    private var enPassantPosition : Option[(Int,Int)] = None
 
     canvas.newGame(this)
     playerWhite.init(this)
@@ -202,7 +209,6 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         }
     }
 
-    private var enPassantPosition : Option[(Int,Int)] = None
     /**
     Return None if the move is not a valid 'en passant' move. Otherwise, return the position of the eaten piece.
     */
@@ -343,17 +349,19 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
 
     /**
     Plays the given move. The move must be legal.
+
+    The last optional parameter is the type of piece wanted in the case of a promotion (default is queen).
     */
-    override def move(fromX:Int,fromY:Int,toX:Int,toY:Int):Unit =
+    def move(fromX:Int,fromY:Int,toX:Int,toY:Int, promotionType:PieceType.PieceType):Unit =
     {
         // We must be on the main thread before making some modifications.
         // if (!SwingUtilities.isEventDispatchThread())
         // Even if we are already on the main thread, we must reinvoke this function later (avoid interlaced turns).
         SwingUtilities.invokeLater(new Runnable() {
-            override def run  : Unit = { _move(fromX,fromY,toX,toY) }
+            override def run  : Unit = { _move(fromX,fromY,toX,toY,promotionType) }
         });
     }
-    private def _move(fromX:Int,fromY:Int,toX:Int,toY:Int):Unit =
+    private def _move(fromX:Int,fromY:Int,toX:Int,toY:Int,promotionType:PieceType.PieceType):Unit =
     {
         round.synchronized
         {
@@ -387,6 +395,17 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             if (pieceAtPosition(fromX,fromY).pieceType == PieceType.Pawn && math.abs(toY-fromY) == 2)
                 enPassantPosition = Some (fromX+(toX-fromX)/2, fromY+(toY-fromY)/2)
             super.move (fromX,fromY,toX,toY)
+            if ((toY == 0 || toY == 7) && pieceAtPosition(toX,toY).pieceType == PieceType.Pawn)
+            {
+                if (promotionType == PieceType.Knight)
+                    super.add(new Knight(round, this, toX, toY))
+                else if (promotionType == PieceType.Bishop)
+                    super.add(new Bishop(round, this, toX, toY))
+                else if (promotionType == PieceType.Rook)
+                    super.add(new Rook(round, this, toX, toY))
+                else
+                    super.add(new Queen(round, this, toX, toY))
+            }
             round = Round.adv(round)
         
             // Check/Checkmate/Stalemate detection
@@ -421,5 +440,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     }
 
     override def remove(fromX:Int,fromY:Int) : Unit = { }
+    override def add(p:Piece):Unit = { }
+    override def move(fromX:Int,fromY:Int,toX:Int,toY:Int) : Unit = { move(fromX,fromY,toX,toY,PieceType.Unknown) }
 
 }

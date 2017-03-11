@@ -113,6 +113,8 @@ Represents a piece on the chessboard.
 abstract class Piece(val team:Round.Round, protected val board:Board, protected var x:Int, protected var y:Int)
 {
     protected var image_path = ""
+    protected var firstMove = true
+    
     /**
     Indicates the type of the piece.
     */
@@ -182,8 +184,6 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
 
         return true;
     }
-
-    protected var firstMove = true
 
     /**
     Moves the piece to the given position.

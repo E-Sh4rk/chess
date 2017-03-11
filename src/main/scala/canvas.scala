@@ -89,14 +89,20 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                     g.setColor(Color.white);
                     g.fillRect(i*width/8,j*height/8,width/8,height/8);
                 }
+                else
+                {
+                    // 'Black' case
+                    g.setColor(new Color(220,220,220));
+                    g.fillRect(i*width/8,j*height/8,width/8,height/8);
+                }
                 if (Some(i,j) == selectedCase)
                 {
                     // Selected case : yellow
-                    g.setColor(Color.yellow);
+                    g.setColor(/*Color.yellow*/new Color(0xFF,0xFF,0x66));
                     g.fillRect(i*width/8,j*height/8,width/8,height/8);
                 }
                 // Coloring cases we can move to : green
-                g.setColor(Color.green);
+                g.setColor(/*Color.green*/new Color(0x62,0xDD,0x62));
                 selectedCase match
                 {
                     case None => {}
@@ -107,12 +113,11 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         }
 
         // Drawing the grid
-        g.setColor(new Color(200,200,200));
+        g.setColor(new Color(100,100,100));
         for (i<-0 to 8)
         {
-            g.setStroke(new BasicStroke(1+height/200));
+            g.setStroke(new BasicStroke(2));
             g.drawLine(0,i*height/8,width,i*height/8);
-            g.setStroke(new BasicStroke(1+width/200));
             g.drawLine(i*width/8,0,i*width/8,height);
         }
 
@@ -122,8 +127,9 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
             for (j<-0 to 7)
             {
                 val piece = game.pieceAtPosition(i,j)
+                val min = math.min(width,height)
                 if (piece != null)
-                    g.drawImage(piece.getImage,i*width/8,j*height/8,width/8,height/8,null)
+                    g.drawImage(piece.getImage,i*width/8+(width-min)/16,j*height/8+(height-min)/16,min/8,min/8,null)
             }
         }
 
@@ -131,7 +137,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         if (message != null)
         {
             g.setColor(Color.red)
-            drawCenteredString(g, message, new Rectangle(0,0,width,height), g.getFont().deriveFont(g.getFont().getSize() * 3.0F))
+            drawCenteredString(g, message, new Rectangle(0,0,width,height), g.getFont().deriveFont(g.getFont().getSize() * 0.5F * width / 100F))
         }
     }
     private def drawCenteredString(g:Graphics, text:String, rect:Rectangle, font:Font)
@@ -142,6 +148,8 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         g.setFont(font);
         g.drawString(text, x, y);
     }
+
+    // TODO : Promotion : choice for the user
 
     // Events (input)
     listenTo(mouse.clicks)
