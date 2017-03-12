@@ -15,6 +15,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     private var round = Round.White
     private var suspended = false
     private var fmRule = 0
+    private var roundNumber = 0
     private var enPassantPosition : Option[(Int,Int)] = None
 
     canvas.newGame(this)
@@ -61,6 +62,16 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     Returns the current round.
     */
     def getRound = { round.synchronized{ round } }
+
+    /**
+    Returns the current round number.
+    */
+    def getRoundNumber = { round.synchronized{ roundNumber/2 + 1 } }
+
+    /**
+    Returns the current round number in the context of the 50-move rule.
+    */
+    def getFiftyMoveRuleNumber = { round.synchronized{ fmRule/2 } }
 
     /**
     Indicates whether the piece at the given position can be moved.
@@ -215,6 +226,20 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         }
     }
     /**
+    Indicates whether a draw can be requested by the current player.
+    */
+    def canRequestDraw():Boolean =
+    {
+        round.synchronized
+        {
+            if (round == Round.Finished)
+                return false
+            if (fmRule >= 100)
+                return true // TODO : Add to IG Interface
+            return false
+        }
+    }
+    /**
     Request draw. The request must be legit (50-move rule...)
     */
     def requestDraw():Unit =
@@ -284,6 +309,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             else if (enPassantMove(fromX,fromY,toX,toY) != None) // Detect if a piece is eaten 'en passant'
                 fmRule = 0
             fmRule += 1
+            roundNumber += 1
 
             // Do the move !!!
             castlingMove(fromX,fromY,toX,toY) match
@@ -316,7 +342,6 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             // Check/Checkmate/Stalemate detection
             val check = getKing(round).isCheck
             val endOfGame = possibleMoves.isEmpty
-            val fmRulePossible = fmRule >= 100
 
             if (check && endOfGame)
                 canvas.setMessage ("Checkmate ! " + Round.adv(round).toString + " wins !")
@@ -324,8 +349,6 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                 canvas.setMessage ("Check !")
             else if (endOfGame)
                 canvas.setMessage ("Stalemate !")
-            else if (fmRulePossible) // TODO : Button + Show counter?
-                canvas.setMessage ("Fifty-move rule !")
             else
                 canvas.clearMessage
 
