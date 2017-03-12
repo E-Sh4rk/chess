@@ -19,22 +19,29 @@ It can either be used as a panel (to show the chessboard) or as a player.
 */
 class Canvas(private var width:Int, private var height:Int) extends Panel with Player
 {
-    private var selectedCase : Option[(Int,Int)] = None
-    private var selectedCase2 : Option[(Int,Int)] = None // Used for promotion
+    private object InterfaceStatus extends Enumeration {
+        type InterfaceStatus = Value
+        val Default, ConfirmResign, ConfirmDraw = Value
+    }
+
     private var game : Game = null
     private var canPlay : Boolean = false
     private var message : String = null
+    private var selectedCase : Option[(Int,Int)] = None
+    private var selectedCase2 : Option[(Int,Int)] = None // Used for promotion
+    private var interfaceStatus : InterfaceStatus.InterfaceStatus = InterfaceStatus.Default
 
     /**
     Initializes the canvas for a new game.
     */
     def newGame (g:Game) : Unit =
     {
-        selectedCase = None
-        selectedCase2 = None
+        game = g
         canPlay = false
         message = null
-        game = g
+        selectedCase = None
+        selectedCase2 = None
+        interfaceStatus = InterfaceStatus.Default
         resize(this.size.width, this.size.height)
     }
     /**
@@ -124,8 +131,18 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     private val resign_button = ImageIO.read(new File("img/Resign_full.png"))
     private val d_button = ImageIO.read(new File("img/Draw.png"))
     private val draw_button = ImageIO.read(new File("img/Draw_full.png"))
+
+    private var button_r : Rectangle = null
+    private var button_d : Rectangle = null
+    private var button_resign : Rectangle = null
+    private var button_draw : Rectangle = null
     override def paintComponent(g: Graphics2D) : Unit = {
         super.paintComponent(g)
+
+        button_r = null
+        button_d = null
+        button_resign = null
+        button_draw = null
 
         if (game == null)
         {
@@ -141,7 +158,6 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
 
         if (panel_width > 0)
         {
-            // TODO : resign & draw buttons
             // Round info display
             g.setColor(Color.black)
             if (game.getRound == Round.White)
@@ -169,18 +185,36 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
             // Buttons
             if (canPlay && game.getRound != Round.Finished)
             {
-                var buttons_y = 0
-                if (game.getRound == Round.White && canPlay)
+                var buttons_y = height/2 - panel_width/10
+                if (game.getRound == Round.White)
                     buttons_y = 3*height/4 - panel_width/10
-                if (game.getRound == Round.Black && canPlay)
+                if (game.getRound == Round.Black)
                     buttons_y = 1*height/4 - panel_width/10
-                if (game.canRequestDraw)
+                if (interfaceStatus == InterfaceStatus.Default)
                 {
-                    g.drawImage(r_button,width+1*panel_width/5,buttons_y,panel_width/5,panel_width/5,null)
-                    g.drawImage(d_button,width+3*panel_width/5,buttons_y,panel_width/5,panel_width/5,null)
+                    if (game.canRequestDraw)
+                    {
+                        button_r = new Rectangle(width+1*panel_width/5,buttons_y,panel_width/5,panel_width/5)
+                        button_d = new Rectangle(width+3*panel_width/5,buttons_y,panel_width/5,panel_width/5)
+                        g.drawImage(r_button,button_r.x,button_r.y,button_r.width,button_r.height,null)
+                        g.drawImage(d_button,button_d.x,button_d.y,button_d.width,button_d.height,null)
+                    }
+                    else
+                    {
+                        button_r = new Rectangle(width+2*panel_width/5,buttons_y,panel_width/5,panel_width/5)
+                        g.drawImage(r_button,button_r.x,button_r.y,button_r.width,button_r.height,null)
+                    }
                 }
-                else
-                    g.drawImage(r_button,width+2*panel_width/5,buttons_y,panel_width/5,panel_width/5,null)
+                if (interfaceStatus == InterfaceStatus.ConfirmResign)
+                {
+                    button_resign = new Rectangle(width+3*panel_width/10,buttons_y,2*panel_width/5,panel_width/5)
+                    g.drawImage(resign_button,button_resign.x,button_resign.y,button_resign.width,button_resign.height,null)
+                }
+                if (interfaceStatus == InterfaceStatus.ConfirmDraw)
+                {
+                    button_draw = new Rectangle(width+3*panel_width/10,buttons_y,2*panel_width/5,panel_width/5)
+                    g.drawImage(draw_button,button_draw.x,button_draw.y,button_draw.width,button_draw.height,null)
+                }
             }
         }
 
@@ -271,16 +305,23 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
 
     // Events (input)
     listenTo(mouse.clicks)
+    private def hasPlayed() : Unit =
+    {
+        selectedCase = None
+        selectedCase2 = None
+        canPlay = false
+    }
     reactions +=
     {
         case MouseClicked(src, pt, mod, clicks, pops) => {
-            if (pt.x >= 0 && pt.y >= 0 && pt.x <= width && pt.y <= height)
+            if (game != null && canPlay)
             {
-                val x = pt.x * 8 / width
-                val y = pt.y * 8 / height
-
-                if (game != null && canPlay)
+                interfaceStatus = InterfaceStatus.Default
+                if (pt.x >= 0 && pt.y >= 0 && pt.x <= width && pt.y <= height)
                 {
+                    val x = pt.x * 8 / width
+                    val y = pt.y * 8 / height
+
                     if (selectedCase2 != None)
                     {
                         var ptype = PieceType.Unknown
@@ -296,9 +337,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                         // Do the promotion move
                         val Some ((sel_x, sel_y)) = selectedCase
                         val Some ((sel_x2, sel_y2)) = selectedCase2
-                        selectedCase = None
-                        selectedCase2 = None
-                        canPlay = false
+                        hasPlayed
                         game.move(sel_x, sel_y, sel_x2, sel_y2, ptype)
                     }
                     else if (selectedCase == Some(x,y))
@@ -319,15 +358,38 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                                 else
                                 {
                                     // Not a promotion move
-                                    selectedCase = None
-                                    canPlay = false
+                                    hasPlayed
                                     game.move(sel_x, sel_y, x, y)
                                 } 
                             }
                         }
                     }
-                    repaint
                 }
+                else if (pt.x >= width && pt.y >= 0 && pt.x <= width+panel_width && pt.y <= height)
+                {
+                    if (button_d != null)
+                        if (button_d.contains(pt.x,pt.y))
+                            interfaceStatus = InterfaceStatus.ConfirmDraw
+                    if (button_r != null)
+                        if (button_r.contains(pt.x,pt.y))
+                            interfaceStatus = InterfaceStatus.ConfirmResign
+                    if (button_draw != null)
+                        if (button_draw.contains(pt.x,pt.y))
+                        {
+                            if (game.canRequestDraw)
+                            {
+                                hasPlayed
+                                game.requestDraw
+                            }
+                        } 
+                    if (button_resign != null)
+                        if (button_resign.contains(pt.x,pt.y))
+                        {
+                            hasPlayed
+                            game.resign
+                        }   
+                }
+                repaint
             }
         }
     }
