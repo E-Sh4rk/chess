@@ -15,6 +15,7 @@ trait Player {
     Indicates to the player that it is his turn.
 
     This function must terminate QUICLKY. Then Game.move must be called by the player (on the current thread or on another thread).
+    Game.abandon or Game.requestDraw can also be called instead of Game.move.
     */
     def mustPlay : Unit
 

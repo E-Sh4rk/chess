@@ -35,7 +35,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         canPlay = false
         message = null
         game = g
-        repaint
+        resize(width, height)
     }
     /**
     Prints a message in the center of the chessboard.
@@ -56,6 +56,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     def stop : Unit = { canPlay = false }
 
     // Drawing (output)
+    private var panel_width = 0
     this.preferredSize = new Dimension(width, height)
     /**
     Resize the canvas.
@@ -63,6 +64,13 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     def resize(w:Int, h:Int)
     {
         width = w ; height = h
+        if (height <= width*7/8 && game != null)
+        {
+            panel_width = w/4
+            if (panel_width > 250)
+                panel_width = 250
+            width = w-panel_width
+        }
         this.preferredSize = new Dimension(width, height)
         repaint
     }
