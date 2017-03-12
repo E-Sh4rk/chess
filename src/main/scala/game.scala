@@ -302,13 +302,13 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                 return
             
             // Fifty-move rule updating
+            fmRule += 1
             if (pieceAtPosition(fromX,fromY).pieceType == PieceType.Pawn) // Detect if the piece moved is a pawn
                 fmRule = 0
             else if (pieceAtPosition(toX,toY) != null) // Detect if a piece is eaten
                 fmRule = 0
             else if (enPassantMove(fromX,fromY,toX,toY) != None) // Detect if a piece is eaten 'en passant'
                 fmRule = 0
-            fmRule += 1
             roundNumber += 1
 
             // Do the move !!!

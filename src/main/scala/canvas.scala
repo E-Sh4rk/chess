@@ -67,12 +67,40 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         if (height <= width*7/8 && game != null)
         {
             panel_width = w/4
-            /*if (panel_width > 250)
-                panel_width = 250*/
+            if (panel_width > 337)
+                panel_width = 337
             width = w-panel_width
         }
         this.preferredSize = new Dimension(width, height)
         repaint
+    }
+
+    private def countRemainingPieces(team:Round.Round) : Array[Int] =
+    {
+        val res : Array[Int] = Array(0,0,0,0,0)
+        for (i<-0 to 7)
+        {
+            for (j<-0 to 7)
+            {
+                val p = game.pieceAtPosition(i,j)
+                if (p != null)
+                {
+                    if (p.team == team)
+                    {
+                        p.pieceType match
+                        {
+                            case PieceType.Pawn => res(0)+=1
+                            case PieceType.Rook => res(1)+=1
+                            case PieceType.Knight => res(2)+=1
+                            case PieceType.Bishop => res(3)+=1
+                            case PieceType.Queen => res(4)+=1
+                            case _ => { }
+                        }
+                    }
+                }
+            }
+        }
+        return res
     }
 
     private val introImage = ImageIO.read(new File("img/Chess_intro.png"))
@@ -82,6 +110,16 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     private val promoRook = ImageIO.read(new File("img/tux_rook.png"))
     private val whiteTrait = ImageIO.read(new File("img/w_king.png"))
     private val blackTrait = ImageIO.read(new File("img/b_king.png"))
+    private val w_queen = ImageIO.read(new File("img/w_queen.png"))
+    private val b_queen = ImageIO.read(new File("img/b_queen.png"))
+    private val w_bishop = ImageIO.read(new File("img/w_bishop.png"))
+    private val b_bishop = ImageIO.read(new File("img/b_bishop.png"))
+    private val w_knight = ImageIO.read(new File("img/w_knight.png"))
+    private val b_knight = ImageIO.read(new File("img/b_knight.png"))
+    private val w_rook = ImageIO.read(new File("img/w_rook.png"))
+    private val b_rook = ImageIO.read(new File("img/b_rook.png"))
+    private val w_pawn = ImageIO.read(new File("img/w_pawn.png"))
+    private val b_pawn = ImageIO.read(new File("img/b_pawn.png"))
     override def paintComponent(g: Graphics2D) : Unit = {
         super.paintComponent(g)
 
@@ -99,14 +137,30 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
 
         if (panel_width > 0)
         {
-            // TODO : Add 50-move counter & abandon & draw
+            // TODO : abandon & draw buttons
             g.setColor(Color.black)
             if (game.getRound == Round.White)
-                g.drawImage(whiteTrait,width+panel_width/5,height/2-panel_width/10,panel_width/5,panel_width/5,null)
+                g.drawImage(whiteTrait,width+0*panel_width/5,height/2-panel_width/10,panel_width/5,panel_width/5,null)
             if (game.getRound == Round.Black)
-                g.drawImage(blackTrait,width+panel_width/5,height/2-panel_width/10,panel_width/5,panel_width/5,null)
-            drawCenteredString(g, game.getRoundNumber.toString, new Rectangle(width+2*panel_width/5,0,panel_width/5,height),
+                g.drawImage(blackTrait,width+0*panel_width/5,height/2-panel_width/10,panel_width/5,panel_width/5,null)
+            drawCenteredString(g, game.getRoundNumber.toString, new Rectangle(width+1*panel_width/5,0,panel_width/5,height),
             g.getFont().deriveFont(10F * panel_width / 100F))
+            drawCenteredString(g, "("+game.getFiftyMoveRuleNumber.toString+"/50)", new Rectangle(width+3*panel_width/5,0,panel_width/5,height),
+            g.getFont().deriveFont(10F * panel_width / 100F))
+
+            val whiteIcons = Array(w_pawn,w_rook,w_knight,w_bishop,w_queen)
+            val whiteCount = countRemainingPieces(Round.White)
+            val blackIcons = Array(b_pawn,b_rook,b_knight,b_bishop,b_queen)
+            val blackCount = countRemainingPieces(Round.Black)
+            for (i<-0 to 4)
+            {
+                drawCenteredString(g, whiteCount(i).toString, new Rectangle(width+i*panel_width/5,height-2*panel_width/5,panel_width/5,panel_width/5),
+                g.getFont().deriveFont(10F * panel_width / 100F))
+                g.drawImage(whiteIcons(i),width+i*panel_width/5,height-1*panel_width/5,panel_width/5,panel_width/5,null)
+                drawCenteredString(g, blackCount(i).toString, new Rectangle(width+i*panel_width/5,panel_width/5,panel_width/5,panel_width/5),
+                g.getFont().deriveFont(10F * panel_width / 100F))
+                g.drawImage(blackIcons(i),width+i*panel_width/5,0,panel_width/5,panel_width/5,null)
+            }       
         }
 
         // DRAWING THE GAME
@@ -212,11 +266,11 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                         // Promotion ! Choosing a piece type
                         if (pt.y <= height/2)
                             ptype = PieceType.Queen
-                        else if (pt.x <= height/3)
+                        else if (pt.x <= width/3)
                             ptype = PieceType.Rook
-                        else if (pt.x <= 2*height/3)
+                        else if (pt.x <= 2*width/3)
                             ptype = PieceType.Knight
-                        else if (pt.x <= height)
+                        else if (pt.x <= width)
                             ptype = PieceType.Bishop
                         // Do the promotion move
                         val Some ((sel_x, sel_y)) = selectedCase
