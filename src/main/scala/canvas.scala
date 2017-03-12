@@ -317,7 +317,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
             if (game != null && canPlay)
             {
                 interfaceStatus = InterfaceStatus.Default
-                if (pt.x >= 0 && pt.y >= 0 && pt.x <= width && pt.y <= height)
+                if (pt.x >= 0 && pt.y >= 0 && pt.x < width && pt.y < height)
                 {
                     val x = pt.x * 8 / width
                     val y = pt.y * 8 / height
@@ -365,7 +365,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                         }
                     }
                 }
-                else if (pt.x >= width && pt.y >= 0 && pt.x <= width+panel_width && pt.y <= height)
+                else if (pt.x >= width && pt.y >= 0 && pt.x < width+panel_width && pt.y < height)
                 {
                     if (button_d != null)
                         if (button_d.contains(pt.x,pt.y))
