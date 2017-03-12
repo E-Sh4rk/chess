@@ -259,15 +259,15 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         }
     }
     /**
-    Abandon the game. The opponent will win the game.
+    Resignation of the player. The opponent will win the game.
     */
-    def abandon():Unit =
+    def resign():Unit =
     {
         SwingUtilities.invokeLater(new Runnable() {
-            override def run  : Unit = { _abandon }
+            override def run  : Unit = { _resign }
         });
     }
-    private def _abandon():Unit =
+    private def _resign():Unit =
     {
         round.synchronized
         {

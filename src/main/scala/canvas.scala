@@ -67,8 +67,8 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         if (height <= width*7/8 && game != null)
         {
             panel_width = w/4
-            if (panel_width > 337)
-                panel_width = 337
+            if (panel_width > 250)
+                panel_width = 250
             width = w-panel_width
         }
         this.preferredSize = new Dimension(width, height)
@@ -120,6 +120,10 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     private val b_rook = ImageIO.read(new File("img/b_rook.png"))
     private val w_pawn = ImageIO.read(new File("img/w_pawn.png"))
     private val b_pawn = ImageIO.read(new File("img/b_pawn.png"))
+    private val r_button = ImageIO.read(new File("img/Resign.png"))
+    private val resign_button = ImageIO.read(new File("img/Resign_full.png"))
+    private val d_button = ImageIO.read(new File("img/Draw.png"))
+    private val draw_button = ImageIO.read(new File("img/Draw_full.png"))
     override def paintComponent(g: Graphics2D) : Unit = {
         super.paintComponent(g)
 
@@ -137,7 +141,8 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
 
         if (panel_width > 0)
         {
-            // TODO : abandon & draw buttons
+            // TODO : resign & draw buttons
+            // Round info display
             g.setColor(Color.black)
             if (game.getRound == Round.White)
                 g.drawImage(whiteTrait,width+0*panel_width/5,height/2-panel_width/10,panel_width/5,panel_width/5,null)
@@ -147,7 +152,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
             g.getFont().deriveFont(10F * panel_width / 100F))
             drawCenteredString(g, "("+game.getFiftyMoveRuleNumber.toString+"/50)", new Rectangle(width+3*panel_width/5,0,panel_width/5,height),
             g.getFont().deriveFont(10F * panel_width / 100F))
-
+            // Piece counter
             val whiteIcons = Array(w_pawn,w_rook,w_knight,w_bishop,w_queen)
             val whiteCount = countRemainingPieces(Round.White)
             val blackIcons = Array(b_pawn,b_rook,b_knight,b_bishop,b_queen)
@@ -160,7 +165,23 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                 drawCenteredString(g, blackCount(i).toString, new Rectangle(width+i*panel_width/5,panel_width/5,panel_width/5,panel_width/5),
                 g.getFont().deriveFont(10F * panel_width / 100F))
                 g.drawImage(blackIcons(i),width+i*panel_width/5,0,panel_width/5,panel_width/5,null)
-            }       
+            }
+            // Buttons
+            if (canPlay && game.getRound != Round.Finished)
+            {
+                var buttons_y = 0
+                if (game.getRound == Round.White && canPlay)
+                    buttons_y = 3*height/4 - panel_width/10
+                if (game.getRound == Round.Black && canPlay)
+                    buttons_y = 1*height/4 - panel_width/10
+                if (game.canRequestDraw)
+                {
+                    g.drawImage(r_button,width+1*panel_width/5,buttons_y,panel_width/5,panel_width/5,null)
+                    g.drawImage(d_button,width+3*panel_width/5,buttons_y,panel_width/5,panel_width/5,null)
+                }
+                else
+                    g.drawImage(r_button,width+2*panel_width/5,buttons_y,panel_width/5,panel_width/5,null)
+            }
         }
 
         // DRAWING THE GAME
