@@ -35,7 +35,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         canPlay = false
         message = null
         game = g
-        resize(width, height)
+        resize(this.size.width, this.size.height)
     }
     /**
     Prints a message in the center of the chessboard.
@@ -67,8 +67,8 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         if (height <= width*7/8 && game != null)
         {
             panel_width = w/4
-            if (panel_width > 250)
-                panel_width = 250
+            /*if (panel_width > 250)
+                panel_width = 250*/
             width = w-panel_width
         }
         this.preferredSize = new Dimension(width, height)
@@ -80,6 +80,8 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     private val promoKnight = ImageIO.read(new File("img/tux_knight.png"))
     private val promoBishop = ImageIO.read(new File("img/tux_bishop.png"))
     private val promoRook = ImageIO.read(new File("img/tux_rook.png"))
+    private val whiteTrait = ImageIO.read(new File("img/w_king.png"))
+    private val blackTrait = ImageIO.read(new File("img/b_king.png"))
     override def paintComponent(g: Graphics2D) : Unit = {
         super.paintComponent(g)
 
@@ -88,16 +90,30 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
             // Drawing the intro image
             g.setColor(Color.black)
             if (width*2 <= height*3)
-                drawCenteredString(g, "Checks", new Rectangle(0,0,width,height-width/2), g.getFont().deriveFont(g.getFont().getSize() * 2F * width / 100F))
+                drawCenteredString(g, "Checks", new Rectangle(0,0,width,height-width/2), g.getFont().deriveFont(25F * width / 100F))
             g.drawImage(introImage,0,height-width/2,width,width/2,null)
             return
         }
 
+        // DRAWING THE IG INTERFACE
+
+        if (panel_width > 0)
+        {
+            // TODO : Add 50-move counter & abandon & draw
+            g.setColor(Color.black)
+            if (game.getRound == Round.White)
+                g.drawImage(whiteTrait,width+panel_width/5,height/2-panel_width/10,panel_width/5,panel_width/5,null)
+            if (game.getRound == Round.Black)
+                g.drawImage(blackTrait,width+panel_width/5,height/2-panel_width/10,panel_width/5,panel_width/5,null)
+            drawCenteredString(g, game.getRoundNumber.toString, new Rectangle(width+2*panel_width/5,0,panel_width/5,height),
+            g.getFont().deriveFont(10F * panel_width / 100F))
+        }
+
+        // DRAWING THE GAME
+
         if (selectedCase2 != None)
         {
             // Promotion !
-            g.setColor(Color.white)
-            g.fillRect(0,0,width,height);
             val max_height = math.min(height,width*3/2)
             val max_width = max_height*2/3
             g.drawImage(promoQueen,(width-(max_width/2))/2,0,max_width/2,max_height/2,null)
@@ -166,14 +182,14 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         if (message != null)
         {
             g.setColor(Color.red)
-            drawCenteredString(g, message, new Rectangle(0,0,width,height), g.getFont().deriveFont(g.getFont().getSize() * 0.5F * width / 100F))
+            drawCenteredString(g, message, new Rectangle(0,0,width,height), g.getFont().deriveFont(7F * width / 100F))
         }
     }
     private def drawCenteredString(g:Graphics, text:String, rect:Rectangle, font:Font)
     {
         val metrics:FontMetrics = g.getFontMetrics(font);
-        val x:Int = (rect.width - metrics.stringWidth(text)) / 2;
-        val y:Int = ((rect.height - metrics.getHeight()) / 2) + metrics.getAscent();
+        val x:Int = rect.x + (rect.width - metrics.stringWidth(text)) / 2;
+        val y:Int = rect.y + ((rect.height - metrics.getHeight()) / 2) + metrics.getAscent();
         g.setFont(font);
         g.drawString(text, x, y);
     }

@@ -235,7 +235,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             if (round == Round.Finished)
                 return false
             if (fmRule >= 100)
-                return true // TODO : Add to IG Interface
+                return true
             return false
         }
     }
