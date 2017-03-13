@@ -29,6 +29,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     private var message : String = null
     private var selectedCase : Option[(Int,Int)] = None
     private var selectedCase2 : Option[(Int,Int)] = None // Used for promotion
+    private var drawAfterMove : Boolean = false
     private var interfaceStatus : InterfaceStatus.InterfaceStatus = InterfaceStatus.Default
 
     /**
@@ -41,6 +42,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         message = null
         selectedCase = None
         selectedCase2 = None
+        drawAfterMove = false
         interfaceStatus = InterfaceStatus.Default
         resize(this.size.width, this.size.height)
     }
@@ -186,13 +188,23 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
             if (canPlay && game.getRound != Round.Finished)
             {
                 var buttons_y = height/2 - panel_width/10
+                var label_y = buttons_y
                 if (game.getRound == Round.White)
+                {
                     buttons_y = 3*height/4 - panel_width/10
+                    label_y = buttons_y-panel_width/5
+                }
                 if (game.getRound == Round.Black)
+                {
                     buttons_y = 1*height/4 - panel_width/10
+                    label_y = buttons_y+panel_width/5
+                }
+                if (game.canRequestDraw)
+                    drawCenteredString(g, "You can request a draw immediatly.", new Rectangle(width,label_y,panel_width,panel_width/5),
+                    g.getFont().deriveFont(5F * panel_width / 100F))
                 if (interfaceStatus == InterfaceStatus.Default)
                 {
-                    if (game.canRequestDraw)
+                    if (!drawAfterMove)
                     {
                         button_r = new Rectangle(width+1*panel_width/5,buttons_y,panel_width/5,panel_width/5)
                         button_d = new Rectangle(width+3*panel_width/5,buttons_y,panel_width/5,panel_width/5)
@@ -201,8 +213,8 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                     }
                     else
                     {
-                        button_r = new Rectangle(width+2*panel_width/5,buttons_y,panel_width/5,panel_width/5)
-                        g.drawImage(r_button,button_r.x,button_r.y,button_r.width,button_r.height,null)
+                        drawCenteredString(g, "You have requested a draw.", new Rectangle(width,buttons_y,panel_width,panel_width/5),
+                        g.getFont().deriveFont(5F * panel_width / 100F))
                     }
                 }
                 if (interfaceStatus == InterfaceStatus.ConfirmResign)
@@ -309,6 +321,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     {
         selectedCase = None
         selectedCase2 = None
+        drawAfterMove = false
         canPlay = false
     }
     reactions +=
@@ -337,8 +350,9 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                         // Do the promotion move
                         val Some ((sel_x, sel_y)) = selectedCase
                         val Some ((sel_x2, sel_y2)) = selectedCase2
+                        val dam = drawAfterMove
                         hasPlayed
-                        game.move(sel_x, sel_y, sel_x2, sel_y2, ptype)
+                        game.move(sel_x, sel_y, sel_x2, sel_y2, ptype, dam)
                     }
                     else if (selectedCase == Some(x,y))
                         selectedCase = None
@@ -358,8 +372,9 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                                 else
                                 {
                                     // Not a promotion move
+                                    val dam = drawAfterMove
                                     hasPlayed
-                                    game.move(sel_x, sel_y, x, y)
+                                    game.move(sel_x, sel_y, x, y, PieceType.Unknown, dam)
                                 } 
                             }
                         }
@@ -381,6 +396,8 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                                 hasPlayed
                                 game.requestDraw
                             }
+                            else
+                                drawAfterMove = true
                         } 
                     if (button_resign != null)
                         if (button_resign.contains(pt.x,pt.y))

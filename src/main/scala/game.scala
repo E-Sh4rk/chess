@@ -293,16 +293,16 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
 
     The last optional parameter is the type of piece wanted in the case of a promotion (default is queen).
     */
-    def move(fromX:Int,fromY:Int,toX:Int,toY:Int, promotionType:PieceType.PieceType):Unit =
+    def move(fromX:Int,fromY:Int,toX:Int,toY:Int, promotionType:PieceType.PieceType, drawAfterMove:Boolean = false):Unit =
     {
         // We must be on the main thread before making some modifications.
         // if (!SwingUtilities.isEventDispatchThread())
         // Even if we are already on the main thread, we must reinvoke this function later (avoid interlaced turns).
         SwingUtilities.invokeLater(new Runnable() {
-            override def run  : Unit = { _move(fromX,fromY,toX,toY,promotionType) }
+            override def run  : Unit = { _move(fromX,fromY,toX,toY,promotionType, drawAfterMove) }
         });
     }
-    private def _move(fromX:Int,fromY:Int,toX:Int,toY:Int,promotionType:PieceType.PieceType):Unit =
+    private def _move(fromX:Int,fromY:Int,toX:Int,toY:Int,promotionType:PieceType.PieceType, drawAfterMove:Boolean):Unit =
     {
         round.synchronized
         {
@@ -349,32 +349,40 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                     super.add(new Queen(round, this, toX, toY))
             }
             round = Round.adv(round)
-        
-            // Check/Checkmate/Stalemate detection
-            val check = getKing(round).isCheck
-            val endOfGame = possibleMoves.isEmpty
 
-            if (check && endOfGame)
-                canvas.setMessage ("Checkmate ! " + Round.adv(round).toString + " wins !")
-            else if (check)
-                canvas.setMessage ("Check !")
-            else if (endOfGame)
-                canvas.setMessage ("Stalemate !")
-            else
-                canvas.clearMessage
-
-            if (endOfGame)
+            if (drawAfterMove && canRequestDraw)
             {
-                round = Round.Finished
-                playerWhite.stop
-                playerBlack.stop
+                // Draw requested
+                requestDraw
             }
+            else
+            {
+                // Check/Checkmate/Stalemate detection
+                val check = getKing(round).isCheck
+                val endOfGame = possibleMoves.isEmpty
 
-            canvas.repaint
-            if (round == Round.White)
-                playerWhite.mustPlay
-            if (round == Round.Black)
-                playerBlack.mustPlay
+                if (check && endOfGame)
+                    canvas.setMessage ("Checkmate ! " + Round.adv(round).toString + " wins !")
+                else if (check)
+                    canvas.setMessage ("Check !")
+                else if (endOfGame)
+                    canvas.setMessage ("Stalemate !")
+                else
+                    canvas.clearMessage
+
+                if (endOfGame)
+                {
+                    round = Round.Finished
+                    playerWhite.stop
+                    playerBlack.stop
+                }
+
+                canvas.repaint
+                if (round == Round.White)
+                    playerWhite.mustPlay
+                if (round == Round.Black)
+                    playerBlack.mustPlay
+            }
         }
     }
 
