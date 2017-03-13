@@ -254,8 +254,15 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         {
             if (suspended || round == Round.Finished)
                 return
+
+            if (!canRequestDraw)
+                return
             
-                // TODO
+            canvas.setMessage ("Draw ! ")
+            round = Round.Finished
+            playerWhite.stop
+            playerBlack.stop
+            canvas.repaint
         }
     }
     /**
@@ -274,7 +281,11 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             if (suspended || round == Round.Finished)
                 return
             
-                // TODO
+            canvas.setMessage ("Resignation ! " + Round.adv(round) + " wins !")
+            round = Round.Finished
+            playerWhite.stop
+            playerBlack.stop
+            canvas.repaint
         }
     }
     /**
