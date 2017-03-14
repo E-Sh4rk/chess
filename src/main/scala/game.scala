@@ -15,13 +15,13 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     private var round = Round.Black
     private var suspended = false
     private var enPassantPosition : Option[(Int,Int)] = None
-    // CurrentConfiguration contains data about current round, possible moves and positions.
+    // CurrentConfiguration contains data about current round, possible moves and positions. Used for caching and history.
     private var currentConfiguration:(scala.collection.mutable.Set[PieceStruct],Round.Round,
     scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)])
     = (null, Round.Black, null, null)
     private var roundNumber = 0
     private var fmRule = 0
-    // ThreefoldCounter is a configuration hisory
+    // ThreefoldCounter is a configuration history
     private var threefoldCounter:scala.collection.mutable.Map
     [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]
     = scala.collection.mutable.Map
@@ -410,9 +410,8 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             else
             {
                 // Check/Checkmate/Stalemate detection
-                val (_,_,p1moves,_) = currentConfiguration
                 val check = getKing(round).isCheck
-                val noMove = p1moves.isEmpty
+                val noMove = possibleMoves.isEmpty
 
                 if (check && noMove)
                     canvas.setMessage ("Checkmate ! " + Round.adv(round).toString + " wins !")
