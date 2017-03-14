@@ -168,8 +168,8 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                 g.drawImage(blackTrait,width+0*panel_width/5,height/2-panel_width/10,panel_width/5,panel_width/5,null)
             drawCenteredString(g, game.getRoundNumber.toString, new Rectangle(width+1*panel_width/5,0,panel_width/5,height),
             g.getFont().deriveFont(10F * panel_width / 100F))
-            drawCenteredString(g, "("+game.getFiftyMoveRuleNumber.toString+"/50)", new Rectangle(width+3*panel_width/5,0,panel_width/5,height),
-            g.getFont().deriveFont(10F * panel_width / 100F))
+            drawCenteredString(g, "("+game.getThreefoldRepetitionCounter.toString+"/3, "+game.getFiftyMoveRuleCounter.toString+"/50)", new Rectangle(width+3*panel_width/5,0,panel_width/5,height),
+            g.getFont().deriveFont(7F * panel_width / 100F))
             // Piece counter
             val whiteIcons = Array(w_pawn,w_rook,w_knight,w_bishop,w_queen)
             val whiteCount = countRemainingPieces(Round.White)
@@ -245,6 +245,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         }
         
         // Coloring the board
+        val possibleMoves = game.possibleMoves
         for (i<-0 to 7)
         {
             for (j<-0 to 7)
@@ -272,7 +273,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                 selectedCase match
                 {
                     case None => {}
-                    case Some ((x,y)) if game.canMove(x,y,i,j) => g.fillRect(i*width/8,j*height/8,width/8,height/8);
+                    case Some ((x,y)) if possibleMoves contains (x,y,i,j) => g.fillRect(i*width/8,j*height/8,width/8,height/8);
                     case _ => {}
                 }
             }

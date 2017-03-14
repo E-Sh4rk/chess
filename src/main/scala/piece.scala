@@ -171,7 +171,7 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
     /**
     Returns whether the piece can move to the given position.
 
-    DOES NOT TAKE INTO ACCOUNT THE FACT THAT THE MOVE CAN'T CHECK THE KING OF THE PLAYING TEAM.
+    DOES NOT TAKE INTO ACCOUNT THE ROUND, THE POTENTIAL CHECK STATUS AND THE SPECIAL RULES.
     */
     def canMove(toX:Int,toY:Int): Boolean =
     {
@@ -205,4 +205,28 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
     Makes a copy of this piece on the new given board.
     */
     def copy(b:Board) : Piece
+}
+
+/**
+A immutable structure that represent a piece at a given instant.
+
+Not every characteristic is specified : a PieceStruct is only characterized by its position, team and type.
+*/
+class PieceStruct(val pieceType:PieceType.PieceType, val team:Round.Round, val pos:(Int,Int))
+{
+    def this (p:Piece) = { this (p.pieceType, p.team, p.getPosition) }
+
+    override def equals(that: Any): Boolean =
+        that match {
+            case that: PieceStruct => this.hashCode == that.hashCode
+            case _ => false
+     }
+    override def hashCode: Int = {
+        val (x,y) = pos
+        var result = pieceType.id
+        result = result*Round.maxId + team.id
+        result = result*8 + x
+        result = result*8 + y
+        return result
+    }
 }

@@ -12,16 +12,66 @@ All methods are thread-safe.
 */
 class Game(private val canvas:Canvas, private val playerWhite:Player, private val playerBlack:Player) extends Board
 {
-    private var round = Round.White
+    private var round = Round.Black
     private var suspended = false
-    private var fmRule = 0
-    private var roundNumber = 0
     private var enPassantPosition : Option[(Int,Int)] = None
+    // CurrentConfiguration contains data about current round, possible moves and positions.
+    private var currentConfiguration:(scala.collection.mutable.Set[PieceStruct],Round.Round,
+    scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)])
+    = (null, Round.Black, null, null)
+    private var roundNumber = 0
+    private var fmRule = 0
+    // ThreefoldCounter is a configuration hisory
+    private var threefoldCounter:scala.collection.mutable.Map
+    [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]
+    = scala.collection.mutable.Map
+    [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]()
 
+    changeRoundAndUpdateConfiguration
     canvas.newGame(this)
     playerWhite.init(this)
     playerBlack.init(this)
     playerWhite.mustPlay
+
+    private def changeRoundAndUpdateConfiguration() : Unit =
+    {
+        val config:scala.collection.mutable.Set[PieceStruct] = scala.collection.mutable.Set[PieceStruct]()
+        for (i<- 0 to 7)
+        {
+            for (j<- 0 to 7)
+            {
+                val p = pieceAtPosition(i,j)
+                if (p != null)
+                    config += new PieceStruct(p)
+            }
+        }
+        val p2Moves = calculatePossibleMoves
+        round = Round.adv(round)
+        val p1Moves = calculatePossibleMoves
+        currentConfiguration = (config,round,p1Moves,p2Moves)
+    }
+    private def calculatePossibleMoves : scala.collection.mutable.Set[(Int,Int,Int,Int)] =
+    {
+        val set = scala.collection.mutable.Set[(Int,Int,Int,Int)]()
+        for (i<-0 to 7)
+        {
+            for (j<-0 to 7)
+            {
+                if (canMove(i,j))
+                {
+                    for (k<-0 to 7)
+                    {
+                        for (l<-0 to 7)
+                        {
+                            if (canMove(i,j,k,l))
+                                set += ((i,j,k,l))
+                        }
+                    }
+                }
+            }
+        }
+        return set
+    }
 
     /**
     Suspends the game and every running thread. Game can be resumed later.
@@ -69,9 +119,20 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     def getRoundNumber = { round.synchronized{ roundNumber/2 + 1 } }
 
     /**
-    Returns the current round number in the context of the 50-move rule.
+    Returns the current round counter in the context of the 50-move rule.
     */
-    def getFiftyMoveRuleNumber = { round.synchronized{ fmRule/2 } }
+    def getFiftyMoveRuleCounter = { round.synchronized{ fmRule/2 } }
+
+    /**
+    Get threefold repetion counter.
+    */
+    def getThreefoldRepetitionCounter() : Int =
+    { 
+        round.synchronized
+        {
+            return (threefoldCounter getOrElse (currentConfiguration, 0)) + 1
+        }
+    }
 
     /**
     Indicates whether the piece at the given position can be moved.
@@ -199,30 +260,15 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     }
     /**
     Returns a list of all the possible moves.
+
+    Using this function is FASTER than calling canMove multiple times : it does not recalculate every move.
     */
-    def possibleMoves : scala.collection.mutable.MutableList[(Int,Int,Int,Int)] =
+    def possibleMoves : scala.collection.mutable.Set[(Int,Int,Int,Int)] =
     {
         round.synchronized
         {
-            val lst = new scala.collection.mutable.MutableList[(Int,Int,Int,Int)]
-            for (i<-0 to 7)
-            {
-                for (j<-0 to 7)
-                {
-                    if (canMove(i,j))
-                    {
-                        for (k<-0 to 7)
-                        {
-                            for (l<-0 to 7)
-                            {
-                                if (canMove(i,j,k,l))
-                                    lst += ((i,j,k,l))
-                            }
-                        }
-                    }
-                }
-            }
-            return lst
+            val (_,_,p1moves,_) = currentConfiguration
+            return p1moves
         }
     }
     /**
@@ -234,7 +280,9 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
         {
             if (round == Round.Finished)
                 return false
-            if (fmRule >= 100)
+            if (getFiftyMoveRuleCounter >= 50)
+                return true
+            if (getThreefoldRepetitionCounter >= 3)
                 return true
             return false
         }
@@ -312,14 +360,17 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             if (!canMove(fromX,fromY,toX,toY))
                 return
             
-            // Fifty-move rule updating
+            // Updating counters
             fmRule += 1
+            threefoldCounter(currentConfiguration) = (threefoldCounter getOrElse (currentConfiguration, 0)) + 1
             if (pieceAtPosition(fromX,fromY).pieceType == PieceType.Pawn) // Detect if the piece moved is a pawn
                 fmRule = 0
             else if (pieceAtPosition(toX,toY) != null) // Detect if a piece is eaten
                 fmRule = 0
             else if (enPassantMove(fromX,fromY,toX,toY) != None) // Detect if a piece is eaten 'en passant'
                 fmRule = 0
+            if (fmRule == 0) // We clear the threefoldCounter if possible
+                threefoldCounter.clear
             roundNumber += 1
 
             // Do the move !!!
@@ -348,8 +399,9 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                 else
                     super.add(new Queen(round, this, toX, toY))
             }
-            round = Round.adv(round)
+            changeRoundAndUpdateConfiguration
 
+            // Preparing next round
             if (drawAfterMove && canRequestDraw)
             {
                 // Draw requested
@@ -358,19 +410,20 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             else
             {
                 // Check/Checkmate/Stalemate detection
+                val (_,_,p1moves,_) = currentConfiguration
                 val check = getKing(round).isCheck
-                val endOfGame = possibleMoves.isEmpty
+                val noMove = p1moves.isEmpty
 
-                if (check && endOfGame)
+                if (check && noMove)
                     canvas.setMessage ("Checkmate ! " + Round.adv(round).toString + " wins !")
                 else if (check)
                     canvas.setMessage ("Check !")
-                else if (endOfGame)
+                else if (noMove)
                     canvas.setMessage ("Stalemate !")
                 else
                     canvas.clearMessage
 
-                if (endOfGame)
+                if (noMove)
                 {
                     round = Round.Finished
                     playerWhite.stop
