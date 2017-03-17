@@ -21,10 +21,12 @@ Implements a simple chessboard without any rule.
 All methods are thread-safe.
 
 @param _b The board to copy. If null or not present : initializes a new chessboard.
+@param dim_x The x-dimension of the chessboard.
+@param dim_y The y-dimension of the chessboard.
 */
-class Board (private val _b:Board)
+class Board (private val _b:Board, val dim_x:Int, val dim_y:Int)
 {
-    private val board = Array.ofDim[Piece](8,8)
+    private val board = Array.ofDim[Piece](dim_x,dim_y)
 
     private def addPiece(p:Piece):Unit =
     {
@@ -35,34 +37,34 @@ class Board (private val _b:Board)
     if (_b == null)
     {
         // Setting up the board
-        for (x<-0 to 7)
+        for (x<-0 to dim_x-1)
         {
             addPiece(new Pawn(Round.Black, this, x, 1))
-            addPiece(new Pawn(Round.White, this, x, 6))
+            addPiece(new Pawn(Round.White, this, x, dim_y-2))
         }
         addPiece(new Rook(Round.Black, this, 0, 0))
-        addPiece(new Rook(Round.Black, this, 7, 0))
+        addPiece(new Rook(Round.Black, this, dim_x-1, 0))
         addPiece(new Knight(Round.Black, this, 1, 0))
-        addPiece(new Knight(Round.Black, this, 6, 0))
+        addPiece(new Knight(Round.Black, this, dim_x-2, 0))
         addPiece(new Bishop(Round.Black, this, 2, 0))
-        addPiece(new Bishop(Round.Black, this, 5, 0))
+        addPiece(new Bishop(Round.Black, this, dim_x-3, 0))
         addPiece(new Queen(Round.Black, this, 3, 0))
-        addPiece(new King(Round.Black, this, 4, 0))
-        addPiece(new Rook(Round.White, this, 0, 7))
-        addPiece(new Rook(Round.White, this, 7, 7))
-        addPiece(new Knight(Round.White, this, 1, 7))
-        addPiece(new Knight(Round.White, this, 6, 7))
-        addPiece(new Bishop(Round.White, this, 2, 7))
-        addPiece(new Bishop(Round.White, this, 5, 7))
-        addPiece(new Queen(Round.White, this, 3, 7))
-        addPiece(new King(Round.White, this, 4, 7))
+        addPiece(new King(Round.Black, this, dim_x-4, 0))
+        addPiece(new Rook(Round.White, this, 0, dim_y-1))
+        addPiece(new Rook(Round.White, this, dim_x-1, dim_y-1))
+        addPiece(new Knight(Round.White, this, 1, dim_y-1))
+        addPiece(new Knight(Round.White, this, dim_x-2, dim_y-1))
+        addPiece(new Bishop(Round.White, this, 2, dim_y-1))
+        addPiece(new Bishop(Round.White, this, dim_x-3, dim_y-1))
+        addPiece(new Queen(Round.White, this, 3, dim_y-1))
+        addPiece(new King(Round.White, this, dim_x-4, dim_y-1))
     }
     else
     {
         // Constructor to make a copy
-        for (i<-0 to 7)
+        for (i<-0 to dim_x-1)
         {
-            for (j<-0 to 7)
+            for (j<-0 to dim_y-1)
             {
                 val p = _b.board(i)(j)
                 if (p != null)
@@ -70,8 +72,9 @@ class Board (private val _b:Board)
             }
         }
     }
-
-    def this () = { this (null) }
+    def this (_b:Board) = { this (_b,_b.dim_x,_b.dim_y) }
+    def this (x:Int,y:Int) = { this (null,x,y) }
+    def this () = { this (8,8) }
 
     /**
     Returns the piece at the given position. Return null if there is no piece at this position.
@@ -115,9 +118,9 @@ class Board (private val _b:Board)
     {
         board.synchronized
         {
-            for (i<-0 to 7)
+            for (i<-0 to dim_x-1)
             {
-                for (j<-0 to 7)
+                for (j<-0 to dim_y-1)
                 {
                     val piece = board(i)(j)
                     if (piece != null)

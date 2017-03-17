@@ -87,9 +87,9 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     private def countRemainingPieces(team:Round.Round) : Array[Int] =
     {
         val res : Array[Int] = Array(0,0,0,0,0)
-        for (i<-0 to 7)
+        for (i<-0 to game.dim_x-1)
         {
-            for (j<-0 to 7)
+            for (j<-0 to game.dim_y-1)
             {
                 val p = game.pieceAtPosition(i,j)
                 if (p != null)
@@ -246,59 +246,51 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         
         // Coloring the board
         val possibleMoves = game.possibleMoves
-        for (i<-0 to 7)
+        for (i<-0 to game.dim_x-1)
         {
-            for (j<-0 to 7)
+            for (j<-0 to game.dim_y-1)
             {
                 if ((i+j) % 2 == 0)
                 {
                     // White case
                     g.setColor(Color.white);
-                    g.fillRect(i*width/8,j*height/8,width/8,height/8);
+                    g.fillRect(i*width/game.dim_x,j*height/game.dim_y,width/game.dim_x,height/game.dim_y);
                 }
                 else
                 {
                     // 'Black' case
                     g.setColor(new Color(220,220,220));
-                    g.fillRect(i*width/8,j*height/8,width/8,height/8);
+                    g.fillRect(i*width/game.dim_x,j*height/game.dim_y,width/game.dim_x,height/game.dim_y);
                 }
                 if (Some(i,j) == selectedCase)
                 {
                     // Selected case : yellow
                     g.setColor(/*Color.yellow*/new Color(0xFF,0xFF,0x66));
-                    g.fillRect(i*width/8,j*height/8,width/8,height/8);
+                    g.fillRect(i*width/game.dim_x,j*height/game.dim_y,width/game.dim_x,height/game.dim_y);
                 }
                 // Coloring cases we can move to : green
                 g.setColor(/*Color.green*/new Color(0x62,0xDD,0x62));
                 selectedCase match
                 {
                     case None => {}
-                    case Some ((x,y)) if possibleMoves contains (x,y,i,j) => g.fillRect(i*width/8,j*height/8,width/8,height/8);
+                    case Some ((x,y)) if possibleMoves contains (x,y,i,j) => g.fillRect(i*width/game.dim_x,j*height/game.dim_y,width/game.dim_x,height/game.dim_y);
                     case _ => {}
                 }
+                // Drawing the piece
+                val piece = game.pieceAtPosition(i,j)
+                val min = math.min(width/game.dim_x,height/game.dim_y)
+                if (piece != null)
+                    g.drawImage(piece.getImage,i*width/game.dim_x+(width/game.dim_x-min)/2,j*height/game.dim_y+(height/game.dim_y-min)/2,min,min,null)
             }
         }
 
         // Drawing the grid
         g.setColor(new Color(100,100,100));
-        for (i<-0 to 8)
-        {
-            g.setStroke(new BasicStroke(2));
-            g.drawLine(0,i*height/8,width,i*height/8);
-            g.drawLine(i*width/8,0,i*width/8,height);
-        }
-
-        // Drawing each piece in game
-        for (i<-0 to 7)
-        {
-            for (j<-0 to 7)
-            {
-                val piece = game.pieceAtPosition(i,j)
-                val min = math.min(width,height)
-                if (piece != null)
-                    g.drawImage(piece.getImage,i*width/8+(width-min)/16,j*height/8+(height-min)/16,min/8,min/8,null)
-            }
-        }
+        g.setStroke(new BasicStroke(2));
+        for (i<-0 to game.dim_x)
+            g.drawLine(i*width/game.dim_x,0,i*width/game.dim_x,height);
+        for (j<-0 to game.dim_y)
+            g.drawLine(0,j*height/game.dim_y,width,j*height/game.dim_y);
 
         // Prints a message !
         if (message != null)
@@ -333,8 +325,8 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                 interfaceStatus = InterfaceStatus.Default
                 if (pt.x >= 0 && pt.y >= 0 && pt.x < width && pt.y < height)
                 {
-                    val x = pt.x * 8 / width
-                    val y = pt.y * 8 / height
+                    val x = pt.x * game.dim_x / width
+                    val y = pt.y * game.dim_y / height
 
                     if (selectedCase2 != None)
                     {
@@ -367,7 +359,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                             val Some ((sel_x, sel_y)) = selectedCase
                             if (game.canMove(sel_x, sel_y, x, y))
                             {
-                                if (game.pieceAtPosition(sel_x,sel_y).pieceType == PieceType.Pawn && (y == 0 || y == 7))
+                                if (game.pieceAtPosition(sel_x,sel_y).pieceType == PieceType.Pawn && (y == 0 || y == game.dim_y-1))
                                     // Promotion move
                                     selectedCase2 = Some(x, y)
                                 else

@@ -10,7 +10,7 @@ All methods are thread-safe.
 @param playerWhite The player of the white team.
 @param playerBlack The player of the black team.
 */
-class Game(private val canvas:Canvas, private val playerWhite:Player, private val playerBlack:Player) extends Board
+class Game(private val canvas:Canvas, private val playerWhite:Player, private val playerBlack:Player) extends Board(8,8)
 {
     private var round = Round.Black
     private var suspended = false
@@ -36,9 +36,9 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     private def changeRoundAndUpdateConfiguration() : Unit =
     {
         val config:scala.collection.mutable.Set[PieceStruct] = scala.collection.mutable.Set[PieceStruct]()
-        for (i<- 0 to 7)
+        for (i<- 0 to dim_x-1)
         {
-            for (j<- 0 to 7)
+            for (j<- 0 to dim_y-1)
             {
                 val p = pieceAtPosition(i,j)
                 if (p != null)
@@ -53,15 +53,15 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     private def calculatePossibleMoves : scala.collection.mutable.Set[(Int,Int,Int,Int)] =
     {
         val set = scala.collection.mutable.Set[(Int,Int,Int,Int)]()
-        for (i<-0 to 7)
+        for (i<-0 to dim_x-1)
         {
-            for (j<-0 to 7)
+            for (j<-0 to dim_y-1)
             {
                 if (canMove(i,j))
                 {
-                    for (k<-0 to 7)
+                    for (k<-0 to dim_x-1)
                     {
-                        for (l<-0 to 7)
+                        for (l<-0 to dim_y-1)
                         {
                             if (canMove(i,j,k,l))
                                 set += ((i,j,k,l))
@@ -204,7 +204,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             if (dir == Direction.Left)
                 rookX = 0
             if (dir == Direction.Right)
-                rookX = 7
+                rookX = dim_x-1
             if (!canMove(rookX,rookY))
                 return None
             val rook = pieceAtPosition(rookX,rookY)
@@ -388,7 +388,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             if (pieceAtPosition(fromX,fromY).pieceType == PieceType.Pawn && math.abs(toY-fromY) == 2)
                 enPassantPosition = Some (fromX+(toX-fromX)/2, fromY+(toY-fromY)/2)
             super.move (fromX,fromY,toX,toY)
-            if ((toY == 0 || toY == 7) && pieceAtPosition(toX,toY).pieceType == PieceType.Pawn)
+            if ((toY == 0 || toY == dim_y-1) && pieceAtPosition(toX,toY).pieceType == PieceType.Pawn)
             {
                 if (promotionType == PieceType.Knight)
                     super.add(new Knight(round, this, toX, toY))

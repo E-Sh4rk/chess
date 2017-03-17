@@ -154,9 +154,9 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
     */
     def isCheck : Boolean =
     {
-        for (i<-0 to 7)
+        for (i<-0 to board.dim_x-1)
         {
-            for (j<-0 to 7)
+            for (j<-0 to board.dim_y-1)
             {
                 val piece = board.pieceAtPosition(i,j)
                 if (piece != null)
@@ -175,7 +175,7 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
     */
     def canMove(toX:Int,toY:Int): Boolean =
     {
-        if (toX < 0 || toY < 0 || toX > 7 || toY > 7)
+        if (toX < 0 || toY < 0 || toX > board.dim_x-1 || toY > board.dim_y-1)
             return false;
         val piece = board.pieceAtPosition(toX, toY);
         if (piece != null)
@@ -223,10 +223,9 @@ class PieceStruct(val pieceType:PieceType.PieceType, val team:Round.Round, val p
      }
     override def hashCode: Int = {
         val (x,y) = pos
-        var result = pieceType.id
+        var result = (x+y)*(x+y+1)/2+y
+        result = result*PieceType.maxId + pieceType.id
         result = result*Round.maxId + team.id
-        result = result*8 + x
-        result = result*8 + y
         return result
     }
 }
