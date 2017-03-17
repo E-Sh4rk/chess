@@ -1,6 +1,8 @@
 
 import javax.swing.SwingUtilities
 
+class TimeControl(val time:Int, val moves:Int, val increment:Int);
+
 /**
 Implements a chessboard with all rules (logic of moves, rounds, end of the game, etc).
 
@@ -26,6 +28,18 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]
     = scala.collection.mutable.Map
     [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]()
+    // Clock
+    private var timeControls:Array[TimeControl] = Array[TimeControl](new TimeControl(3600,9999,5))
+    private var clock:scala.collection.mutable.Map[Round.Round,Int] = scala.collection.mutable.Map(Round.White -> 0, Round.Black -> 0)
+
+    /*
+    val t = new java.util.Timer()
+    val task = new java.util.TimerTask {
+        def run() = println("Beep!") 
+    }
+    t.schedule(task, 1000L, 1000L)
+    task.cancel()
+    */
 
     changeRoundAndUpdateConfiguration
     canvas.newGame(this)
@@ -71,6 +85,11 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             }
         }
         return set
+    }
+
+    private def updateClock () : Unit =
+    {
+
     }
 
     /**

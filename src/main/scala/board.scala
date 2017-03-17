@@ -73,7 +73,7 @@ class Board (private val _b:Board, val dim_x:Int, val dim_y:Int)
         }
     }
     def this (_b:Board) = { this (_b,_b.dim_x,_b.dim_y) }
-    def this (x:Int,y:Int) = { this (null,x,y) }
+    def this (dim_x:Int,dim_y:Int) = { this (null,dim_x,dim_y) }
     def this () = { this (8,8) }
 
     /**
