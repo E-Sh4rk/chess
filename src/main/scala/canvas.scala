@@ -171,10 +171,12 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
             drawCenteredString(g, "("+game.getThreefoldRepetitionCounter.toString+"/3, "+game.getFiftyMoveRuleCounter.toString+"/50)", new Rectangle(width+3*panel_width/5,0,panel_width/5,height),
             g.getFont().deriveFont(7F * panel_width / 100F))
             // Clock
-            drawCenteredString(g, game.getClock(Round.Black).toString, new Rectangle(width+2*panel_width/5,height/2-panel_width/2,panel_width/5,panel_width/2),
-            g.getFont().deriveFont(10F * panel_width / 100F))
-            drawCenteredString(g, game.getClock(Round.White).toString, new Rectangle(width+2*panel_width/5,height/2,panel_width/5,panel_width/2),
-            g.getFont().deriveFont(10F * panel_width / 100F))
+            if (game.getClock(Round.Black) >= 0)
+                drawCenteredString(g, timeToString(game.getClock(Round.Black)), new Rectangle(width+2*panel_width/5,height/2-panel_width/2,panel_width/5,panel_width/2),
+                g.getFont().deriveFont(10F * panel_width / 100F))
+            if (game.getClock(Round.White) >= 0)
+                drawCenteredString(g, timeToString(game.getClock(Round.White)), new Rectangle(width+2*panel_width/5,height/2,panel_width/5,panel_width/2),
+                g.getFont().deriveFont(10F * panel_width / 100F))
             // Piece counter
             val whiteIcons = Array(w_pawn,w_rook,w_knight,w_bishop,w_queen)
             val whiteCount = countRemainingPieces(Round.White)
@@ -304,7 +306,21 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
             drawCenteredString(g, message, new Rectangle(0,0,width,height), g.getFont().deriveFont(7F * width / 100F))
         }
     }
-    private def drawCenteredString(g:Graphics, text:String, rect:Rectangle, font:Font)
+    private def timeToString(t:Int) : String =
+    {
+        val sec:Int = t%60
+        val min:Int = (t/60) % 60
+        val hour:Int = t/3600
+        return intToString(hour,2) + ":" + intToString(min,2) + ":" + intToString(sec,2)
+    }
+    private def intToString(i:Int, n:Int) : String =
+    {
+        var res = i.toString
+        while (res.length < n)
+            res = "0" + res
+        return res
+    }
+    private def drawCenteredString(g:Graphics, text:String, rect:Rectangle, font:Font) : Unit =
     {
         val metrics:FontMetrics = g.getFontMetrics(font);
         val x:Int = rect.x + (rect.width - metrics.stringWidth(text)) / 2;
