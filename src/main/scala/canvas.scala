@@ -170,6 +170,11 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
             g.getFont().deriveFont(10F * panel_width / 100F))
             drawCenteredString(g, "("+game.getThreefoldRepetitionCounter.toString+"/3, "+game.getFiftyMoveRuleCounter.toString+"/50)", new Rectangle(width+3*panel_width/5,0,panel_width/5,height),
             g.getFont().deriveFont(7F * panel_width / 100F))
+            // Clock
+            drawCenteredString(g, game.getClock(Round.Black).toString, new Rectangle(width+2*panel_width/5,height/2-panel_width/2,panel_width/5,panel_width/2),
+            g.getFont().deriveFont(10F * panel_width / 100F))
+            drawCenteredString(g, game.getClock(Round.White).toString, new Rectangle(width+2*panel_width/5,height/2,panel_width/5,panel_width/2),
+            g.getFont().deriveFont(10F * panel_width / 100F))
             // Piece counter
             val whiteIcons = Array(w_pawn,w_rook,w_knight,w_bishop,w_queen)
             val whiteCount = countRemainingPieces(Round.White)
