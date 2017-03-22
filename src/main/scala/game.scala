@@ -38,17 +38,23 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     // Clock
     private var timeControls:TimePeriod = new TimePeriod(4500,0,5) // TODO : Should be Array[TimePeriod], in order to have many periods.
     private var clock:scala.collection.mutable.Map[Round.Round,Int] = scala.collection.mutable.Map(Round.White -> 0, Round.Black -> 0)
-    private var timerTask : java.util.TimerTask = new java.util.TimerTask { def run() = round.synchronized{updateClock} }
-    private val timer : java.util.Timer = new java.util.Timer()
+    private var timer : java.util.Timer = null
 
     changeRoundAndUpdateConfiguration
     canvas.newGame(this)
     playerWhite.init(this)
     playerBlack.init(this)
     playerWhite.mustPlay
-    timer.schedule(timerTask, 1000L, 1000L)
     clock(Round.White) = timeControls.time
     clock(Round.Black) = timeControls.time
+    scheduleTimer
+
+    private def scheduleTimer() : Unit =
+    {
+        val timerTask = new java.util.TimerTask { def run() = {round.synchronized{updateClock}} }
+        timer = new java.util.Timer()
+        timer.schedule(timerTask, 1000L, 1000L)
+    }
 
     private def changeRoundAndUpdateConfiguration() : Unit =
     {
@@ -146,7 +152,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
                     playerWhite.mustPlay
                 if (round == Round.Black)
                     playerBlack.mustPlay
-                timer.schedule(timerTask, 1000L, 1000L)
+                scheduleTimer
             }
         }
     }

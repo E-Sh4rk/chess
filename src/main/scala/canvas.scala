@@ -72,7 +72,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     */
     def resize(w:Int, h:Int)
     {
-        width = w ; height = h
+        width = w ; height = h ; panel_width = 0
         if (height <= width*7/8 && game != null)
         {
             panel_width = w/4
