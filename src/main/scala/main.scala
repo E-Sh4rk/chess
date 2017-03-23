@@ -94,7 +94,7 @@ object MyApp extends SimpleSwingApplication {
                 if (source == newGame)
                 {
                     if (game != null) game.suspend
-                    game = new Game(canvas, newWhitePlayer, newBlackPlayer, clockSettings)
+                    game = new Game(canvas, newWhitePlayer, newBlackPlayer, settingsPanel.gameMode, clockSettings)
                 }
                 if (source == settings)
                 {

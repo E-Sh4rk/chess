@@ -19,7 +19,8 @@ All methods are thread-safe.
 @param playerWhite The player of the white team.
 @param playerBlack The player of the black team.
 */
-class Game(private val canvas:Canvas, private var playerWhite:Player, private var playerBlack:Player, private val clockSettings:TimePeriod) extends Board(8,8)
+class Game(private val canvas:Canvas, private var playerWhite:Player, private var playerBlack:Player,
+           private val gameMode:GameMode.GameMode, private val clockSettings:TimePeriod) extends Board(gameMode)
 {
     private var round = Round.Black
     private var suspended = false

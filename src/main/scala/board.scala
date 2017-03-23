@@ -1,5 +1,13 @@
 
 /**
+Enumeration that represents the game mode (variant)
+*/
+object GameMode extends Enumeration {
+    type GameMode = Value
+    val Vanilla, Janus, Capablanca = Value
+}
+
+/**
 Enumeration that represents a round : White, Black, Finished.
 */
 object Round extends Enumeration {
@@ -20,12 +28,15 @@ Implements a simple chessboard without any rule.
 
 All methods are thread-safe.
 
+@param _gm The game mode (it will determine default position of pieces).
 @param _b The board to copy. If null or not present : initializes a new chessboard.
 @param dim_x The x-dimension of the chessboard.
 @param dim_y The y-dimension of the chessboard.
 */
-class Board (private val _b:Board, val dim_x:Int, val dim_y:Int)
+class Board (private val _b:Board, private val _gm:GameMode.GameMode)
 {
+    val dim_x:Int = if (_b == null) (if (_gm == GameMode.Vanilla) 8 else 10) else _b.dim_x
+    val dim_y:Int = if (_b == null) 8 else _b.dim_y
     private val board = Array.ofDim[Piece](dim_x,dim_y)
 
     private def addPiece(p:Piece):Unit =
@@ -72,9 +83,9 @@ class Board (private val _b:Board, val dim_x:Int, val dim_y:Int)
             }
         }
     }
-    def this (_b:Board) = { this (_b,_b.dim_x,_b.dim_y) }
-    def this (dim_x:Int,dim_y:Int) = { this (null,dim_x,dim_y) }
-    def this () = { this (8,8) }
+    def this (_b:Board) = { this (_b, GameMode.Vanilla) }
+    def this (_gm:GameMode.GameMode) = { this (null, _gm) }
+    def this () = { this (GameMode.Vanilla) }
 
     /**
     Returns the piece at the given position. Return null if there is no piece at this position.
