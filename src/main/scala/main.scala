@@ -10,24 +10,17 @@ object MyApp extends SimpleSwingApplication {
         val canvas = new Canvas(1000,750)
         var game:Game = null
 
-        // Buttons
-        val human = new Button("Human Fight !")
-        val human_AI = new Button("Human vs AI !")
-        val AI = new Button("AI Fight !")
+        // Game Buttons
+        val newGame = new Button("New Game")
         val settings = new Button("Settings")
         val buttons = new FlowPanel
         {
-            contents += human
-            contents += human_AI
-            contents += AI
+            contents += newGame
             contents += settings
         }
 
         // Settings
-        val settingsPanel = new FlowPanel // TODO : Move to settings.scala
-        {
-            contents += new Button("Test")
-        }
+        val settingsPanel = new Settings
 
         // Main Content
         val content = new BorderPanel
@@ -44,47 +37,58 @@ object MyApp extends SimpleSwingApplication {
                 if (settingsPanel.visible)
                 {
                     settings.text = "Go back to the game"
-                    human.visible = false
-                    human_AI.visible = false
-                    AI.visible = false
+                    newGame.visible = false
                 }
                 else
                 {
                     settings.text = "Settings"
-                    human.visible = true
-                    human_AI.visible = true
-                    AI.visible = true
+                    newGame.visible = true
                 }
             }
             def settingsDisplayed() : Boolean = { settingsPanel.visible }
         }
         contents = content
 
-        listenTo(human, human_AI, AI, settings, this)
+        // Utilitary functions
+        private def newWhitePlayer () : Player =
+        {
+            if (settingsPanel.white_is_human)
+                return canvas
+            else
+                return new PrimitiveAI
+        }
+        private def newBlackPlayer () : Player =
+        {
+            if (settingsPanel.black_is_human)
+                return canvas
+            else
+                return new PrimitiveAI
+        }
+
+        // Reactions
+        listenTo(newGame, settings, this)
         reactions += {
-            case ButtonClicked (source) => {
-                    if (source == human)
+            case ButtonClicked (source) =>
+            {
+                if (source == newGame)
+                {
+                    if (game != null) game.suspend
+                    game = new Game(canvas, newWhitePlayer, newBlackPlayer)
+                }
+                if (source == settings)
+                {
+                    if (game != null && !content.settingsDisplayed) game.suspend
+                    content.switch
+                    if (game != null && !content.settingsDisplayed)
                     {
-                        if (game != null) game.suspend
-                        game = new Game(canvas, canvas, canvas)
-                    }
-                    if (source == human_AI)
-                    {
-                        if (game != null) game.suspend
-                        game = new Game(canvas, canvas, new PrimitiveAI)
-                    }
-                    if (source == AI)
-                    {
-                        if (game != null) game.suspend
-                        game = new Game(canvas, new PrimitiveAI, new PrimitiveAI)
-                    }
-                    if (source == settings)
-                    {
-                        if (game != null && !content.settingsDisplayed) game.suspend
-                        content.switch
-                        if (game != null && !content.settingsDisplayed) game.resume
+                        if (settingsPanel.white_player_has_changed)
+                            game.setWhitePlayer(newWhitePlayer)
+                        if (settingsPanel.black_player_has_changed)
+                            game.setBlackPlayer(newBlackPlayer)
+                        game.resume
                     }
                 }
+            }
             case WindowClosing(_) => { if (game != null) game.suspend }
             case UIElementResized (source) =>
             {

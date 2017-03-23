@@ -19,7 +19,7 @@ All methods are thread-safe.
 @param playerWhite The player of the white team.
 @param playerBlack The player of the black team.
 */
-class Game(private val canvas:Canvas, private val playerWhite:Player, private val playerBlack:Player) extends Board(8,8)
+class Game(private val canvas:Canvas, private var playerWhite:Player, private var playerBlack:Player) extends Board(8,8)
 {
     private var round = Round.Black
     private var suspended = false
@@ -36,7 +36,7 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
     = scala.collection.mutable.Map
     [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]()
     // Clock
-    private var timeControls:TimePeriod = new TimePeriod(4500,0,5) // TODO : Should be Array[TimePeriod], in order to have many periods.
+    private var timeControls:TimePeriod = new TimePeriod(4500,0,5) // Should be Array[TimePeriod], in order to support multiple periods. But for now...
     private var clock:scala.collection.mutable.Map[Round.Round,Int] = scala.collection.mutable.Map(Round.White -> 0, Round.Black -> 0)
     private var timer : java.util.Timer = null
 
@@ -156,6 +156,15 @@ class Game(private val canvas:Canvas, private val playerWhite:Player, private va
             }
         }
     }
+
+    /**
+    Change the current white player. Only works if the game is suspended.
+    */
+    def setWhitePlayer(p:Player) : Unit = { round.synchronized { if (suspended) playerWhite = p } }
+    /**
+    Change the current black player. Only works if the game is suspended.
+    */
+    def setBlackPlayer(p:Player) : Unit = { round.synchronized { if (suspended) playerBlack = p } }
 
     /**
     Returns the current round.
