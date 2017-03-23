@@ -19,7 +19,7 @@ All methods are thread-safe.
 @param playerWhite The player of the white team.
 @param playerBlack The player of the black team.
 */
-class Game(private val canvas:Canvas, private var playerWhite:Player, private var playerBlack:Player) extends Board(8,8)
+class Game(private val canvas:Canvas, private var playerWhite:Player, private var playerBlack:Player, private val clockSettings:TimePeriod) extends Board(8,8)
 {
     private var round = Round.Black
     private var suspended = false
@@ -36,7 +36,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     = scala.collection.mutable.Map
     [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]()
     // Clock
-    private var timeControls:TimePeriod = new TimePeriod(4500,0,5) // Should be Array[TimePeriod], in order to support multiple periods. But for now...
+    // clockSettings should be Array[TimePeriod], in order to support multiple periods. But for now...
     private var clock:scala.collection.mutable.Map[Round.Round,Int] = scala.collection.mutable.Map(Round.White -> 0, Round.Black -> 0)
     private var timer : java.util.Timer = null
 
@@ -45,8 +45,8 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     playerWhite.init(this)
     playerBlack.init(this)
     playerWhite.mustPlay
-    clock(Round.White) = timeControls.time
-    clock(Round.Black) = timeControls.time
+    clock(Round.White) = clockSettings.time
+    clock(Round.Black) = clockSettings.time
     scheduleTimer
 
     private def scheduleTimer() : Unit =
@@ -107,7 +107,6 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     {
         if (clock(round) > 0)
             clock(round) -= 1
-        // Check if time is over.
         if (clock(round) == 0)
         {
             canvas.setMessage ("Time elapsed ! " + Round.adv(round) + " wins !")
@@ -426,7 +425,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             if (fmRule == 0) // We clear the threefoldCounter if possible
                 threefoldCounter.clear
             roundNumber += 1
-            clock(round) += timeControls.increment
+            clock(round) += clockSettings.increment
 
             // Do the move !!!
             castlingMove(fromX,fromY,toX,toY) match
@@ -457,9 +456,9 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             changeRoundAndUpdateConfiguration
 
             // Reinit clock if new period
-            if (timeControls.moves > 0)
-                if ((getRoundNumber - 1) % timeControls.moves == 0)
-                    clock(round) = timeControls.time
+            if (clockSettings.moves > 0)
+                if ((getRoundNumber - 1) % clockSettings.moves == 0)
+                    clock(round) = clockSettings.time
 
             // Preparing next round
             if (drawAfterMove && canRequestDraw)

@@ -64,6 +64,27 @@ object MyApp extends SimpleSwingApplication {
             else
                 return new PrimitiveAI
         }
+        private def clockSettings () : TimePeriod =
+        {
+            if (settingsPanel.clockEnabled)
+            {
+                var time = 0 ; var rounds = 0 ; var inc = 0
+                val lines = settingsPanel.clockSettings.split("[\\r\\n]+")
+                for (line <- lines)
+                {
+                    try
+                    {
+                        val values = line.split("\\s+")
+                        time = values(0).toInt
+                        rounds = values(1).toInt
+                        inc = values(2).toInt
+                        return new TimePeriod(time, rounds, inc)
+                    }
+                    catch { case e:Exception => {} }
+                }
+            }
+            return new TimePeriod(-1, 0, 0)
+        }
 
         // Reactions
         listenTo(newGame, settings, this)
@@ -73,7 +94,7 @@ object MyApp extends SimpleSwingApplication {
                 if (source == newGame)
                 {
                     if (game != null) game.suspend
-                    game = new Game(canvas, newWhitePlayer, newBlackPlayer)
+                    game = new Game(canvas, newWhitePlayer, newBlackPlayer, clockSettings)
                 }
                 if (source == settings)
                 {
