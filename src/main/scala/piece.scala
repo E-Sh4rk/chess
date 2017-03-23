@@ -25,6 +25,21 @@ object Direction extends Enumeration {
         return dir == Direction.UpLeft || dir == Direction.DownLeft || dir == Direction.UpRight || dir == Direction.DownRight
     }
     /**
+    Indicates whether a move is a knight move.
+    */
+    def isKnightMove (fromX:Int,fromY:Int,toX:Int,toY:Int) : Boolean =
+    {
+        if (math.abs(fromX-toX) == 2)
+            if (math.abs(fromY-toY) == 1)
+                return true
+
+        if (math.abs(fromY-toY) == 2)
+            if (math.abs(fromX-toX) == 1)
+                return true
+
+        return false
+    }
+    /**
     Returns the direction that has been applied to go from the first position to the second.
     */
     def directionApplied (fromX:Int, fromY:Int, toX:Int, toY:Int) : Direction.Direction =
@@ -86,7 +101,7 @@ object Direction extends Enumeration {
 
 object PieceType extends Enumeration {
     type PieceType = Value
-    val Pawn, Rook, Bishop, Knight, King, Queen, Unknown = Value
+    val Pawn, Rook, Bishop, Knight, King, Queen, ArchBishop, Chancellor, Unknown = Value
 }
 
 /**

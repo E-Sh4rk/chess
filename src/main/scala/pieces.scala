@@ -79,10 +79,9 @@ class Rook(private val _team:Round.Round, private val _board:Board, private val 
         
         val dir = Direction.directionApplied(x,y,toX,toY)
         if (Direction.isStraight(dir))
-        {
             if (noObstacleTo(toX,toY))
                 return true
-        }
+
         return false
     }
     override def copy(b:Board) : Piece =
@@ -109,10 +108,9 @@ class Bishop(private val _team:Round.Round, private val _board:Board, private va
         
         val dir = Direction.directionApplied(x,y,toX,toY)
         if (Direction.isDiag(dir))
-        {
             if (noObstacleTo(toX,toY))
                 return true
-        }
+
         return false
     }
     override def copy(b:Board) : Piece =
@@ -137,15 +135,7 @@ class Knight(private val _team:Round.Round, private val _board:Board, private va
         if (!super.canMove(toX,toY))
             return false;
         
-        if (math.abs(x-toX) == 2)
-            if (math.abs(y-toY) == 1)
-                return true
-
-        if (math.abs(y-toY) == 2)
-            if (math.abs(x-toX) == 1)
-                return true
-
-        return false
+        return Direction.isKnightMove(x,y,toX,toY)
     }
     override def copy(b:Board) : Piece =
     {
@@ -198,10 +188,9 @@ class Queen(private val _team:Round.Round, private val _board:Board, private val
         
         val dir = Direction.directionApplied(x,y,toX,toY)
         if (Direction.isStraight(dir) || Direction.isDiag(dir))
-        {
             if (noObstacleTo(toX,toY))
                 return true
-        }
+
         return false
     }
     override def copy(b:Board) : Piece =
@@ -212,3 +201,60 @@ class Queen(private val _team:Round.Round, private val _board:Board, private val
     }
 }
 
+class ArchBishop(private val _team:Round.Round, private val _board:Board, private val _x:Int, private val _y:Int) extends Piece(_team, _board, _x, _y)
+{
+    if(team == Round.White)
+        image_path = "img/w_archbishop.png"
+    if(team == Round.Black)
+        image_path = "img/b_archbishop.png"
+
+    override val pieceType = PieceType.ArchBishop
+
+    override def canMove(toX:Int,toY:Int): Boolean =
+    {
+        if (!super.canMove(toX,toY))
+            return false;
+
+        val dir = Direction.directionApplied(x,y,toX,toY)
+        if (Direction.isDiag(dir))
+            if (noObstacleTo(toX,toY))
+                return true
+        
+        return Direction.isKnightMove(x,y,toX,toY)
+    }
+    override def copy(b:Board) : Piece =
+    {
+        val p = new ArchBishop(team, b, x, y)
+        p.firstMove = this.firstMove
+        return p
+    }
+}
+
+class Chancellor(private val _team:Round.Round, private val _board:Board, private val _x:Int, private val _y:Int) extends Piece(_team, _board, _x, _y)
+{
+    if(team == Round.White)
+        image_path = "img/w_chancellor.png"
+    if(team == Round.Black)
+        image_path = "img/b_chancellor.png"
+
+    override val pieceType = PieceType.Chancellor
+
+    override def canMove(toX:Int,toY:Int): Boolean =
+    {
+        if (!super.canMove(toX,toY))
+            return false;
+
+        val dir = Direction.directionApplied(x,y,toX,toY)
+        if (Direction.isStraight(dir))
+            if (noObstacleTo(toX,toY))
+                return true
+        
+        return Direction.isKnightMove(x,y,toX,toY)
+    }
+    override def copy(b:Board) : Piece =
+    {
+        val p = new Chancellor(team, b, x, y)
+        p.firstMove = this.firstMove
+        return p
+    }
+}
