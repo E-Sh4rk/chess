@@ -24,6 +24,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
 {
     private var round = Round.Black
     private var suspended = false
+    private var opponentRequestedDraw = false
     private var enPassantPosition : Option[(Int,Int)] = None
     // CurrentConfiguration contains data about current round, possible moves and positions. Used for caching and history.
     private var currentConfiguration:(scala.collection.mutable.Set[PieceStruct],Round.Round,
@@ -338,6 +339,8 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
         {
             if (round == Round.Finished)
                 return false
+            if (opponentRequestedDraw)
+                return true
             if (getFiftyMoveRuleCounter >= 50)
                 return true
             if (getThreefoldRepetitionCounter >= 3)
@@ -455,6 +458,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                     super.add(new Queen(round, this, toX, toY))
             }
             changeRoundAndUpdateConfiguration
+            opponentRequestedDraw = false
 
             // Reinit clock if new period
             if (clockSettings.moves > 0)
@@ -463,12 +467,12 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
 
             // Preparing next round
             if (drawAfterMove && canRequestDraw)
-            {
-                // Draw requested
                 requestDraw
-            }
             else
             {
+                if (drawAfterMove)
+                    opponentRequestedDraw = true
+
                 // Check/Checkmate/Stalemate detection
                 val check = getKing(round).isCheck
                 val noMove = possibleMoves.isEmpty

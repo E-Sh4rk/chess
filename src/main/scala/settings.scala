@@ -7,6 +7,7 @@ import scala.swing.TextArea
 import scala.swing.ComboBox
 import scala.swing.Label
 import java.awt.Dimension
+import swing.event._
 
 class Settings extends GridBagPanel
 {
@@ -23,6 +24,7 @@ class Settings extends GridBagPanel
 
     private val clock : CheckBox = new CheckBox("Activate game clock")
     private val clockText : TextArea = new TextArea("3600 0 5\nOnly one period is supported for now...",5,25)
+    clockText.enabled = false
 
     private val labelVariant : Label = new Label("Game mode (variant)")
     private val variant : ComboBox[String] = new ComboBox[String](List("Vanilla","Janus","Capablanca"))
@@ -85,6 +87,22 @@ class Settings extends GridBagPanel
             case "Janus" => GameMode.Janus
             case "Capablanca" => GameMode.Capablanca
             case _ => GameMode.Vanilla
+        }
+    }
+
+    // Reactions
+    listenTo(clock)
+    reactions +=
+    {
+        case ButtonClicked (source) =>
+        {
+            if (source == clock)
+            {
+                if (clock.selected)
+                    clockText.enabled = true
+                else
+                    clockText.enabled = false
+            }
         }
     }
 }
