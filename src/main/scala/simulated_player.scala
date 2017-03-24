@@ -1,9 +1,10 @@
 /**
 A player that uses a preprogrammed list of moves.
 */
-class SimulatedPlayer(private val moves:/*History*/Int) extends Player
+class SimulatedPlayer(private val moves:History) extends Player
 {
     private var game:Game = null
+    private var nextMoveIndex = 0
 
     def init (g:Game) : Unit = { game = g }
     def mustPlay : Unit = { }
@@ -16,7 +17,18 @@ class SimulatedPlayer(private val moves:/*History*/Int) extends Player
     */
     def playNextMove () : Boolean =
     {
-        // TODO
-        return false
+        if (game != null)
+        {
+            if (nextMoveIndex >= moves.moves.length)
+            return false
+        
+            val m = moves.moves(nextMoveIndex)
+            if (game.canMove(m.fromX,m.fromY,m.toX,m.toY))
+            {
+                game.move(m.fromX,m.fromY,m.toX,m.toY)
+                nextMoveIndex += 1
+            }
+        }
+        return nextMoveIndex >= moves.moves.length
     }
 }

@@ -9,21 +9,38 @@ object MyApp extends SimpleSwingApplication {
 
         val canvas = new Canvas(1000,750)
         var game:Game = null
+        var explore_mode = false
+        var currentSimulatedPlayer:SimulatedPlayer = null
 
         // Game Buttons
         val newGame = new Button("New Game")
         val loadGame = new Button("Load Game")
         val saveGame = new Button("Save Game")
         val settings = new Button("Settings")
+        val prev_final = new Button("<=")
+        val prev = new Button("<-")
         val next = new Button("->")
-        next.enabled = false
-        val buttons = new FlowPanel
+        val next_final = new Button("=>")
+        val switch_mode = new Button("Switch to explore mode")
+        val buttons1 = new FlowPanel
         {
             contents += newGame
             contents += loadGame
             contents += saveGame
             contents += settings
+        }
+        val buttons2 = new FlowPanel
+        {
+            contents += prev_final
+            contents += prev
             contents += next
+            contents += next_final
+            contents += switch_mode
+        }
+        val buttons = new BorderPanel
+        {
+            add (buttons1, BorderPanel.Position.South)
+            add (buttons2, BorderPanel.Position.North)
         }
 
         // Settings
@@ -47,7 +64,7 @@ object MyApp extends SimpleSwingApplication {
                     newGame.visible = false
                     loadGame.visible = false
                     saveGame.visible = false
-                    next.visible = false
+                    buttons2.visible = false
                 }
                 else
                 {
@@ -55,7 +72,7 @@ object MyApp extends SimpleSwingApplication {
                     newGame.visible = true
                     loadGame.visible = true
                     saveGame.visible = true
-                    next.visible = true
+                    buttons2.visible = true
                 }
             }
             def settingsDisplayed() : Boolean = { settingsPanel.visible }
@@ -65,6 +82,12 @@ object MyApp extends SimpleSwingApplication {
         // Utilitary functions
         private def newWhitePlayer () : Player =
         {
+            if (explore_mode)
+            {
+                if (currentSimulatedPlayer == null)
+                    currentSimulatedPlayer = newSimulatedPlayer
+                currentSimulatedPlayer
+            }
             if (settingsPanel.white_is_human)
                 return canvas
             else
@@ -72,6 +95,12 @@ object MyApp extends SimpleSwingApplication {
         }
         private def newBlackPlayer () : Player =
         {
+            if (explore_mode)
+            {
+                if (currentSimulatedPlayer == null)
+                    currentSimulatedPlayer = newSimulatedPlayer
+                currentSimulatedPlayer
+            }
             if (settingsPanel.black_is_human)
                 return canvas
             else
@@ -98,15 +127,22 @@ object MyApp extends SimpleSwingApplication {
             }
             return new TimePeriod(-1, 0, 0)
         }
+        private def newSimulatedPlayer () : SimulatedPlayer =
+        {
+            val h = new History
+            h.mode = settingsPanel.gameMode
+            return new SimulatedPlayer(h)
+        }
 
         // Reactions
-        listenTo(newGame, settings, this)
+        listenTo(newGame, settings, this, switch_mode)
         reactions += {
             case ButtonClicked (source) =>
             {
                 if (source == newGame)
                 {
                     if (game != null) game.suspend
+                    currentSimulatedPlayer = null
                     game = new Game(canvas, newWhitePlayer, newBlackPlayer, settingsPanel.gameMode, clockSettings)
                 }
                 if (source == settings)
@@ -120,6 +156,22 @@ object MyApp extends SimpleSwingApplication {
                         if (settingsPanel.black_player_has_changed)
                             game.setBlackPlayer(newBlackPlayer)
                         game.resume
+                    }
+                }
+                if (source == switch_mode)
+                {
+                    explore_mode = !explore_mode
+                    if (explore_mode)
+                    {
+                        currentSimulatedPlayer = null
+                        if (game != null)
+                            currentSimulatedPlayer = new SimulatedPlayer(game.getHistory)
+                        switch_mode.text = "Switch to play mode"
+                    }
+                    else
+                    {
+                        currentSimulatedPlayer = null
+                        switch_mode.text = "Switch to explore mode"
                     }
                 }
             }
