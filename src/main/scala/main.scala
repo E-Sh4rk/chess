@@ -12,11 +12,18 @@ object MyApp extends SimpleSwingApplication {
 
         // Game Buttons
         val newGame = new Button("New Game")
+        val loadGame = new Button("Load Game")
+        val saveGame = new Button("Save Game")
         val settings = new Button("Settings")
+        val next = new Button("->")
+        next.enabled = false
         val buttons = new FlowPanel
         {
             contents += newGame
+            contents += loadGame
+            contents += saveGame
             contents += settings
+            contents += next
         }
 
         // Settings
@@ -38,11 +45,17 @@ object MyApp extends SimpleSwingApplication {
                 {
                     settings.text = "Go back to the game"
                     newGame.visible = false
+                    loadGame.visible = false
+                    saveGame.visible = false
+                    next.visible = false
                 }
                 else
                 {
                     settings.text = "Settings"
                     newGame.visible = true
+                    loadGame.visible = true
+                    saveGame.visible = true
+                    next.visible = true
                 }
             }
             def settingsDisplayed() : Boolean = { settingsPanel.visible }

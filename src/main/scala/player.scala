@@ -56,5 +56,5 @@ abstract class SynchPlayer extends Player with Runnable {
         }
         catch { case  ex : InterruptedException => { } }
     }
-    def stop : Unit = { if (thread != null){ thread.interrupt ; thread = null } }
+    def stop : Unit = { if (thread != null){ thread.interrupt ; thread = null } ; game = null }
 }
