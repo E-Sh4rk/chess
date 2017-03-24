@@ -168,7 +168,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     /**
     Return the history of the current game.
     */
-    def getHistory() = { round.synchronized{ history } } // TODO : History
+    def getHistory() = { round.synchronized{ history } }
     /**
     Change the current white player. Only works if the game is suspended.
     */
