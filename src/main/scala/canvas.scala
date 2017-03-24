@@ -62,7 +62,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     // Player methods
     def init (g:Game) : Unit = { } // The canvas use the same game for drawing as for playing
     def mustPlay : Unit = { canPlay = true }
-    def stop : Unit = { canPlay = false }
+    def stop : Unit = { hasPlayed }
 
     // Drawing (output)
     private var panel_width = 0
