@@ -26,6 +26,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     private var suspended = false
     private var opponentRequestedDraw = false
     private var enPassantPosition : Option[(Int,Int)] = None
+    private var history:History = new History
     // CurrentConfiguration contains data about current round, possible moves and positions. Used for caching and history.
     private var currentConfiguration:(scala.collection.mutable.Set[PieceStruct],Round.Round,
     scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)])
@@ -42,13 +43,19 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     private var clock:scala.collection.mutable.Map[Round.Round,Int] = scala.collection.mutable.Map(Round.White -> 0, Round.Black -> 0)
     private var timer : java.util.Timer = null
 
+
+    history.mode = gameMode
+    history.dim_x = dim_x
+    history.dim_y = dim_y
+
     changeRoundAndUpdateConfiguration
+    clock(Round.White) = clockSettings.time
+    clock(Round.Black) = clockSettings.time
+
     canvas.newGame(this)
     playerWhite.init(this)
     playerBlack.init(this)
     playerWhite.mustPlay
-    clock(Round.White) = clockSettings.time
-    clock(Round.Black) = clockSettings.time
     scheduleTimer
 
     private def scheduleTimer() : Unit =
@@ -161,7 +168,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     /**
     Return the history of the current game.
     */
-    def getHistory() : History = {return null } // TODO
+    def getHistory() = { round.synchronized{ history } } // TODO : History
     /**
     Change the current white player. Only works if the game is suspended.
     */

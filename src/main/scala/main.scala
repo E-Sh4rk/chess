@@ -37,6 +37,7 @@ object MyApp extends SimpleSwingApplication {
             contents += next_final
             contents += switch_mode
         }
+        exploreButtonsSetEnabled(false)
         val buttons = new BorderPanel
         {
             add (buttons1, BorderPanel.Position.South)
@@ -83,11 +84,7 @@ object MyApp extends SimpleSwingApplication {
         private def newWhitePlayer () : Player =
         {
             if (explore_mode)
-            {
-                if (currentSimulatedPlayer == null)
-                    currentSimulatedPlayer = newSimulatedPlayer
-                currentSimulatedPlayer
-            }
+                return currentSimulatedPlayer
             if (settingsPanel.white_is_human)
                 return canvas
             else
@@ -96,11 +93,7 @@ object MyApp extends SimpleSwingApplication {
         private def newBlackPlayer () : Player =
         {
             if (explore_mode)
-            {
-                if (currentSimulatedPlayer == null)
-                    currentSimulatedPlayer = newSimulatedPlayer
-                currentSimulatedPlayer
-            }
+                return currentSimulatedPlayer
             if (settingsPanel.black_is_human)
                 return canvas
             else
@@ -127,11 +120,29 @@ object MyApp extends SimpleSwingApplication {
             }
             return new TimePeriod(-1, 0, 0)
         }
-        private def newSimulatedPlayer () : SimulatedPlayer =
+        private def switchToExploreMode() =
         {
-            val h = new History
-            h.mode = settingsPanel.gameMode
-            return new SimulatedPlayer(h)
+            if (game != null)
+            {
+                explore_mode = true
+                currentSimulatedPlayer = new SimulatedPlayer(game.getHistory)
+                switch_mode.text = "Switch to play mode"
+                exploreButtonsSetEnabled(true)
+            }
+        }
+        private def switchToPlayMode() =
+        {
+            explore_mode = false
+            currentSimulatedPlayer = null
+            switch_mode.text = "Switch to explore mode"
+            exploreButtonsSetEnabled(false)
+        }
+        private def exploreButtonsSetEnabled(b:Boolean) =
+        {
+            prev_final.enabled = b
+            prev.enabled = b
+            next.enabled = b
+            next_final.enabled = b
         }
 
         // Reactions
@@ -142,7 +153,7 @@ object MyApp extends SimpleSwingApplication {
                 if (source == newGame)
                 {
                     if (game != null) game.suspend
-                    currentSimulatedPlayer = null
+                    switchToPlayMode
                     game = new Game(canvas, newWhitePlayer, newBlackPlayer, settingsPanel.gameMode, clockSettings)
                 }
                 if (source == settings)
@@ -160,19 +171,10 @@ object MyApp extends SimpleSwingApplication {
                 }
                 if (source == switch_mode)
                 {
-                    explore_mode = !explore_mode
-                    if (explore_mode)
-                    {
-                        currentSimulatedPlayer = null
-                        if (game != null)
-                            currentSimulatedPlayer = new SimulatedPlayer(game.getHistory)
-                        switch_mode.text = "Switch to play mode"
-                    }
+                    if (!explore_mode)
+                        switchToExploreMode
                     else
-                    {
-                        currentSimulatedPlayer = null
-                        switch_mode.text = "Switch to explore mode"
-                    }
+                        switchToPlayMode
                 }
             }
             case WindowClosing(_) => { if (game != null) game.suspend }
