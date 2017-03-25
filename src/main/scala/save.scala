@@ -117,9 +117,89 @@ class History()
     fw.close()
   }
 
+  private def readNextChar(s:Source) : Char =
+  {
+    while (s.hasNext)
+    {
+      val c = s.next
+      if (c != '\n' && c != ' ' && c != '\r' && c != '\t')
+        return c
+    }
+    return '\0'
+  }
+  private def readUntilChar(s:Source, d:Char) : String =
+  {
+    var res = new StringBuilder
+    while (s.hasNext)
+    {
+      val c = s.next
+      if (c == d)
+        return res.toString
+      res.append(c)
+    }
+    return res.toString
+  }
+  private def readUntilSpace(s:Source) : String =
+  {
+    var res = new StringBuilder
+    while (s.hasNext)
+    {
+      val c = s.next
+      if (c == '\n' || c == ' ' || c == '\r' || c == '\t')
+        return res.toString
+      res.append(c)
+    }
+    return res.toString
+  }
   def loadPGN(fileName:String) : History =
   {
+    var h = new History
     var source = Source.fromFile(fileName)
-    return null
+    var current = readNextChar(source)
+    while (current != '\0')
+    {
+      // Header
+      if (current == '[')
+      {
+        var content = readUntilChar(source,']')
+        var tagName = content.split('"')(0)
+        var tagValue = content.split('"')(1)
+        tagName.filterNot((x: Char) => x.isWhitespace).toLowerCase match
+        {
+          case "event" => h.event = tagValue
+          case "site" => h.site = tagValue
+          case "date" => h.date = tagValue
+          case "round" => h.round = tagValue
+          case "white" => h.white = tagValue
+          case "black" => h.black = tagValue
+          case "result" => h.result = tagValue
+          case "mode" => h.mode = GameMode.withName(tagValue)
+          case _ => { }
+        }
+      }
+      // Moves
+      {
+        // Castle
+        if (current == 'O')
+        {
+          var castle = CastleType.NoCastle
+          var event = GameEvent.NoEvent
+          var content = readUntilSpace(source)
+          if (content.startsWith("O-O-O"))
+            castle = CastleType.Queenside
+          else if (content.startsWith("O-O"))
+            castle = CastleType.Kingside
+          if (content.endsWith("#"))
+            event = GameEvent.Checkmate
+          if (content.endsWith("+"))
+            event = GameEvent.Check
+          h.moves.append(new Move(PieceType.King, -1, -1, -1, -1, false, castle, PieceType.Unknown, event))
+        }
+        // TODO
+      }
+      // Ending (final score) : Nothing for the moment
+      current = readNextChar(source)
+    }
+    return h
   }
 }
