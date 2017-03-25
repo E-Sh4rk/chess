@@ -9,9 +9,14 @@ object CastleType extends Enumeration {
     val NoCastle, Kingside, Queenside = Value
 }
 
+object GameEvent extends Enumeration {
+    type GameEvent = Value
+    val NoEvent, Check, Checkmate = Value
+}
+
 class Move(var pieceType:PieceType.PieceType, /* Always specified */
            var fromX:Int, var fromY:Int, var toX:Int, var toY:Int, /* Negative when not specified */
-           var isCatch:Boolean, var castle:CastleType.CastleType, var promotion:PieceType.PieceType); /* Always specified */
+           var isCatch:Boolean, var castle:CastleType.CastleType, var promotion:PieceType.PieceType, var event:GameEvent.GameEvent); /* Always specified */
 
 class History()
 {
@@ -86,6 +91,10 @@ class History()
         stringOfMove += yToRow(move.toY)
         if (move.promotion != PieceType.Unknown)
           stringOfMove += "=" + pieceTypeAbv(move.promotion)
+        if (move.event == GameEvent.Check)
+          stringOfMove += "+"
+        if (move.event == GameEvent.Checkmate)
+          stringOfMove += "#"
       }
 
       // Add move to the file
@@ -107,17 +116,10 @@ class History()
     
     fw.close()
   }
-}
 
-
-// Source.fromFile("mon/fichier.txt").getLines
-/*
-object Demo {
-   def main(args: Array[String]) {
-      val pattern = "\\[Scala".r
-      val str = "[Scala is Scalable and cool"
-      
-      println((pattern findAllIn str).mkString(""))
-   }
+  def loadPGN(fileName:String) : History =
+  {
+    var source = Source.fromFile(fileName)
+    return null
+  }
 }
-*/

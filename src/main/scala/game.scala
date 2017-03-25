@@ -434,6 +434,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             var h_catch:Boolean = false
             var h_castle:CastleType.CastleType = CastleType.NoCastle
             var h_promotion:PieceType.PieceType = PieceType.Unknown
+            var h_event:GameEvent.GameEvent = GameEvent.NoEvent
             
             // Updating counters
             fmRule += 1
@@ -504,9 +505,15 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                 val noMove = possibleMoves.isEmpty
 
                 if (check && noMove)
+                {
                     canvas.setMessage ("Checkmate ! " + Round.adv(round).toString + " wins !")
+                    h_event = GameEvent.Checkmate
+                }
                 else if (check)
+                {
                     canvas.setMessage ("Check !")
+                    h_event = GameEvent.Check
+                }
                 else if (noMove)
                     canvas.setMessage ("Stalemate !")
                 else
@@ -516,7 +523,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                     gameFinished
 
                 // Add move to history !
-                history.moves.append(new Move(h_type, fromX, fromY, toX, toY, h_catch, h_castle, h_promotion))
+                history.moves.append(new Move(h_type, fromX, fromY, toX, toY, h_catch, h_castle, h_promotion, h_event))
 
                 canvas.repaint
                 if (round == Round.White)
