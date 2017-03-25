@@ -516,7 +516,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                     gameFinished
 
                 // Add move to history !
-                history.moves.append(new Move(h_type, fromX, fromY, toX, toY, h_catch, check, h_castle, h_promotion))
+                history.moves.append(new Move(h_type, fromX, fromY, toX, toY, h_catch, h_castle, h_promotion))
 
                 canvas.repaint
                 if (round == Round.White)

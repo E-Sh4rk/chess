@@ -1,6 +1,8 @@
 import swing._
 import swing.event._
 import java.awt.Dimension
+import java.io.File
+import javax.swing.filechooser.FileFilter
 
 object MyApp extends SimpleSwingApplication {
 	def top = new MainFrame {
@@ -11,6 +13,21 @@ object MyApp extends SimpleSwingApplication {
         var game:Game = null
         var explore_mode = false
         var currentSimulatedPlayer:SimulatedPlayer = null
+
+        // PGN File Filter
+        val pgn_ff : FileFilter = new FileFilter() {
+            override def getDescription() : String = { return "Portable Game Notation (*.pgn)" }
+            override def accept(f:File) : Boolean =
+            {
+                if (f.isDirectory)
+                    return true
+                else
+                {
+                    var filename = f.getName.toLowerCase
+                    return filename.endsWith(".pgn")
+                }
+            }
+        }
 
         // Game Buttons
         val newGame = new Button("New Game")
@@ -146,7 +163,7 @@ object MyApp extends SimpleSwingApplication {
         }
 
         // Reactions
-        listenTo(newGame, settings, this, switch_mode)
+        listenTo(newGame, settings, saveGame, this, switch_mode)
         reactions += {
             case ButtonClicked (source) =>
             {
@@ -175,6 +192,18 @@ object MyApp extends SimpleSwingApplication {
                         switchToExploreMode
                     else
                         switchToPlayMode
+                }
+                if (source == saveGame)
+                {
+                    if (game != null)
+                    {
+                        val chooser = new FileChooser
+                        chooser.multiSelectionEnabled = false
+                        chooser.fileFilter = pgn_ff
+                        chooser.fileSelectionMode = FileChooser.SelectionMode.FilesOnly
+                        if(chooser.showSaveDialog(null) == FileChooser.Result.Approve)
+                            game.getHistory.savePGN(chooser.selectedFile.getPath);
+                    }
                 }
             }
             case WindowClosing(_) => { if (game != null) game.suspend }
