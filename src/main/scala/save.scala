@@ -39,7 +39,9 @@ class History()
     PieceType.Knight -> "N",
     PieceType.Bishop -> "B",
     PieceType.Queen -> "Q",
-    PieceType.King -> "K"
+    PieceType.King -> "K",
+    PieceType.ArchBishop -> "A",
+    PieceType.Chancellor -> "C"
   )
 
   def xToColumn (x:Int) : String =
@@ -49,6 +51,14 @@ class History()
   def yToRow (y:Int) : String =
   {
     return (dim_y - y).toString
+  }
+  def rowToY (row:String) : Int =
+  {
+    return dim_y - row.toInt
+  }
+  def columnToX (col:String) : Int =
+  {
+    return col(0).toInt - 'a'.toInt
   }
 
   def savePGN(fileName:String) =
@@ -151,6 +161,27 @@ class History()
     }
     return res.toString
   }
+  private def isAlphanumeric(c:Char) : Boolean =
+  {
+    if ('a' <= c && c <= 'z')
+      return true
+    if ('A' <= c && c <= 'Z')
+      return true
+    if ('0' <= c && c <= '9')
+      return true
+    return false
+  }
+  private def pieceOfAbv(abv:String) : PieceType.PieceType =
+  {
+    pieceTypeAbv.find(_._2==abv) match {
+      case None => return PieceType.Unknown
+      case Some ((k,v)) => return k
+    }
+  }
+  private def removeIndex(i:Int, str:String) : String =
+  {
+    return str.substring(0,i)+str.substring(i+1)
+  }
   def loadPGN(fileName:String) : History =
   {
     var h = new History
@@ -178,26 +209,73 @@ class History()
         }
       }
       // Moves
+      if (isAlphanumeric(current))
       {
-        // Castle
-        if (current == 'O')
+        var content = readUntilSpace(source)
+        content = content.split('.').last
+        if (!content.isEmpty)
         {
           var castle = CastleType.NoCastle
           var event = GameEvent.NoEvent
-          var content = readUntilSpace(source)
-          if (content.startsWith("O-O-O"))
-            castle = CastleType.Queenside
-          else if (content.startsWith("O-O"))
-            castle = CastleType.Kingside
+          var ptype = PieceType.Unknown
+          var fromX = -1 ; var fromY = -1
+          var toX = -1 ; var toY = -1
+          var isCatch = false ; var promotion = PieceType.Unknown
+
+          // Check/Checkmate annotation
           if (content.endsWith("#"))
-            event = GameEvent.Checkmate
+              event = GameEvent.Checkmate
           if (content.endsWith("+"))
-            event = GameEvent.Check
-          h.moves.append(new Move(PieceType.King, -1, -1, -1, -1, false, castle, PieceType.Unknown, event))
+              event = GameEvent.Check
+
+          // Remove annotations at the end of the move
+          while (!isAlphanumeric(content.last))
+            content = content.substring(0, content.length-1)
+          
+          // Castle
+          if (current == 'O')
+          {
+            ptype = PieceType.King
+            if (content.startsWith("O-O-O"))
+              castle = CastleType.Queenside
+            else if (content.startsWith("O-O"))
+              castle = CastleType.Kingside
+          }
+          // Regular move
+          else
+          {
+            // Reading piece type
+            ptype = pieceOfAbv(current.toString)
+            if (ptype == PieceType.Unknown)
+              ptype = PieceType.Pawn
+            else
+              content = content.substring(1)
+            // Promotion ?
+            // TODO
+            // Catch symbol / No catch symbol
+            if (content.indexOf('x') >= 0)
+            {
+              isCatch = true
+              content = removeIndex(content.indexOf('x'), content)
+            }
+            if (content.indexOf('-') >= 0) // This symbol is not legal in abreged notation, but we tolerate it
+              content = removeIndex(content.indexOf('-'), content)
+            // TO Position
+            // TODO
+            // FROM Position
+            // TODO
+          }
+          
+          h.moves.append(new Move(ptype, fromX, fromY, toX, toY, isCatch, castle, promotion, event))
         }
-        // TODO
       }
       // Ending (final score) : Nothing for the moment
+      // Comments
+      if (current == '{')
+        readUntilChar(source,'}')
+      if (current == ';')
+        readUntilChar(source,'\n')
+
       current = readNextChar(source)
     }
     return h
