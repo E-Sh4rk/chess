@@ -4,10 +4,15 @@ import scala.util.matching.Regex
 import java.io.File
 import java.io.FileWriter
 
-class Move(val pieceType:PieceType.PieceType,
-           val fromX:Int, val fromY:Int, val toX:Int, val toY:Int,
-           val isCatch:Boolean, val isCheck:Boolean,
-           val isCastling:Boolean, val isPromotion:Boolean);
+object CastleType extends Enumeration {
+    type CastleType = Value
+    val NoCastle, Kingside, Queenside = Value
+}
+
+class Move(var pieceType:PieceType.PieceType, /* Always specified */
+           var fromX:Int, var fromY:Int, var toX:Int, var toY:Int, /* Negative when not specified */
+           var isCatch:Boolean, var isCheck:Boolean, /* Always specified */
+           var castle:CastleType.CastleType, var promotion:PieceType.PieceType); /* Always specified */
 
 class History()
 {
@@ -26,14 +31,6 @@ class History()
 
   val pieceTypeAbv = scala.collection.mutable.Map[PieceType.PieceType, String]()
   
-  def castlingIsKingside(move:Move) =
-  {
-    //The coordinates reported in a castling move are the king's ones.
-    //We check if the king's final position is in the same half
-    //of the chessboard as the beginning position.
-    (2 * move.fromX) / dim_x == (2 * move.toX) / dim_x
-  }
-
   def makePGN(fileName:String) =
   {
     

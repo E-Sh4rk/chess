@@ -174,6 +174,20 @@ class Board (private val _b:Board, private val _gm:GameMode.GameMode)
     {
         board.synchronized
         {
+            val pieces = getPieces(t,PieceType.King)
+            if(pieces.length > 0)
+                return pieces(0)
+            return null
+        }
+    }
+    /**
+    Returns the pieces that correspond to the given type and team.
+    */
+    def getPieces(t:Round.Round,ptype:PieceType.PieceType):scala.collection.mutable.MutableList[Piece] =
+    {
+        board.synchronized
+        {
+            val res = new scala.collection.mutable.MutableList[Piece]()
             for (i<-0 to dim_x-1)
             {
                 for (j<-0 to dim_y-1)
@@ -181,11 +195,11 @@ class Board (private val _b:Board, private val _gm:GameMode.GameMode)
                     val piece = board(i)(j)
                     if (piece != null)
                         if (piece.team == t)
-                            if (piece.pieceType == PieceType.King)
-                                return piece
+                            if (piece.pieceType == ptype)
+                                res += piece
                 }
             }
-            return null
+            return res
         }
     }
 }

@@ -404,6 +404,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             canvas.repaint
         }
     }
+
     /**
     Plays the given move. The move must be legal.
 
@@ -429,10 +430,10 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                 return
 
             // Vars for history
-            var ptype:PieceType.PieceType = pieceAtPosition(fromX,fromY).pieceType
-            var isCatch:Boolean = false
-            var isCastling:Boolean = false
-            var isPromotion:Boolean = false
+            var h_type:PieceType.PieceType = pieceAtPosition(fromX,fromY).pieceType
+            var h_catch:Boolean = false
+            var h_castle:CastleType.CastleType = CastleType.NoCastle
+            var h_promotion:PieceType.PieceType = PieceType.Unknown
             
             // Updating counters
             fmRule += 1
@@ -440,9 +441,9 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             if (pieceAtPosition(fromX,fromY).pieceType == PieceType.Pawn) // Detect if the piece moved is a pawn
                 fmRule = 0
             else if (pieceAtPosition(toX,toY) != null) // Detect if a piece is eaten
-                { isCatch = true ; fmRule = 0 }
+                { h_catch = true ; fmRule = 0 }
             else if (enPassantMove(fromX,fromY,toX,toY) != None) // Detect if a piece is eaten 'en passant'
-                { isCatch = true ; fmRule = 0 }
+                { h_catch = true ; fmRule = 0 }
             if (fmRule == 0) // We clear the threefoldCounter if possible
                 threefoldCounter.clear
             roundNumber += 1
@@ -452,7 +453,11 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             castlingMove(fromX,fromY,toX,toY) match
             {
                 case None => {}
-                case Some ((fX,fY,tX,tY)) => {isCastling = true ; super.move (fX,fY,tX,tY)}
+                case Some ((fX,fY,tX,tY)) =>
+                {
+                    h_castle = if ( 2 * fromX / dim_x == 2 * toX / dim_x ) CastleType.Kingside else CastleType.Queenside
+                    super.move (fX,fY,tX,tY)
+                }
             }
             enPassantMove(fromX,fromY,toX,toY) match
             {
@@ -465,7 +470,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             super.move (fromX,fromY,toX,toY)
             if ((toY == 0 || toY == dim_y-1) && pieceAtPosition(toX,toY).pieceType == PieceType.Pawn)
             {
-                isPromotion = true
+                h_promotion = promotionType
                 if (promotionType == PieceType.Knight)
                     super.add(new Knight(round, this, toX, toY))
                 else if (promotionType == PieceType.Bishop)
@@ -473,7 +478,10 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                 else if (promotionType == PieceType.Rook)
                     super.add(new Rook(round, this, toX, toY))
                 else
+                {
+                    h_promotion = PieceType.Queen
                     super.add(new Queen(round, this, toX, toY))
+                }
             }
             changeRoundAndUpdateConfiguration
             opponentRequestedDraw = false
@@ -508,7 +516,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                     gameFinished
 
                 // Add move to history !
-                history.moves.append(new Move(ptype, fromX, fromY, toX, toY, isCatch, check, isCastling, isPromotion))
+                history.moves.append(new Move(h_type, fromX, fromY, toX, toY, h_catch, check, h_castle, h_promotion))
 
                 canvas.repaint
                 if (round == Round.White)
