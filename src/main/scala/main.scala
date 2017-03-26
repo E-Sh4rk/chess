@@ -207,20 +207,17 @@ object MyApp extends SimpleSwingApplication {
                 }
                 if (source == loadGame)
                 {
-                    if (game != null)
+                    val chooser = new FileChooser
+                    chooser.multiSelectionEnabled = false
+                    chooser.fileFilter = pgn_ff
+                    chooser.fileSelectionMode = FileChooser.SelectionMode.FilesOnly
+                    if(chooser.showOpenDialog(null) == FileChooser.Result.Approve)
                     {
-                        val chooser = new FileChooser
-                        chooser.multiSelectionEnabled = false
-                        chooser.fileFilter = pgn_ff
-                        chooser.fileSelectionMode = FileChooser.SelectionMode.FilesOnly
-                        if(chooser.showOpenDialog(null) == FileChooser.Result.Approve)
-                        {
-                            if (game != null) game.suspend
-                            val history = History.loadPGN(chooser.selectedFile.getPath)
-                            val player = new SimulatedPlayer(history)
-                            game = new Game(canvas, player, player, history.mode, clockSettings)
-                            switchToExploreMode
-                        }
+                        if (game != null) game.suspend
+                        val history = History.loadPGN(chooser.selectedFile.getPath)
+                        val player = new SimulatedPlayer(history)
+                        game = new Game(canvas, player, player, history.mode, clockSettings)
+                        switchToExploreMode
                     }
                 }
             }

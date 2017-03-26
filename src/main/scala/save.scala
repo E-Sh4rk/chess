@@ -236,9 +236,9 @@ object History
       if (isAlphanumeric(current))
       {
         var content = current.toString + readUntilSpace(source)
-        content = content.split('.').last
-        if (!content.isEmpty)
+        if (!content.endsWith(".")) // If it is just the round number, we don't mind
         {
+          content = content.split('.').last
           var castle = CastleType.NoCastle
           var event = GameEvent.NoEvent
           var ptype = PieceType.Unknown
