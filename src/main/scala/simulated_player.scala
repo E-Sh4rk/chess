@@ -5,10 +5,15 @@ class SimulatedPlayer(private val moves:History) extends Player
 {
     private var game:Game = null
     private var nextMoveIndex = 0
+    private var autoPlayUntil = -1
 
     def init (g:Game) : Unit = { game = g }
-    def mustPlay : Unit = { }
     def stop : Unit = { game = null }
+    def mustPlay : Unit =
+    {
+        if (nextMoveIndex <= autoPlayUntil)
+            playNextMove
+    }
 
     /**
     Plays the next move.
@@ -20,7 +25,10 @@ class SimulatedPlayer(private val moves:History) extends Player
         if (game != null)
         {
             if (nextMoveIndex >= moves.moves.length)
-            return false
+            {
+                autoPlayUntil = -1
+                return false
+            }
         
             val m = moves.moves(nextMoveIndex)
 
@@ -53,7 +61,21 @@ class SimulatedPlayer(private val moves:History) extends Player
                 game.move(m.fromX,m.fromY,m.toX,m.toY,m.promotion)
                 nextMoveIndex += 1
             }
+            else
+            {
+                if (autoPlayUntil >= nextMoveIndex)
+                    autoPlayUntil = -1
+                return false
+            }
         }
         return nextMoveIndex < moves.moves.length
+    }
+    /**
+    Plays all moves in the history.
+    */
+    def playAllMoves () : Unit =
+    {
+        autoPlayUntil = moves.moves.length-1
+        playNextMove
     }
 }

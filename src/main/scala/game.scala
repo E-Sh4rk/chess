@@ -55,9 +55,27 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     canvas.newGame(this)
     playerWhite.init(this)
     playerBlack.init(this)
-    playerWhite.mustPlay
+    callPlayers
     scheduleTimer
 
+    private def callPlayers():Unit =
+    {
+        SwingUtilities.invokeLater(new Runnable() {
+            override def run  : Unit =
+            {
+                round.synchronized
+                {
+                    if (suspended || round == Round.Finished)
+                        return
+
+                    if (round == Round.White)
+                        playerWhite.mustPlay
+                    if (round == Round.Black)
+                        playerBlack.mustPlay
+                }
+            }
+        });
+    }
     private def scheduleTimer() : Unit =
     {
         val timerTask = new java.util.TimerTask { def run() = {round.synchronized{updateClock}} }
@@ -156,10 +174,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                 suspended = false
                 playerWhite.init(this)
                 playerBlack.init(this)
-                if (round == Round.White)
-                    playerWhite.mustPlay
-                if (round == Round.Black)
-                    playerBlack.mustPlay
+                callPlayers
                 scheduleTimer
             }
         }
@@ -526,10 +541,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                 history.moves.append(new Move(h_type, fromX, fromY, toX, toY, h_catch, h_castle, h_promotion, h_event))
 
                 canvas.repaint
-                if (round == Round.White)
-                    playerWhite.mustPlay
-                if (round == Round.Black)
-                    playerBlack.mustPlay
+                callPlayers
             }
         }
     }

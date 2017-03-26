@@ -163,7 +163,7 @@ object MyApp extends SimpleSwingApplication {
         }
 
         // Reactions
-        listenTo(newGame, settings, saveGame, loadGame, this, switch_mode, next)
+        listenTo(newGame, settings, saveGame, loadGame, this, switch_mode, next, next_final)
         reactions += {
             case ButtonClicked (source) =>
             {
@@ -194,6 +194,7 @@ object MyApp extends SimpleSwingApplication {
                         if (game != null)
                         {
                             next.enabled = false
+                            next_final.enabled = false
                             game.suspend
                             game.setWhitePlayer(newWhitePlayer)
                             game.setBlackPlayer(newBlackPlayer)
@@ -249,7 +250,19 @@ object MyApp extends SimpleSwingApplication {
                     if (currentSimulatedPlayer != null)
                     {
                         if (!currentSimulatedPlayer.playNextMove)
+                        {
                             next.enabled = false
+                            next_final.enabled = false
+                        }
+                    }
+                }
+                if (source == next_final)
+                {
+                    if (currentSimulatedPlayer != null)
+                    {
+                        currentSimulatedPlayer.playAllMoves
+                        next.enabled = false
+                        next_final.enabled = false
                     }
                 }
             }
