@@ -163,7 +163,7 @@ object MyApp extends SimpleSwingApplication {
         }
 
         // Reactions
-        listenTo(newGame, settings, saveGame, loadGame, this, switch_mode)
+        listenTo(newGame, settings, saveGame, loadGame, this, switch_mode, next)
         reactions += {
             case ButtonClicked (source) =>
             {
@@ -218,6 +218,15 @@ object MyApp extends SimpleSwingApplication {
                         val player = new SimulatedPlayer(history)
                         game = new Game(canvas, player, player, history.mode, clockSettings)
                         switchToExploreMode
+                        currentSimulatedPlayer = player
+                    }
+                }
+                if (source == next)
+                {
+                    if (currentSimulatedPlayer != null)
+                    {
+                        if (!currentSimulatedPlayer.playNextMove)
+                            next.enabled = false
                     }
                 }
             }

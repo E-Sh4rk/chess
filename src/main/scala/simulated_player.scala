@@ -54,6 +54,6 @@ class SimulatedPlayer(private val moves:History) extends Player
                 nextMoveIndex += 1
             }
         }
-        return nextMoveIndex >= moves.moves.length
+        return nextMoveIndex < moves.moves.length
     }
 }
