@@ -268,14 +268,15 @@ object MyApp extends SimpleSwingApplication {
                     {
                         game.suspend
                         val i = game.getMoveNumber-2
-                        canvas.ignoreRepaint = true
-                        game = new Game(canvas, currentSimulatedPlayer, currentSimulatedPlayer, currentSimulatedPlayer.history.mode, clockSettings)
-                        currentSimulatedPlayer.playUntilIndex(i)
                         if (i < 0)
                         {
                             prev_final.enabled = false
                             prev.enabled = false
                         }
+                        else
+                            canvas.ignoreRepaint = true
+                        game = new Game(canvas, currentSimulatedPlayer, currentSimulatedPlayer, currentSimulatedPlayer.history.mode, clockSettings)
+                        currentSimulatedPlayer.playUntilIndex(i)
                         next.enabled = true ; next_final.enabled = true
                     }
                 }

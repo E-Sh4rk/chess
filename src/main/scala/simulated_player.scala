@@ -92,10 +92,8 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
     }
     /**
     Plays all moves until the specified index.
-
-    Returns true if, after the move, there still are new moves to play in the list, and false otherwise.
     */
-    def playUntilIndex (i:Int) : Boolean =
+    def playUntilIndex (i:Int) : Unit =
     {
         if (game != null)
         {
@@ -106,14 +104,9 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
                 autoPlayUntil = i
                 if (canPlay)
                     playNextMove
-                return i + 1 < history.moves.length
             }
             else
-            {
                 disableAutoPlay
-                return game.getMoveNumber < history.moves.length
-            }
         }
-        return false
     }
 }
