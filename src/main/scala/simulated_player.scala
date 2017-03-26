@@ -64,7 +64,10 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
             }
 
             if (game.canMove(m.fromX,m.fromY,m.toX,m.toY))
+            {
                 game.move(m.fromX,m.fromY,m.toX,m.toY,m.promotion)
+                canPlay = false
+            }
             else
             {
                 disableAutoPlay
@@ -102,8 +105,7 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
                 if (canvas != null)
                     canvas.ignoreRepaint = true
                 autoPlayUntil = i
-                if (canPlay)
-                    playNextMove
+                playNextMove
             }
             else
                 disableAutoPlay
