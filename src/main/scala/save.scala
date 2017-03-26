@@ -167,6 +167,10 @@ class History()
       return true
     if ('A' <= c && c <= 'Z')
       return true
+    return isNumeric(c)
+  }
+  private def isNumeric(c:Char) : Boolean =
+  {
     if ('0' <= c && c <= '9')
       return true
     return false
@@ -181,6 +185,10 @@ class History()
   private def removeIndex(i:Int, str:String) : String =
   {
     return str.substring(0,i)+str.substring(i+1)
+  }
+  private def removeLast(s:String) : String =
+  {
+    return s.substring(0, s.length-1)
   }
   def loadPGN(fileName:String) : History =
   {
@@ -230,7 +238,7 @@ class History()
 
           // Remove annotations at the end of the move
           while (!isAlphanumeric(content.last))
-            content = content.substring(0, content.length-1)
+            content = removeLast(content)
           
           // Castle
           if (current == 'O')
@@ -251,7 +259,13 @@ class History()
             else
               content = content.substring(1)
             // Promotion ?
-            // TODO
+            if (content.lastIndexOf('=') >= 0)
+              content = removeIndex(content.lastIndexOf('='), content)
+            if (!isNumeric(content.last))
+            {
+              promotion = pieceOfAbv(content.last.toString)
+              content = removeLast(content)
+            }
             // Catch symbol / No catch symbol
             if (content.indexOf('x') >= 0)
             {
@@ -261,11 +275,30 @@ class History()
             if (content.indexOf('-') >= 0) // This symbol is not legal in abreged notation, but we tolerate it
               content = removeIndex(content.indexOf('-'), content)
             // TO Position
-            // TODO
+            var tmp_to_row = ""
+            while (isNumeric(content.last))
+            {
+              tmp_to_row = content.last + tmp_to_row
+              content = removeLast(content)
+            }
+            toY = rowToY(tmp_to_row)
+            toX = columnToX(content.last.toString)
+            content = removeLast(content)
             // FROM Position
-            // TODO
+            if (!content.isEmpty)
+            {
+              if (!isNumeric(content(0)))
+              {
+                fromX = columnToX(content(0).toString)
+                content = content.substring(1)
+              }
+              if (!content.isEmpty)
+              {
+                fromY = rowToY(content)
+                content = ""
+              }
+            }
           }
-          
           h.moves.append(new Move(ptype, fromX, fromY, toX, toY, isCatch, castle, promotion, event))
         }
       }
