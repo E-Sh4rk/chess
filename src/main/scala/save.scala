@@ -232,11 +232,21 @@ object History
           case _ => { }
         }
       }
-      // Moves
+      // Ending (unknown final score)
+      if (current == '*')
+      {
+        // Nothing for the moment...
+      }
       if (isAlphanumeric(current))
       {
         var content = current.toString + readUntilSpace(source)
-        if (!content.endsWith(".")) // If it is just the round number, we don't mind
+        // Ending (known final score)
+        if (content == "1-0" || content == "0-1" || content == "1/2-1/2" || content == "0,5-0,5")
+        {
+          // Nothing for the moment...
+        }
+        // Moves
+        else if (!content.endsWith(".")) // If it is just the round number, we don't mind
         {
           content = content.split('.').last
           var castle = CastleType.NoCastle
@@ -317,11 +327,12 @@ object History
           h.moves.append(new Move(ptype, fromX, fromY, toX, toY, isCatch, castle, promotion, event))
         }
       }
-      // Ending (final score) : Nothing for the moment
       // Comments
       if (current == '{')
         readUntilChar(source,'}')
       if (current == ';')
+        readUntilChar(source,'\n')
+      if (current == '%') // % is used for extensions of PGN
         readUntilChar(source,'\n')
 
       current = readNextChar(source)
