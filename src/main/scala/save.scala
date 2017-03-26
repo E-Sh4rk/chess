@@ -33,17 +33,6 @@ class History()
   var dim_x = 8
   var dim_y = 8
 
-  private val pieceTypeAbv = scala.collection.mutable.Map[PieceType.PieceType, String](
-    PieceType.Pawn -> "",
-    PieceType.Rook -> "R",
-    PieceType.Knight -> "N",
-    PieceType.Bishop -> "B",
-    PieceType.Queen -> "Q",
-    PieceType.King -> "K",
-    PieceType.ArchBishop -> "A",
-    PieceType.Chancellor -> "C"
-  )
-
   private def xToColumn (x:Int) : String =
   {
     if (x >= dim_x || x < 0)
@@ -81,7 +70,9 @@ class History()
     fw.write(String.format("[White \"%s\"]\n", white))
     fw.write(String.format("[Black \"%s\"]\n", black))
     fw.write(String.format("[Result \"%s\"]\n", result))
-    fw.write(String.format("[Mode \"%s\"]\n\n", mode.toString()))
+    fw.write(String.format("[Mode \"%s\"]\n", mode.toString()))
+    fw.write(String.format("[DimX \"%s\"]\n", dim_x.toString()))
+    fw.write(String.format("[DimY \"%s\"]\n\n", dim_y.toString()))
 
     var nbCharsInLine = 0
     var roundNumber = 0
@@ -100,7 +91,7 @@ class History()
         stringOfMove += "O-O-O"
       else
       {
-        stringOfMove += pieceTypeAbv(move.pieceType)
+        stringOfMove += History.pieceTypeAbv(move.pieceType)
         if (move.fromX >= 0)
           stringOfMove += xToColumn(move.fromX)
         if (move.fromY >= 0)
@@ -110,7 +101,7 @@ class History()
         stringOfMove += xToColumn(move.toX)
         stringOfMove += yToRow(move.toY)
         if (move.promotion != PieceType.Unknown)
-          stringOfMove += "=" + pieceTypeAbv(move.promotion)
+          stringOfMove += "=" + History.pieceTypeAbv(move.promotion)
         if (move.event == GameEvent.Check)
           stringOfMove += "+"
         if (move.event == GameEvent.Checkmate)
@@ -136,7 +127,20 @@ class History()
     
     fw.close()
   }
+}
 
+object History
+{
+  private val pieceTypeAbv = scala.collection.mutable.Map[PieceType.PieceType, String](
+    PieceType.Pawn -> "",
+    PieceType.Rook -> "R",
+    PieceType.Knight -> "N",
+    PieceType.Bishop -> "B",
+    PieceType.Queen -> "Q",
+    PieceType.King -> "K",
+    PieceType.ArchBishop -> "A",
+    PieceType.Chancellor -> "C"
+  )
   private def readNextChar(s:Source) : Char =
   {
     while (s.hasNext)
@@ -223,6 +227,8 @@ class History()
           case "black" => h.black = tagValue
           case "result" => h.result = tagValue
           case "mode" => h.mode = GameMode.withName(tagValue)
+          case "dimx" => h.dim_x = tagValue.toInt
+          case "dimy" => h.dim_y = tagValue.toInt
           case _ => { }
         }
       }
@@ -290,20 +296,20 @@ class History()
               tmp_to_row = content.last + tmp_to_row
               content = removeLast(content)
             }
-            toY = rowToY(tmp_to_row)
-            toX = columnToX(content.last)
+            toY = h.rowToY(tmp_to_row)
+            toX = h.columnToX(content.last)
             content = removeLast(content)
             // FROM Position
             if (!content.isEmpty)
             {
               if (!isNumeric(content(0)))
               {
-                fromX = columnToX(content(0))
+                fromX = h.columnToX(content(0))
                 content = content.substring(1)
               }
               if (!content.isEmpty)
               {
-                fromY = rowToY(content)
+                fromY = h.rowToY(content)
                 content = ""
               }
             }

@@ -163,7 +163,7 @@ object MyApp extends SimpleSwingApplication {
         }
 
         // Reactions
-        listenTo(newGame, settings, saveGame, this, switch_mode)
+        listenTo(newGame, settings, saveGame, loadGame, this, switch_mode)
         reactions += {
             case ButtonClicked (source) =>
             {
@@ -203,6 +203,24 @@ object MyApp extends SimpleSwingApplication {
                         chooser.fileSelectionMode = FileChooser.SelectionMode.FilesOnly
                         if(chooser.showSaveDialog(null) == FileChooser.Result.Approve)
                             game.getHistory.savePGN(chooser.selectedFile.getPath);
+                    }
+                }
+                if (source == loadGame)
+                {
+                    if (game != null)
+                    {
+                        val chooser = new FileChooser
+                        chooser.multiSelectionEnabled = false
+                        chooser.fileFilter = pgn_ff
+                        chooser.fileSelectionMode = FileChooser.SelectionMode.FilesOnly
+                        if(chooser.showOpenDialog(null) == FileChooser.Result.Approve)
+                        {
+                            if (game != null) game.suspend
+                            val history = History.loadPGN(chooser.selectedFile.getPath)
+                            val player = new SimulatedPlayer(history)
+                            game = new Game(canvas, player, player, history.mode, clockSettings)
+                            switchToExploreMode
+                        }
                     }
                 }
             }
