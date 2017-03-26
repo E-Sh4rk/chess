@@ -275,10 +275,10 @@ object History
               castle = CastleType.Queenside
           }
           // Regular move
-          else
+          else if (!content.isEmpty)
           {
             // Reading piece type
-            ptype = pieceOfAbv(current)
+            ptype = pieceOfAbv(content(0))
             if (ptype == PieceType.Unknown)
               ptype = PieceType.Pawn
             else
@@ -300,13 +300,13 @@ object History
             if (content.indexOf('-') >= 0) // This symbol is not legal in abreged notation, but we tolerate it
               content = removeIndex(content.indexOf('-'), content)
             // TO Position
-            var tmp_to_row = ""
+            var to_row_str = ""
             while (isNumeric(content.last))
             {
-              tmp_to_row = content.last + tmp_to_row
+              to_row_str = content.last + to_row_str
               content = removeLast(content)
             }
-            toY = h.rowToY(tmp_to_row)
+            toY = h.rowToY(to_row_str)
             toX = h.columnToX(content.last)
             content = removeLast(content)
             // FROM Position
@@ -334,6 +334,10 @@ object History
         readUntilChar(source,'\n')
       if (current == '%') // % is used for extensions of PGN
         readUntilChar(source,'\n')
+      if (current == '(') // (...) is used for variants
+        readUntilChar(source,')')
+      if (current == '$') // $ is used for NAG
+        readUntilSpace(source)
 
       current = readNextChar(source)
     }
