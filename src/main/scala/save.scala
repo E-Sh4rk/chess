@@ -33,7 +33,7 @@ class History()
   var dim_x = 8
   var dim_y = 8
 
-  val pieceTypeAbv = scala.collection.mutable.Map[PieceType.PieceType, String](
+  private val pieceTypeAbv = scala.collection.mutable.Map[PieceType.PieceType, String](
     PieceType.Pawn -> "",
     PieceType.Rook -> "R",
     PieceType.Knight -> "N",
@@ -44,21 +44,31 @@ class History()
     PieceType.Chancellor -> "C"
   )
 
-  def xToColumn (x:Int) : String =
+  private def xToColumn (x:Int) : String =
   {
+    if (x >= dim_x || x < 0)
+      throw new Exception("Wrong x dim !")
     return (('a'.toInt + x).toChar).toString
   }
-  def yToRow (y:Int) : String =
+  private def yToRow (y:Int) : String =
   {
+    if (y >= dim_y || y < 0)
+      throw new Exception("Wrong y dim !")
     return (dim_y - y).toString
   }
-  def rowToY (row:String) : Int =
+  private def rowToY (row:String) : Int =
   {
-    return dim_y - row.toInt
+    val res = dim_y - row.toInt
+    if (res < 0 || res >= dim_y)
+      throw new Exception("Wrong row !")
+    return res
   }
-  def columnToX (col:String) : Int =
+  private def columnToX (col:Char) : Int =
   {
-    return col(0).toInt - 'a'.toInt
+    val res = col.toInt - 'a'.toInt
+    if (res < 0 || res >= dim_x)
+      throw new Exception("Wrong column !")
+    return res
   }
 
   def savePGN(fileName:String) =
@@ -175,9 +185,9 @@ class History()
       return true
     return false
   }
-  private def pieceOfAbv(abv:String) : PieceType.PieceType =
+  private def pieceOfAbv(abv:Char) : PieceType.PieceType =
   {
-    pieceTypeAbv.find(_._2==abv) match {
+    pieceTypeAbv.find(_._2==abv.toString) match {
       case None => return PieceType.Unknown
       case Some ((k,v)) => return k
     }
@@ -219,7 +229,7 @@ class History()
       // Moves
       if (isAlphanumeric(current))
       {
-        var content = readUntilSpace(source)
+        var content = current.toString + readUntilSpace(source)
         content = content.split('.').last
         if (!content.isEmpty)
         {
@@ -241,19 +251,18 @@ class History()
             content = removeLast(content)
           
           // Castle
-          if (current == 'O')
+          if (content.startsWith("O-O"))
           {
             ptype = PieceType.King
+            castle = CastleType.Kingside
             if (content.startsWith("O-O-O"))
               castle = CastleType.Queenside
-            else if (content.startsWith("O-O"))
-              castle = CastleType.Kingside
           }
           // Regular move
           else
           {
             // Reading piece type
-            ptype = pieceOfAbv(current.toString)
+            ptype = pieceOfAbv(current)
             if (ptype == PieceType.Unknown)
               ptype = PieceType.Pawn
             else
@@ -263,7 +272,7 @@ class History()
               content = removeIndex(content.lastIndexOf('='), content)
             if (!isNumeric(content.last))
             {
-              promotion = pieceOfAbv(content.last.toString)
+              promotion = pieceOfAbv(content.last)
               content = removeLast(content)
             }
             // Catch symbol / No catch symbol
@@ -282,14 +291,14 @@ class History()
               content = removeLast(content)
             }
             toY = rowToY(tmp_to_row)
-            toX = columnToX(content.last.toString)
+            toX = columnToX(content.last)
             content = removeLast(content)
             // FROM Position
             if (!content.isEmpty)
             {
               if (!isNumeric(content(0)))
               {
-                fromX = columnToX(content(0).toString)
+                fromX = columnToX(content(0))
                 content = content.substring(1)
               }
               if (!content.isEmpty)
