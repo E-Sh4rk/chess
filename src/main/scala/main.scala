@@ -189,24 +189,46 @@ object MyApp extends SimpleSwingApplication {
                 if (source == switch_mode)
                 {
                     if (!explore_mode)
+                    {
                         switchToExploreMode
+                        if (game != null)
+                        {
+                            next.enabled = false
+                            game.suspend
+                            game.setWhitePlayer(newWhitePlayer)
+                            game.setBlackPlayer(newBlackPlayer)
+                            game.resume
+                        }
+                    }
                     else
+                    {
                         switchToPlayMode
+                        if (game != null)
+                        {
+                            game.suspend
+                            game.setWhitePlayer(newWhitePlayer)
+                            game.setBlackPlayer(newBlackPlayer)
+                            game.resume
+                        }
+                    }
                 }
                 if (source == saveGame)
                 {
                     if (game != null)
                     {
+                        game.suspend
                         val chooser = new FileChooser
                         chooser.multiSelectionEnabled = false
                         chooser.fileFilter = pgn_ff
                         chooser.fileSelectionMode = FileChooser.SelectionMode.FilesOnly
                         if(chooser.showSaveDialog(null) == FileChooser.Result.Approve)
                             game.getHistory.savePGN(chooser.selectedFile.getPath);
+                        game.resume
                     }
                 }
                 if (source == loadGame)
                 {
+                    if (game != null) game.suspend
                     val chooser = new FileChooser
                     chooser.multiSelectionEnabled = false
                     chooser.fileFilter = pgn_ff
@@ -220,6 +242,7 @@ object MyApp extends SimpleSwingApplication {
                         switchToExploreMode
                         currentSimulatedPlayer = player
                     }
+                    else if (game != null) game.resume
                 }
                 if (source == next)
                 {
