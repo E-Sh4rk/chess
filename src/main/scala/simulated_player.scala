@@ -34,6 +34,8 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
                 disableAutoPlay
                 return false
             }
+            if (game.getMoveNumber >= autoPlayUntil || game.getMoveNumber >= history.moves.length-1)
+                disableAutoPlay
         
             val m = history.moves(game.getMoveNumber)
 
@@ -62,27 +64,24 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
             }
 
             if (game.canMove(m.fromX,m.fromY,m.toX,m.toY))
-            {
-                if (game.getMoveNumber >= autoPlayUntil)
-                    disableAutoPlay
                 game.move(m.fromX,m.fromY,m.toX,m.toY,m.promotion)
-            }
             else
             {
                 disableAutoPlay
                 return false
             }
-            if (game.getMoveNumber+1 < history.moves.length)
-                return true
-            disableAutoPlay
+            return game.getMoveNumber < history.moves.length-1
         }
         return false
     }
     private def disableAutoPlay() : Unit =
     {
-        autoPlayUntil = -1
-        if (canvas != null)
-            canvas.ignoreRepaint = false
+        if (autoPlayUntil >= 0)
+        {
+            autoPlayUntil = -1
+            if (canvas != null)
+                canvas.ignoreRepaint = false
+        }
     }
     /**
     Plays all moves in the history.

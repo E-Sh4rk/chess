@@ -14,7 +14,7 @@ object MyApp extends SimpleSwingApplication {
         var explore_mode = false
         var currentSimulatedPlayer:SimulatedPlayer = null
 
-        // PGN File Filter
+        // File chooser
         val pgn_ff : FileFilter = new FileFilter() {
             override def getDescription() : String = { return "Portable Game Notation (*.pgn)" }
             override def accept(f:File) : Boolean =
@@ -28,6 +28,10 @@ object MyApp extends SimpleSwingApplication {
                 }
             }
         }
+        val chooser = new FileChooser
+        chooser.multiSelectionEnabled = false
+        chooser.fileFilter = pgn_ff
+        chooser.fileSelectionMode = FileChooser.SelectionMode.FilesOnly
 
         // Game Buttons
         val newGame = new Button("New Game")
@@ -55,6 +59,7 @@ object MyApp extends SimpleSwingApplication {
             contents += switch_mode
         }
         exploreButtonsSetEnabled(false)
+        switch_mode.enabled = false
         val buttons = new BorderPanel
         {
             add (buttons1, BorderPanel.Position.South)
@@ -160,6 +165,7 @@ object MyApp extends SimpleSwingApplication {
             prev.enabled = b
             next.enabled = b
             next_final.enabled = b
+            switch_mode.enabled = true
         }
 
         // Reactions
@@ -171,6 +177,7 @@ object MyApp extends SimpleSwingApplication {
                 {
                     if (game != null) game.suspend
                     switchToPlayMode
+                    prev.enabled = false ; prev_final.enabled = false
                     game = new Game(canvas, newWhitePlayer, newBlackPlayer, settingsPanel.gameMode, clockSettings)
                 }
                 if (source == settings)
@@ -188,24 +195,21 @@ object MyApp extends SimpleSwingApplication {
                 }
                 if (source == switch_mode)
                 {
-                    if (!explore_mode)
+                    if (game != null)
                     {
-                        switchToExploreMode
-                        if (game != null)
+                        if (!explore_mode)
                         {
-                            next.enabled = false
-                            next_final.enabled = false
+                            
+                            switchToExploreMode
+                            next.enabled = false ; next_final.enabled = false
                             game.suspend
                             game.setWhitePlayer(newWhitePlayer)
                             game.setBlackPlayer(newBlackPlayer)
                             game.resume
                         }
-                    }
-                    else
-                    {
-                        switchToPlayMode
-                        if (game != null)
+                        else
                         {
+                            switchToPlayMode
                             game.suspend
                             game.setWhitePlayer(newWhitePlayer)
                             game.setBlackPlayer(newBlackPlayer)
@@ -218,10 +222,6 @@ object MyApp extends SimpleSwingApplication {
                     if (game != null)
                     {
                         game.suspend
-                        val chooser = new FileChooser
-                        chooser.multiSelectionEnabled = false
-                        chooser.fileFilter = pgn_ff
-                        chooser.fileSelectionMode = FileChooser.SelectionMode.FilesOnly
                         if(chooser.showSaveDialog(null) == FileChooser.Result.Approve)
                             game.getHistory.savePGN(chooser.selectedFile.getPath);
                         game.resume
@@ -230,18 +230,14 @@ object MyApp extends SimpleSwingApplication {
                 if (source == loadGame)
                 {
                     if (game != null) game.suspend
-                    val chooser = new FileChooser
-                    chooser.multiSelectionEnabled = false
-                    chooser.fileFilter = pgn_ff
-                    chooser.fileSelectionMode = FileChooser.SelectionMode.FilesOnly
                     if(chooser.showOpenDialog(null) == FileChooser.Result.Approve)
                     {
-                        if (game != null) game.suspend
                         val history = History.loadPGN(chooser.selectedFile.getPath)
                         val player = new SimulatedPlayer(history, canvas)
                         game = new Game(canvas, player, player, history.mode, clockSettings)
                         switchToExploreMode
                         currentSimulatedPlayer = player
+                        prev.enabled = false ; prev_final.enabled = false
                     }
                     else if (game != null) game.resume
                 }
@@ -254,6 +250,7 @@ object MyApp extends SimpleSwingApplication {
                             next.enabled = false
                             next_final.enabled = false
                         }
+                        prev_final.enabled = true ; prev.enabled = true
                     }
                 }
                 if (source == next_final)
@@ -261,8 +258,8 @@ object MyApp extends SimpleSwingApplication {
                     if (currentSimulatedPlayer != null)
                     {
                         currentSimulatedPlayer.playAllMoves
-                        next.enabled = false
-                        next_final.enabled = false
+                        next.enabled = false ; next_final.enabled = false
+                        prev_final.enabled = true ; prev.enabled = true
                     }
                 }
                 if (source == prev)
@@ -274,8 +271,12 @@ object MyApp extends SimpleSwingApplication {
                         canvas.ignoreRepaint = true
                         game = new Game(canvas, currentSimulatedPlayer, currentSimulatedPlayer, currentSimulatedPlayer.history.mode, clockSettings)
                         currentSimulatedPlayer.playUntilIndex(i)
-                        next.enabled = true
-                        next_final.enabled = true
+                        if (i < 0)
+                        {
+                            prev_final.enabled = false
+                            prev.enabled = false
+                        }
+                        next.enabled = true ; next_final.enabled = true
                     }
                 }
                 if (source == prev_final)
@@ -284,8 +285,8 @@ object MyApp extends SimpleSwingApplication {
                     {
                         if (game != null) game.suspend
                         game = new Game(canvas, currentSimulatedPlayer, currentSimulatedPlayer, currentSimulatedPlayer.history.mode, clockSettings)
-                        next.enabled = true
-                        next_final.enabled = true
+                        next.enabled = true ; next_final.enabled = true
+                        prev.enabled = false ; prev_final.enabled = false
                     }
                 }
             }
