@@ -61,8 +61,8 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
 
     // Player methods
     def init (g:Game) : Unit = { } // The canvas use the same game for drawing as for playing
-    def mustPlay : Unit = { canPlay = true }
-    def stop : Unit = { hasPlayed }
+    def mustPlay : Unit = { canPlay = true ; repaint }
+    def stop : Unit = { hasPlayed ; repaint }
 
     // Drawing (output)
     private var panel_width = 0
@@ -139,6 +139,9 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     private var button_resign : Rectangle = null
     private var button_draw : Rectangle = null
     override def paintComponent(g: Graphics2D) : Unit = {
+        if (ignoreRepaint)
+            return
+
         super.paintComponent(g)
 
         button_r = null

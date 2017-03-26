@@ -1,36 +1,41 @@
 /**
 A player that uses a preprogrammed list of moves.
+
+You should give the canvas as parameter in order to improve the graphic rendering.
 */
-class SimulatedPlayer(private val moves:History) extends Player
+class SimulatedPlayer(val history:History, private val canvas : Canvas = null) extends Player
 {
     private var game:Game = null
-    private var nextMoveIndex = 0
     private var autoPlayUntil = -1
+    private var canPlay = false
 
     def init (g:Game) : Unit = { game = g }
-    def stop : Unit = { game = null }
+    def stop : Unit = { canPlay = false ; game = null }
     def mustPlay : Unit =
     {
-        if (nextMoveIndex <= autoPlayUntil)
+        if (game == null)
+            return
+        canPlay = true
+        if (game.getMoveNumber <= autoPlayUntil)
             playNextMove
     }
 
     /**
     Plays the next move.
 
-    Returns true if there still are new moves to play in the list, and false otherwise.
+    Returns true if, after the move, there still are new moves to play in the list, and false otherwise.
     */
     def playNextMove () : Boolean =
     {
-        if (game != null)
+        if (game != null && canPlay)
         {
-            if (nextMoveIndex >= moves.moves.length)
+            if (game.getMoveNumber >= history.moves.length)
             {
-                autoPlayUntil = -1
+                disableAutoPlay
                 return false
             }
         
-            val m = moves.moves(nextMoveIndex)
+            val m = history.moves(game.getMoveNumber)
 
             if (m.castle != CastleType.NoCastle)
             {
@@ -58,24 +63,58 @@ class SimulatedPlayer(private val moves:History) extends Player
 
             if (game.canMove(m.fromX,m.fromY,m.toX,m.toY))
             {
+                if (game.getMoveNumber >= autoPlayUntil)
+                    disableAutoPlay
                 game.move(m.fromX,m.fromY,m.toX,m.toY,m.promotion)
-                nextMoveIndex += 1
             }
             else
             {
-                if (autoPlayUntil >= nextMoveIndex)
-                    autoPlayUntil = -1
+                disableAutoPlay
                 return false
             }
+            if (game.getMoveNumber+1 < history.moves.length)
+                return true
+            disableAutoPlay
         }
-        return nextMoveIndex < moves.moves.length
+        return false
+    }
+    private def disableAutoPlay() : Unit =
+    {
+        autoPlayUntil = -1
+        if (canvas != null)
+            canvas.ignoreRepaint = false
     }
     /**
     Plays all moves in the history.
     */
     def playAllMoves () : Unit =
     {
-        autoPlayUntil = moves.moves.length-1
-        playNextMove
+        playUntilIndex(history.moves.length-1)
+    }
+    /**
+    Plays all moves until the specified index.
+
+    Returns true if, after the move, there still are new moves to play in the list, and false otherwise.
+    */
+    def playUntilIndex (i:Int) : Boolean =
+    {
+        if (game != null)
+        {
+            if (i >= game.getMoveNumber)
+            {
+                if (canvas != null)
+                    canvas.ignoreRepaint = true
+                autoPlayUntil = i
+                if (canPlay)
+                    playNextMove
+                return i + 1 < history.moves.length
+            }
+            else
+            {
+                disableAutoPlay
+                return game.getMoveNumber < history.moves.length
+            }
+        }
+        return false
     }
 }

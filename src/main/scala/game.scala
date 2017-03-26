@@ -204,6 +204,11 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     def getRoundNumber = { round.synchronized{ roundNumber/2 + 1 } }
 
     /**
+    Returns the current move number.
+    */
+    def getMoveNumber = { round.synchronized{ roundNumber } }
+
+    /**
     Returns the current round counter in the context of the 50-move rule.
     */
     def getFiftyMoveRuleCounter = { round.synchronized{ fmRule/2 } }

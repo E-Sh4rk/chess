@@ -142,7 +142,7 @@ object MyApp extends SimpleSwingApplication {
             if (game != null)
             {
                 explore_mode = true
-                currentSimulatedPlayer = new SimulatedPlayer(game.getHistory)
+                currentSimulatedPlayer = new SimulatedPlayer(game.getHistory, canvas)
                 switch_mode.text = "Switch to play mode"
                 exploreButtonsSetEnabled(true)
             }
@@ -163,7 +163,7 @@ object MyApp extends SimpleSwingApplication {
         }
 
         // Reactions
-        listenTo(newGame, settings, saveGame, loadGame, this, switch_mode, next, next_final)
+        listenTo(newGame, settings, saveGame, loadGame, this, switch_mode, next, next_final, prev, prev_final)
         reactions += {
             case ButtonClicked (source) =>
             {
@@ -238,7 +238,7 @@ object MyApp extends SimpleSwingApplication {
                     {
                         if (game != null) game.suspend
                         val history = History.loadPGN(chooser.selectedFile.getPath)
-                        val player = new SimulatedPlayer(history)
+                        val player = new SimulatedPlayer(history, canvas)
                         game = new Game(canvas, player, player, history.mode, clockSettings)
                         switchToExploreMode
                         currentSimulatedPlayer = player
@@ -263,6 +263,29 @@ object MyApp extends SimpleSwingApplication {
                         currentSimulatedPlayer.playAllMoves
                         next.enabled = false
                         next_final.enabled = false
+                    }
+                }
+                if (source == prev)
+                {
+                    if (currentSimulatedPlayer != null && game != null)
+                    {
+                        game.suspend
+                        val i = game.getMoveNumber-2
+                        canvas.ignoreRepaint = true
+                        game = new Game(canvas, currentSimulatedPlayer, currentSimulatedPlayer, currentSimulatedPlayer.history.mode, clockSettings)
+                        currentSimulatedPlayer.playUntilIndex(i)
+                        next.enabled = true
+                        next_final.enabled = true
+                    }
+                }
+                if (source == prev_final)
+                {
+                    if (currentSimulatedPlayer != null)
+                    {
+                        if (game != null) game.suspend
+                        game = new Game(canvas, currentSimulatedPlayer, currentSimulatedPlayer, currentSimulatedPlayer.history.mode, clockSettings)
+                        next.enabled = true
+                        next_final.enabled = true
                     }
                 }
             }
