@@ -246,7 +246,7 @@ object History
           // Nothing for the moment...
         }
         // Moves
-        else if (!content.endsWith(".")) // If it is just the round number, we don't mind
+        else if (content.last != '.') // If it is just the round number, we don't mind
         {
           content = content.split('.').last
           var castle = CastleType.NoCastle
@@ -257,21 +257,28 @@ object History
           var isCatch = false ; var promotion = PieceType.Unknown
 
           // Check/Checkmate annotation
-          if (content.endsWith("#"))
+          if (content.contains("#"))
               event = GameEvent.Checkmate
-          if (content.endsWith("+"))
+          if (content.contains("+"))
               event = GameEvent.Check
 
           // Remove annotations at the end of the move
-          while (!isAlphanumeric(content.last))
+          var c = content.last
+          while (!isAlphanumeric(c))
+          {
             content = removeLast(content)
+            if (!content.isEmpty)
+              c = content.last
+            else
+              c = '0'
+          }
           
           // Castle
-          if (content.startsWith("O-O"))
+          if (content.contains("O-O"))
           {
             ptype = PieceType.King
             castle = CastleType.Kingside
-            if (content.startsWith("O-O-O"))
+            if (content.contains("O-O-O"))
               castle = CastleType.Queenside
           }
           // Regular move
@@ -284,21 +291,14 @@ object History
             else
               content = content.substring(1)
             // Promotion ?
-            if (content.lastIndexOf('=') >= 0)
-              content = removeIndex(content.lastIndexOf('='), content)
             if (!isNumeric(content.last))
             {
               promotion = pieceOfAbv(content.last)
+              if (promotion != PieceType.Unknown)
+                content = removeLast(content)
+            }
+            if (content.last == '=')
               content = removeLast(content)
-            }
-            // Catch symbol / No catch symbol
-            if (content.indexOf('x') >= 0)
-            {
-              isCatch = true
-              content = removeIndex(content.indexOf('x'), content)
-            }
-            if (content.indexOf('-') >= 0) // This symbol is not legal in abreged notation, but we tolerate it
-              content = removeIndex(content.indexOf('-'), content)
             // TO Position
             var to_row_str = ""
             while (isNumeric(content.last))
@@ -309,6 +309,17 @@ object History
             toY = h.rowToY(to_row_str)
             toX = h.columnToX(content.last)
             content = removeLast(content)
+            // Catch symbol / No catch symbol
+            if (!content.isEmpty)
+            {
+              if (content.last == 'x')
+              {
+                isCatch = true
+                content = removeLast(content)
+              }
+              else if (content.last == '-') // This symbol is not legal in abreged notation, but we tolerate it
+                content = removeLast(content)
+            }
             // FROM Position
             if (!content.isEmpty)
             {

@@ -53,13 +53,14 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
             if (m.fromX < 0 || m.fromY < 0)
             {
                 // We try to guess the move
-                val pieces = game.getPieces(game.getRound,m.pieceType)
-                for (p <- pieces)
+                val moves = game.possibleMoves
+                for (move <- moves)
                 {
-                    val (p_x,p_y) = p.getPosition
-                    if ( (p_x == m.fromX || m.fromX < 0) && (p_y == m.fromY || m.fromY < 0) )
-                        if (game.canMove(p_x,p_y,m.toX,m.toY))
-                        { m.fromX = p_x ; m.fromY = p_y }
+                    val (f_x,f_y,t_x,t_y) = move
+                    if (t_x == m.toX && t_y == m.toY)
+                        if (game.pieceAtPosition(f_x,f_y).pieceType == m.pieceType || m.pieceType == PieceType.Unknown)
+                            if ( (f_x == m.fromX || m.fromX < 0) && (f_y == m.fromY || m.fromY < 0) )
+                            { m.fromX = f_x ; m.fromY = f_y }
                 }
             }
 
