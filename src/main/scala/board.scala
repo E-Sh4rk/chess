@@ -135,7 +135,15 @@ class Board (private val _b:Board, private val _gm:GameMode.GameMode)
     /**
     Returns the piece at the given position. Return null if there is no piece at this position.
     */
-    def pieceAtPosition(x:Int,y:Int) = { board.synchronized { board(x)(y) } }
+    def pieceAtPosition(x:Int,y:Int) : Piece =
+    {
+        board.synchronized
+        {
+            if (x < 0 || y < 0 || x >= dim_x || y >= dim_y)
+                return null
+            return board(x)(y)
+        }
+    }
     /**
     Moves a piece from a position to another position.
     */

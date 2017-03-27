@@ -84,7 +84,10 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
         {
             autoPlayUntil = -1
             if (canvas != null)
+            {
                 canvas.ignoreRepaint = false
+                canvas.repaint
+            }
         }
     }
     /**
