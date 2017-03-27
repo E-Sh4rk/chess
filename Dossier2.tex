@@ -1,0 +1,85 @@
+\documentclass[11pt]{article}
+\usepackage[francais]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools,amssymb,amsthm,thmtools}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\title{Projet Programmation 2}
+\author{Mickaël LAURENT, Maher MALLEM}
+\date{Mars 2017}
+%\author{}
+%\date{}
+\begin{document}
+\renewcommand{\labelitemi}{-}
+\maketitle
+
+\section{Fonctionnalités}
+
+Voici les fonctionnalités ajoutées :\newline
+\begin{itemize}
+\item Le jeu peut désormais être redimensionné et mis en plein écran.
+
+\item Prise en charge des règles spéciales de déplacement (roque, prise en passant, promotion). La sous-promotion est également prise en charge : le joueur peut choisir la pièce voulue lors d'une promotion (tour/cavalier/fou/dame).
+
+\item Partie automatiquement nulle en cas de PAT, sur accord mutuel des deux joueurs (si les deux joueurs réclament une partie nulle consécutivement), ou sur réclamation d'un des joueurs en cas de triple répétition ou de règle des 50 coups.
+
+\item Possibilité aux joueurs d'abandonner.
+
+\item Possibilité de jouer à la pendule. Il est possible de choisir la durée de la période (en nombre de tour), le temps correspondant, et l'incrément. Cependant, une seule période est configurable pour l'instant.
+
+\item Possibilité d'exporter le jeu en cours au format PGN (que nous avons étendu pour pouvoir sauvegarder également des variantes du jeu d'échec, telles que Janus et Capablanca). Ce format d'exportation respecte toutes les normes strictes.
+
+\item Possibilité d'importer des fichiers au format PGN. Le format d'importation est relativement souple, et permet ainsi de charger des fichiers PGN complexes (avec commentaires et annotations, avec plusieurs variantes pour certains coups, etc). Cependant, toutes ces informations complémentaires sont ignorées (seuls les en-têtes et les coups sont pris en compte).
+
+\item Ajout de deux variantes (en plus du mode normal, dit 'Vanilla') : il s'agit des variantes Janus et Capablanca. Ces variantes sont parfaitement intégrées et compatibles avec les différentes fonctionnalités (IA, pendule, sauvegarde...)
+
+\item Ajout à l'interface d'un mode navigation ('explore mode') qui permet, au cours de n'importe quelle partie, de visionner l'historique des coups joués, de reprendre le jeu à partir d'un coup précédent, etc. Attention : le mode navigation n'est pas compatible avec le jeu à l'horloge pour l'instant.
+
+\item Ajout à l'interface d'un menu d'option, permettant de régler facilement les différents paramètres d'une prochaine partie, ou même de modifier les paramètres des joueurs (IA/humain) pour la partie courante.
+\end{itemize}
+\-
+
+Voici les fonctionnalités qu'il reste à faire :\newline
+\begin{itemize}
+\item Traiter le cas de l'impossibilité de mater (-> partie nulle).
+\item Support d'un nombre quelconque de périodes pour le jeu à la pendule.
+\item Support du jeu à la pendule pour le mode navigation.
+\item Support du jeu à la pendule et des résultats (gagnant/perdant) pour la sauvegarde et le chargement en PGN.
+\end{itemize}
+\-
+
+\section{La classe History (save.scala)}
+
+La classe History représente l'historique d'une partie, et sert notamment à permettre la navigation dans une partie et à sauvegarder/charger une partie. Elle contient des informations générales (telles que la variante du jeu et les dimensions de l'échiquier) ainsi que la liste des coups joués. Chaque coup est représenté par une instance de la classe Move.
+
+Pour pouvoir permettre la sauvegarde et le chargement facilement en format PGN, la classe Move possède un structure adaptée qui correspond aux mouvements tels que décrits dans un fichier PGN. Elles possède tous les éléments obligatoires qui y figurent (type de pièce joué, position d'arrivée, promotion éventuelle, s'il s'agit d'un roque ou non...), et aussi des éléments facultatifs qui ne sont pas toujours présents dans un PGN mais qui parfois servent à lever une ambiguité (position de départ...).\newline
+
+Lors d'une partie, la classe Game possède une instance de History qu'elle met à jour à chaque mouvement. Elle rempli pour chaque mouvement tous les champs, même s'il sont facultatifs. Pour sauvegarder une partie, il suffit de récupérer cet historique et de l'exporter en PGN. Le PGN obtenu spécifie ainsi toujours la position de départ des pièces (puisque ce champs est toujours renseigné par Game, mais lorsqu'il n'est pas nécessaire). Cela n'est pas très optimal en terme de concision du PGN obtenu, mais reste parfaitement valide, et nous sommes ainsi certains qu'il n'y a aucune ambiguité dans notre PGN.
+
+En revanche, lorsque nous chargeons un PGN, la position de départ d'un coup n'est pas forcément spécifiée. Nous remplissons donc uniquement les informations dont nous disposons immédiatement, et la résolution des informations manquantes se fera lors de la navigation dans le jeu chargé (voir section suivante).\newline
+
+Le format PGN a été légeremment étendu afin de permettre de sauvegarder également les variantes Janus et Capablanca : les initiales A (archbishop) et C (chancellor) ont été ajoutées pour désigner ces nouveaux types de pièce, et les notations de position (par exemple b5) sont également étendues pour permettre d'adresser un échiquier plus grand (la colonne peut utiliser toutes les lettres de l'alphabet, et la ligne peut être un nombre à plusieurs chiffres). Afin de connaitre le type de variante dont il est question et les dimensions de l'échiquier lors du chargement d'une partie, des en-têtes (Mode, DimX et DimY) sont ajoutés au PGN lors de la sauvegarde. Si ces en-têtes ne sont pas présentes lors du chargement d'un PGN, il sera supposé qu'il s'agit d'une partie d'échec classique, sur des dimensions 8x8.\newline
+
+La prochaine section s'intéresse à la navigation dans une partie.
+
+\section{La classe SimulatedPlayer}
+
+Cette classe implémente un joueur préprogrammé, qui prend la liste des coups à jouer en argument de constructeur (représenté par un History). Cela permet la navigation au sein d'une partie (que ce soit juste après le chargement d'un PGN ou bien en plein milieu d'une partie) : lorsque le joueur appuie sur le bouton '->', le joueur préprogrammé joue le coup suivant sur sa liste. Le bouton '<-' a un fonctionnement plus complexe : il réinitialise le jeu puis joue autant de coup que nécessaire pour retrouver la bonne position. Ce mode de fonctionnement permet de ne pas avoir à sauvegarder toutes les instances de Game passées (qui peuvent peser lourd en mémoire, car la classe Game a beaucoup de choses à stocker). De plus, lorsque l'on vient de charger une partie via un fichier PGN, on est obligé de simuler les mouvements pour produire les instances successives de Game. En revanche, ce système est assez lourd lorsqu'il s'agit du bouton '<-' car il faut alors resimuler toute la partie jusqu'au moment voulu.\newline
+
+La liste des coup donnée au SimulatedPlayer peut parfois être partielle : comme vu dans la partie précédente, certaines informations comme la position de départ du coup sont facultatives. C'est donc la classe SimulatedPlayer qui va se charger de deviner ces informations lorsqu'elles ne sont pas fournies. Cela est facilement faisable car lorsqu'il s'apprete à jouer un coup, le joueur préprogrammé a accès à l'état du jeu et donc à la liste des coups possibles.
+
+\section{Principales modifications de Game}
+
+Les principales modifications de la classe Game sont liées :\newline
+\begin{itemize}
+\item Au timer : ajout d'une méthode appelée chaque seconde qui s'occupe de mettre à jour l'horloge en fonction des paramètres choisis par l'utilisateur. Pour l'instant, il n'est pas possible de définir plus d'une période, mais cela sera possible dans un futur proche.\newline
+
+\item Aux règles spéciales de déplacement : le roque, la prise en passant et la promotion. Pour le roque, il a été nécessaire d'ajouter un attribut supplémentaire aux pièces, indiquant si elles ont déjà été bougées auparavant ou non. Pour la prise en passant, un attribut à été ajouté à Game, indiquant la possibilité d'une éventuelle prochaine prise en passant au prochain tour. Pour la promotion, un argument supplémentaire a été ajouté à la fonction 'move', permettant de spécifier la pièce désirée en cas de promotion.\newline
+
+\item Aux conditions de partie nulle : triple répétition, règle des 50 coups. Alors que la règle des 50 coups est facile à implémenter (un simple compteur suffit), la triple répétion est une règle plus complexe si on veut la respecter dans les moindres détails. Il est nécessaire pour cela de comparer l'état du jeu actuel à des précédents états, en prenant en compte certaines choses et d'autres non (plus précisement, il faut prendre en compte : l'équipe qui a le trait, l'état visible de l'échiquier, les coups possibles pour les blancs, les coups possibles pour les noirs). Une classe PieceStruct (piece.scala) a été créée pour cela, et la structure utilisée pour conserver les précédents états est un Map, car cela permet de pouvoir facilement et rapidement associer à un état le nombre de fois qu'il a été atteint auparavant.
+\end{itemize}
+\-
+
+\end{document}

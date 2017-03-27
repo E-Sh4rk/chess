@@ -13,45 +13,27 @@ class Pawn(private val _team:Round.Round, private val _board:Board, private val 
         if (!super.canMove(toX,toY))
             return false;
 
-        if (team == Round.White) // Pawn must go up
+        if (team == Round.White && toY >= y)
+            return false;
+        if (team == Round.Black && toY <= y)
+            return false;
+
+        // Not an eating move
+        if (board.pieceAtPosition(toX, toY) == null)
         {
-            // Not an eating move
-            if (board.pieceAtPosition(toX, toY) == null)
-            {
-                if (x != toX)
-                    return false;
-                if (y-toY < 1 || y-toY > 2)
-                    return false;
-                if (y-toY == 2 && (!firstMove || board.pieceAtPosition(x,y-1) != null))
-                    return false;
-            }
-            else // Eating move
-            {
-                if (math.abs (x - toX) != 1)
-                    return false;
-                if (y - toY != 1)
-                    return false;
-            }
+            if (x != toX)
+                return false;
+            if (math.abs(y-toY) > 2 || toY == y)
+                return false;
+            if (math.abs(y-toY) == 2 && (!firstMove || board.pieceAtPosition(x,(y+toY)/2) != null))
+                return false;
         }
-        if (team == Round.Black) // Pawn must go down
+        else // Eating move
         {
-            // Not an eating move
-            if (board.pieceAtPosition(toX, toY) == null)
-            {
-                if (toX != x)
-                    return false;
-                if (toY-y < 1 || toY-y > 2)
-                    return false;
-                if (toY-y == 2 && (!firstMove || board.pieceAtPosition(x,y+1) != null))
-                    return false;
-            }
-            else // Eating move
-            {
-                if (math.abs (toX - x) != 1)
-                    return false;
-                if (toY - y != 1)
-                    return false;
-            }
+            if (math.abs(x-toX) != 1)
+                return false;
+            if (math.abs(y-toY) != 1)
+                return false;
         }
         return true;
     }

@@ -257,10 +257,10 @@ object History
           var isCatch = false ; var promotion = PieceType.Unknown
 
           // Check/Checkmate annotation
-          if (content.contains("#"))
-              event = GameEvent.Checkmate
           if (content.contains("+"))
               event = GameEvent.Check
+          if (content.contains("#"))
+              event = GameEvent.Checkmate
 
           // Remove annotations at the end of the move
           var c = content.last

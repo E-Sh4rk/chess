@@ -487,7 +487,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             }
             enPassantPosition = None
             if (pieceAtPosition(fromX,fromY).pieceType == PieceType.Pawn && math.abs(toY-fromY) == 2)
-                enPassantPosition = Some (fromX+(toX-fromX)/2, fromY+(toY-fromY)/2)
+                enPassantPosition = Some ((toX+fromX)/2, (toY+fromY)/2)
             super.move (fromX,fromY,toX,toY)
             if ((toY == 0 || toY == dim_y-1) && pieceAtPosition(toX,toY).pieceType == PieceType.Pawn)
             {
@@ -512,6 +512,18 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                 if ((getRoundNumber - 1) % clockSettings.moves == 0)
                     clock(round) = clockSettings.time
 
+            // Check/Checkmate/Stalemate detection
+            val check = getKing(round).isCheck
+            val noMove = possibleMoves.isEmpty
+
+            if (check && noMove)
+                h_event = GameEvent.Checkmate
+            else if (check)
+                h_event = GameEvent.Check
+
+            // Add move to history !
+            history.moves.append(new Move(h_type, fromX, fromY, toX, toY, h_catch, h_castle, h_promotion, h_event))
+
             // Preparing next round
             if (drawAfterMove && canRequestDraw)
                 requestDraw
@@ -520,20 +532,10 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                 if (drawAfterMove)
                     opponentRequestedDraw = true
 
-                // Check/Checkmate/Stalemate detection
-                val check = getKing(round).isCheck
-                val noMove = possibleMoves.isEmpty
-
                 if (check && noMove)
-                {
                     canvas.setMessage ("Checkmate ! " + Round.adv(round).toString + " wins !")
-                    h_event = GameEvent.Checkmate
-                }
                 else if (check)
-                {
                     canvas.setMessage ("Check !")
-                    h_event = GameEvent.Check
-                }
                 else if (noMove)
                     canvas.setMessage ("Stalemate !")
                 else
@@ -541,9 +543,6 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
 
                 if (noMove)
                     gameFinished
-
-                // Add move to history !
-                history.moves.append(new Move(h_type, fromX, fromY, toX, toY, h_catch, h_castle, h_promotion, h_event))
 
                 canvas.repaint
                 callPlayers
