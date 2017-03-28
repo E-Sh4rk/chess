@@ -40,7 +40,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]()
     // Clock
     // clockSettings should be Array[TimePeriod], in order to support multiple periods. But for now...
-    private var clock:scala.collection.mutable.Map[Round.Round,Int] = scala.collection.mutable.Map(Round.White -> 0, Round.Black -> 0)
+    private var clock:scala.collection.mutable.Map[Round.Round,Int] = scala.collection.mutable.Map(Round.White -> 0, Round.Black -> 0, Round.Finished -> 0)
     private var timer : java.util.Timer = null
 
 
@@ -132,6 +132,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     }
     private def updateClock() : Unit =
     {
+        val old = clock(round)
         if (clock(round) > 0)
             clock(round) -= 1
         if (clock(round) == 0)
@@ -139,7 +140,8 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             canvas.setMessage ("Time elapsed ! " + Round.adv(round) + " wins !")
             gameFinished
         }
-        canvas.repaint
+        if (old != clock(round))
+            canvas.repaint
     }
     /**
     Get the current clock of the player.

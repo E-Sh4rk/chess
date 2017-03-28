@@ -131,11 +131,17 @@ object MyApp extends SimpleSwingApplication {
                 {
                     try
                     {
-                        val values = line.split("\\s+")
-                        time = values(0).toInt
-                        rounds = values(1).toInt
-                        inc = values(2).toInt
-                        return new TimePeriod(time, rounds, inc)
+                        if (!line.isEmpty)
+                        {
+                            if (line(0) != '#')
+                            {
+                                val values = line.split("\\s+")
+                                time = values(0).toInt
+                                rounds = values(1).toInt
+                                inc = values(2).toInt
+                                return new TimePeriod(time, rounds, inc)
+                            }
+                        }
                     }
                     catch { case e:Exception => {} }
                 }

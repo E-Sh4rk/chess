@@ -102,11 +102,11 @@ class History()
         stringOfMove += yToRow(move.toY)
         if (move.promotion != PieceType.Unknown)
           stringOfMove += "=" + History.pieceTypeAbv(move.promotion)
-        if (move.event == GameEvent.Check)
-          stringOfMove += "+"
-        if (move.event == GameEvent.Checkmate)
-          stringOfMove += "#"
       }
+      if (move.event == GameEvent.Check)
+        stringOfMove += "+"
+      if (move.event == GameEvent.Checkmate)
+        stringOfMove += "#"
 
       // Add move to the file
       stringOfMove += " "
