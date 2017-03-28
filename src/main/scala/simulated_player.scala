@@ -1,7 +1,7 @@
 /**
 A player that uses a preprogrammed list of moves.
 
-You should give the canvas as parameter in order to improve the graphic rendering.
+You should give the canvas as a parameter in order to improve the graphic rendering.
 */
 class SimulatedPlayer(val history:History, private val canvas : Canvas = null) extends Player
 {

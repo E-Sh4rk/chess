@@ -4,16 +4,35 @@ import scala.util.matching.Regex
 import java.io.File
 import java.io.FileWriter
 
+/**
+Enumeration for castling.
+*/
 object CastleType extends Enumeration {
     type CastleType = Value
     val NoCastle, Kingside, Queenside = Value
 }
 
+/**
+Enumeration that indicates whether there is a check/checkmate.
+*/
 object GameEvent extends Enumeration {
     type GameEvent = Value
     val NoEvent, Check, Checkmate = Value
 }
 
+/**
+Characterizes a move in the history of a game.
+
+@param pieceType The type of the piece moved.
+@param fromX The abscissa of the initial position.
+@param fromY The ordinate of the initial position.
+@param toX The abscissa of the ending position.
+@param toY The ordinate of the ending position.
+@param isCatch Indicates whether a piece was catched.
+@param castle The type of a castling move if it is one. Otherwise : NoCastle.
+@param promotion Indicates the type of the promotion piece if there a promotion. Otherwise : Unknwon.
+@param event Indicates if the move leads to a check/checkmate. Otherwise : NoEvent.
+*/
 class Move(var pieceType:PieceType.PieceType, /* Always specified */
            var fromX:Int, var fromY:Int, var toX:Int, var toY:Int, /* Negative when not specified */
            var isCatch:Boolean, var castle:CastleType.CastleType, var promotion:PieceType.PieceType, var event:GameEvent.GameEvent); /* Always specified */
@@ -59,7 +78,11 @@ class History()
       throw new Exception("Wrong column !")
     return res
   }
-
+  /**
+  Creates a PGN file from the history of the moves.
+  
+  @param fileName The desired name for the PGN file.
+  */
   def savePGN(fileName:String) =
   {
     val fw = new FileWriter(new File(String.format("%s", fileName)))
@@ -108,7 +131,7 @@ class History()
       if (move.event == GameEvent.Checkmate)
         stringOfMove += "#"
 
-      // Add move to the file
+      // Adds move to the file
       stringOfMove += " "
       if (nbCharsInLine + stringOfMove.length > 80)
       {
@@ -204,6 +227,11 @@ object History
   {
     return s.substring(0, s.length-1)
   }
+  /**
+  Creates a history from a PGN file.
+
+  @param fileName The name of the target file.
+  */
   def loadPGN(fileName:String) : History =
   {
     var h = new History
@@ -301,7 +329,7 @@ object History
             }
             if (content.last == '=')
               content = removeLast(content)
-            // TO Position
+            // To Position
             var to_row_str = ""
             while (isNumeric(content.last))
             {

@@ -2,7 +2,7 @@
 import javax.swing.SwingUtilities
 
 /**
-Represent a period for the clock.
+Represents a period for the clock.
 
 @param time The time limit, in seconds. If negative, no time limit.
 @param moves The duration of the period, in number of rounds. If non-positive, period duration is infinite.
@@ -18,6 +18,8 @@ All methods are thread-safe.
 @param canvas The canvas that will display the game.
 @param playerWhite The player of the white team.
 @param playerBlack The player of the black team.
+@param gameMode The game mode.
+@param clockSettings The settings of the simulated timing device.
 */
 class Game(private val canvas:Canvas, private var playerWhite:Player, private var playerBlack:Player,
            private val gameMode:GameMode.GameMode, private val clockSettings:TimePeriod) extends Board(gameMode)
@@ -39,7 +41,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     = scala.collection.mutable.Map
     [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]()
     // Clock
-    // clockSettings should be Array[TimePeriod], in order to support multiple periods. But for now...
+    // clockSettings should be Array[TimePeriod] in order to support multiple periods. But for now...
     private var clock:scala.collection.mutable.Map[Round.Round,Int] = scala.collection.mutable.Map(Round.White -> 0, Round.Black -> 0, Round.Finished -> 0)
     private var timer : java.util.Timer = null
 
@@ -96,12 +98,15 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                     config += new PieceStruct(p)
             }
         }
-        val p2Moves = calculatePossibleMoves
+        val p2Moves = computePossibleMoves
         round = Round.adv(round)
-        val p1Moves = calculatePossibleMoves
+        val p1Moves = computePossibleMoves
         currentConfiguration = (config,round,p1Moves,p2Moves)
     }
-    private def calculatePossibleMoves : scala.collection.mutable.Set[(Int,Int,Int,Int)] =
+    /**
+    Returns the set of all the possible moves.
+    */
+    private def computePossibleMoves : scala.collection.mutable.Set[(Int,Int,Int,Int)] =
     {
         val set = scala.collection.mutable.Set[(Int,Int,Int,Int)]()
         for (i<-0 to dim_x-1)
@@ -144,7 +149,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             canvas.repaint
     }
     /**
-    Get the current clock of the player.
+    Gets the current clock of the player.
     */
     def getClock (t:Round.Round) = { round.synchronized{ clock(t) } }
 
@@ -183,15 +188,15 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     }
 
     /**
-    Return the history of the current game.
+    Returns the history of the current game.
     */
     def getHistory() = { round.synchronized{ history } }
     /**
-    Change the current white player. Only works if the game is suspended.
+    Changes the current white player. Only works if the game is suspended.
     */
     def setWhitePlayer(p:Player) : Unit = { round.synchronized { if (suspended) playerWhite = p } }
     /**
-    Change the current black player. Only works if the game is suspended.
+    Changes the current black player. Only works if the game is suspended.
     */
     def setBlackPlayer(p:Player) : Unit = { round.synchronized { if (suspended) playerBlack = p } }
 
@@ -216,7 +221,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     def getFiftyMoveRuleCounter = { round.synchronized{ fmRule/2 } }
 
     /**
-    Get threefold repetion counter.
+    Gets threefold repetion counter.
     */
     def getThreefoldRepetitionCounter() : Int =
     { 
@@ -242,7 +247,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     }
 
     /**
-    Return None if the move is not a valid 'en passant' move. Otherwise, return the position of the eaten piece.
+    Returns None if the move is not a valid 'en passant' move. Otherwise returns the position of the eaten piece.
     */
     def enPassantMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Option[(Int,Int)] =
     {
@@ -275,13 +280,13 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
         }
     }
     /**
-    Return None if the move is not a valid castling move. Otherwise, return the move implied for the rook.
+    Returns None if the move is not a valid castling move. Otherwise returns the move implied for the rook.
     */
     def castlingMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Option[(Int,Int,Int,Int)] =
     {
         round.synchronized
         {
-            // 1. King and rook have not moved previously in this game
+            // 1. King and rook have not moved in this game
             if (!canMove(fromX,fromY))
                 return None
             val p = pieceAtPosition(fromX,fromY)
@@ -353,7 +358,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     /**
     Returns a list of all the possible moves.
 
-    Using this function is FASTER than calling canMove multiple times : it does not recalculate every move.
+    Using this function is FASTER than calling canMove multiple times : it does not recompute every move.
     */
     def possibleMoves : scala.collection.mutable.Set[(Int,Int,Int,Int)] =
     {
@@ -382,7 +387,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
         }
     }
     /**
-    Request draw. The request must be legit (50-move rule...)
+    Invoked when a player is asking for draw. The request must be legit (50-move rule...)
     */
     def requestDraw():Unit =
     {
@@ -461,13 +466,13 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             // Updating counters
             fmRule += 1
             threefoldCounter(currentConfiguration) = (threefoldCounter getOrElse (currentConfiguration, 0)) + 1
-            if (pieceAtPosition(fromX,fromY).pieceType == PieceType.Pawn) // Detect if the piece moved is a pawn
+            if (pieceAtPosition(fromX,fromY).pieceType == PieceType.Pawn) // Detects if the piece moved is a pawn
                 fmRule = 0
-            else if (pieceAtPosition(toX,toY) != null) // Detect if a piece is eaten
+            else if (pieceAtPosition(toX,toY) != null) // Detects if a piece is eaten
                 { h_catch = true ; fmRule = 0 }
-            else if (enPassantMove(fromX,fromY,toX,toY) != None) // Detect if a piece is eaten 'en passant'
+            else if (enPassantMove(fromX,fromY,toX,toY) != None) // Detects if a piece is eaten 'en passant'
                 { h_catch = true ; fmRule = 0 }
-            if (fmRule == 0) // We clear the threefoldCounter if possible
+            if (fmRule == 0) // Clears the threefoldCounter if possible
                 threefoldCounter.clear
             roundNumber += 1
             clock(round) += clockSettings.increment
@@ -509,7 +514,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             changeRoundAndUpdateConfiguration
             opponentRequestedDraw = false
 
-            // Reinit clock if new period
+            // Reinitializes clock if new period
             if (clockSettings.moves > 0)
                 if ((getRoundNumber - 1) % clockSettings.moves == 0)
                     clock(round) = clockSettings.time
@@ -523,7 +528,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             else if (check)
                 h_event = GameEvent.Check
 
-            // Add move to history !
+            // Adds move to history !
             history.moves.append(new Move(h_type, fromX, fromY, toX, toY, h_catch, h_castle, h_promotion, h_event))
 
             // Preparing next round

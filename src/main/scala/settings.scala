@@ -9,6 +9,9 @@ import scala.swing.Label
 import java.awt.Dimension
 import swing.event._
 
+/**
+Settings of a game (game mode, clock...)
+*/
 class Settings extends GridBagPanel
 {
     private val p1_ai : /*CheckBox*/ToggleButton = new /*CheckBox*/ToggleButton ("White player is AI")
