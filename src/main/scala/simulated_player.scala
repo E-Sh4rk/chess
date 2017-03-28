@@ -72,6 +72,8 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
             else
             {
                 disableAutoPlay
+                if (canvas != null)
+                    canvas.repaint
                 return false
             }
             return game.getMoveNumber < history.moves.length-1
@@ -84,10 +86,7 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
         {
             autoPlayUntil = -1
             if (canvas != null)
-            {
                 canvas.ignoreRepaint = false
-                canvas.repaint
-            }
         }
     }
     /**

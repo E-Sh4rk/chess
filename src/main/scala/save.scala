@@ -240,8 +240,10 @@ object History
       if (isAlphanumeric(current))
       {
         var content = current.toString + readUntilSpace(source)
+        // Removing the 'en passant' indicator (not legal in PGN but we tolerate it)
+        content = content.replace("e.p.", "")
         // Ending (known final score)
-        if (content == "1-0" || content == "0-1" || content == "1/2-1/2" || content == "0,5-0,5")
+        if (content == "1-0" || content == "0-1" || content == "1/2-1/2" || content == "0,5-0,5" || content.isEmpty)
         {
           // Nothing for the moment...
         }
@@ -317,7 +319,7 @@ object History
                 isCatch = true
                 content = removeLast(content)
               }
-              else if (content.last == '-') // This symbol is not legal in abreged notation, but we tolerate it
+              else if (content.last == '-') // This symbol is not legal in PGN, but we tolerate it
                 content = removeLast(content)
             }
             // FROM Position
