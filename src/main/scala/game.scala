@@ -531,7 +531,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
 
             // Preparing next round
             if (drawAfterMove && canRequestDraw)
-                requestDraw
+                _requestDraw
             else
             {
                 if (drawAfterMove)
