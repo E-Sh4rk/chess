@@ -24,13 +24,13 @@ object GameEvent extends Enumeration {
 Characterizes a move in the history of a game.
 
 @param pieceType The type of the piece moved.
-@param fromX The abscissa of the initial position.
-@param fromY The ordinate of the initial position.
-@param toX The abscissa of the ending position.
-@param toY The ordinate of the ending position.
+@param fromX The abscissa of the initial position. (Negative if not specified)
+@param fromY The ordinate of the initial position. (Negative if not specified)
+@param toX The abscissa of the ending position. (Negative if not specified)
+@param toY The ordinate of the ending position. (Negative if not specified)
 @param isCatch Indicates whether a piece was catched.
 @param castle The type of a castling move if it is one. Otherwise : NoCastle.
-@param promotion Indicates the type of the promotion piece if there a promotion. Otherwise : Unknwon.
+@param promotion Indicates the type of the promotion piece if there a promotion. Otherwise : Unknown.
 @param event Indicates if the move leads to a check/checkmate. Otherwise : NoEvent.
 */
 class Move(var pieceType:PieceType.PieceType, /* Always specified */
@@ -329,7 +329,7 @@ object History
             }
             if (content.last == '=')
               content = removeLast(content)
-            // To Position
+            // TO Position
             var to_row_str = ""
             while (isNumeric(content.last))
             {

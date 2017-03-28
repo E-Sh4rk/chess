@@ -10,7 +10,7 @@ import java.awt.Dimension
 import swing.event._
 
 /**
-Settings of a game (game mode, clock...)
+A panel for the settings (players, game mode, clock...)
 */
 class Settings extends GridBagPanel
 {

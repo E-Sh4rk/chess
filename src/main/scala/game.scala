@@ -19,7 +19,7 @@ All methods are thread-safe.
 @param playerWhite The player of the white team.
 @param playerBlack The player of the black team.
 @param gameMode The game mode.
-@param clockSettings The settings of the simulated timing device.
+@param clockSettings The settings for the clock.
 */
 class Game(private val canvas:Canvas, private var playerWhite:Player, private var playerBlack:Player,
            private val gameMode:GameMode.GameMode, private val clockSettings:TimePeriod) extends Board(gameMode)
@@ -103,9 +103,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
         val p1Moves = computePossibleMoves
         currentConfiguration = (config,round,p1Moves,p2Moves)
     }
-    /**
-    Returns the set of all the possible moves.
-    */
+
     private def computePossibleMoves : scala.collection.mutable.Set[(Int,Int,Int,Int)] =
     {
         val set = scala.collection.mutable.Set[(Int,Int,Int,Int)]()
@@ -387,7 +385,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
         }
     }
     /**
-    Invoked when a player is asking for draw. The request must be legit (50-move rule...)
+    Draw requested. The request must be legit (50-move rule...)
     */
     def requestDraw():Unit =
     {
