@@ -284,7 +284,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     {
         round.synchronized
         {
-            // 1. King and rook have not moved in this game
+            // 1. King and rook have not moved previously in this game
             if (!canMove(fromX,fromY))
                 return None
             val p = pieceAtPosition(fromX,fromY)
