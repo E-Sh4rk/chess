@@ -4,16 +4,35 @@ import scala.util.matching.Regex
 import java.io.File
 import java.io.FileWriter
 
+/**
+Enumeration for castling.
+*/
 object CastleType extends Enumeration {
     type CastleType = Value
     val NoCastle, Kingside, Queenside = Value
 }
 
+/**
+Enumeration that indicates whether there is a check/checkmate.
+*/
 object GameEvent extends Enumeration {
     type GameEvent = Value
     val NoEvent, Check, Checkmate = Value
 }
 
+/**
+Characterizes a move in the history of a game.
+
+@param pieceType The type of the piece moved.
+@param fromX The abscissa of the initial position. (Negative if not specified)
+@param fromY The ordinate of the initial position. (Negative if not specified)
+@param toX The abscissa of the ending position. (Negative if not specified)
+@param toY The ordinate of the ending position. (Negative if not specified)
+@param isCatch Indicates whether a piece was catched.
+@param castle The type of a castling move if it is one. Otherwise : NoCastle.
+@param promotion Indicates the type of the promotion piece if there a promotion. Otherwise : Unknown.
+@param event Indicates if the move leads to a check/checkmate. Otherwise : NoEvent.
+*/
 class Move(var pieceType:PieceType.PieceType, /* Always specified */
            var fromX:Int, var fromY:Int, var toX:Int, var toY:Int, /* Negative when not specified */
            var isCatch:Boolean, var castle:CastleType.CastleType, var promotion:PieceType.PieceType, var event:GameEvent.GameEvent); /* Always specified */
@@ -59,73 +78,81 @@ class History()
       throw new Exception("Wrong column !")
     return res
   }
-
+  /**
+  Creates a PGN file from the history of the moves.
+  
+  @param fileName The desired name for the PGN file.
+  */
   def savePGN(fileName:String) =
   {
-    val fw = new FileWriter(new File(String.format("%s", fileName)))
-    fw.write(String.format("[Event \"%s\"]\n", event))
-    fw.write(String.format("[Site \"%s\"]\n", site))
-    fw.write(String.format("[Date \"%s\"]\n", date))
-    fw.write(String.format("[Round \"%s\"]\n", round))
-    fw.write(String.format("[White \"%s\"]\n", white))
-    fw.write(String.format("[Black \"%s\"]\n", black))
-    fw.write(String.format("[Result \"%s\"]\n", result))
-    fw.write(String.format("[Mode \"%s\"]\n", mode.toString()))
-    fw.write(String.format("[DimX \"%s\"]\n", dim_x.toString()))
-    fw.write(String.format("[DimY \"%s\"]\n\n", dim_y.toString()))
-
-    var nbCharsInLine = 0
-    var roundNumber = 0
-    for (move <- moves)
+    try
     {
-      var stringOfMove = ""
+      val fw = new FileWriter(new File(String.format("%s", fileName)))
+      fw.write(String.format("[Event \"%s\"]\n", event))
+      fw.write(String.format("[Site \"%s\"]\n", site))
+      fw.write(String.format("[Date \"%s\"]\n", date))
+      fw.write(String.format("[Round \"%s\"]\n", round))
+      fw.write(String.format("[White \"%s\"]\n", white))
+      fw.write(String.format("[Black \"%s\"]\n", black))
+      fw.write(String.format("[Result \"%s\"]\n", result))
+      fw.write(String.format("[Mode \"%s\"]\n", mode.toString()))
+      fw.write(String.format("[DimX \"%s\"]\n", dim_x.toString()))
+      fw.write(String.format("[DimY \"%s\"]\n\n", dim_y.toString()))
 
-      // Round number
-      if (roundNumber%2 == 0)
-        stringOfMove += (roundNumber/2 + 1).toString + ". "
+      var nbCharsInLine = 0
+      var roundNumber = 0
+      for (move <- moves)
+      {
+        var stringOfMove = ""
+
+        // Round number
+        if (roundNumber%2 == 0)
+          stringOfMove += (roundNumber/2 + 1).toString + ". "
+        
+        // Move
+        if (move.castle == CastleType.Kingside)
+          stringOfMove += "O-O"
+        else if (move.castle == CastleType.Queenside)
+          stringOfMove += "O-O-O"
+        else
+        {
+          stringOfMove += History.pieceTypeAbv(move.pieceType)
+          if (move.fromX >= 0)
+            stringOfMove += xToColumn(move.fromX)
+          if (move.fromY >= 0)
+            stringOfMove += yToRow(move.fromY)
+          if (move.isCatch)
+            stringOfMove += "x"
+          stringOfMove += xToColumn(move.toX)
+          stringOfMove += yToRow(move.toY)
+          if (move.promotion != PieceType.Unknown)
+            stringOfMove += "=" + History.pieceTypeAbv(move.promotion)
+        }
+        if (move.event == GameEvent.Check)
+          stringOfMove += "+"
+        if (move.event == GameEvent.Checkmate)
+          stringOfMove += "#"
+
+        // Adds move to the file
+        stringOfMove += " "
+        if (nbCharsInLine + stringOfMove.length > 80)
+        {
+          fw.write(System.lineSeparator())
+          nbCharsInLine = 0
+        }
+        fw.write(stringOfMove)
+        nbCharsInLine += stringOfMove.length
+        roundNumber += 1
+      }
+      fw.write(System.lineSeparator())
+
+      // Terminateur : 1/2-1/2 ou 1-0 ou 0-1 ou *
+      fw.write("*")
+      fw.write(System.lineSeparator())
       
-      // Move
-      if (move.castle == CastleType.Kingside)
-        stringOfMove += "O-O"
-      else if (move.castle == CastleType.Queenside)
-        stringOfMove += "O-O-O"
-      else
-      {
-        stringOfMove += History.pieceTypeAbv(move.pieceType)
-        if (move.fromX >= 0)
-          stringOfMove += xToColumn(move.fromX)
-        if (move.fromY >= 0)
-          stringOfMove += yToRow(move.fromY)
-        if (move.isCatch)
-          stringOfMove += "x"
-        stringOfMove += xToColumn(move.toX)
-        stringOfMove += yToRow(move.toY)
-        if (move.promotion != PieceType.Unknown)
-          stringOfMove += "=" + History.pieceTypeAbv(move.promotion)
-      }
-      if (move.event == GameEvent.Check)
-        stringOfMove += "+"
-      if (move.event == GameEvent.Checkmate)
-        stringOfMove += "#"
-
-      // Add move to the file
-      stringOfMove += " "
-      if (nbCharsInLine + stringOfMove.length > 80)
-      {
-        fw.write(System.lineSeparator())
-        nbCharsInLine = 0
-      }
-      fw.write(stringOfMove)
-      nbCharsInLine += stringOfMove.length
-      roundNumber += 1
+      fw.close()
     }
-    fw.write(System.lineSeparator())
-
-    // Terminateur : 1/2-1/2 ou 1-0 ou 0-1 ou *
-    fw.write("*")
-    fw.write(System.lineSeparator())
-    
-    fw.close()
+    catch { case  ex : Exception => { } }
   }
 }
 
@@ -204,8 +231,15 @@ object History
   {
     return s.substring(0, s.length-1)
   }
+  /**
+  Creates a history from a PGN file.
+
+  @param fileName The name of the target file.
+  */
   def loadPGN(fileName:String) : History =
   {
+    try
+    {
     var h = new History
     var source = Source.fromFile(fileName)
     var current = readNextChar(source)
@@ -240,8 +274,10 @@ object History
       if (isAlphanumeric(current))
       {
         var content = current.toString + readUntilSpace(source)
+        // Removing the 'en passant' indicator (not legal in PGN but we tolerate it)
+        content = content.replace("e.p.", "")
         // Ending (known final score)
-        if (content == "1-0" || content == "0-1" || content == "1/2-1/2" || content == "0,5-0,5")
+        if (content == "1-0" || content == "0-1" || content == "1/2-1/2" || content == "0,5-0,5" || content.isEmpty)
         {
           // Nothing for the moment...
         }
@@ -317,7 +353,7 @@ object History
                 isCatch = true
                 content = removeLast(content)
               }
-              else if (content.last == '-') // This symbol is not legal in abreged notation, but we tolerate it
+              else if (content.last == '-') // This symbol is not legal in PGN, but we tolerate it
                 content = removeLast(content)
             }
             // FROM Position
@@ -353,5 +389,7 @@ object History
       current = readNextChar(source)
     }
     return h
+    }
+    catch { case  ex : Exception => { return null } }
   }
 }

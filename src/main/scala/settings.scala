@@ -14,6 +14,9 @@ object AI_Type extends Enumeration {
     val Random, AlphaBeta, GNU_Chess = Value
 }
 
+/**
+A panel for the settings (players, game mode, clock...)
+*/
 class Settings extends GridBagPanel
 {
     private val p1_ai : /*CheckBox*/ToggleButton = new /*CheckBox*/ToggleButton ("White player is AI")

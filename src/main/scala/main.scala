@@ -243,7 +243,12 @@ object MyApp extends SimpleSwingApplication {
                     {
                         game.suspend
                         if(chooser.showSaveDialog(null) == FileChooser.Result.Approve)
-                            game.getHistory.savePGN(chooser.selectedFile.getPath);
+                        {
+                            if (!chooser.selectedFile.getPath.toLowerCase.endsWith(".pgn"))
+                                game.getHistory.savePGN(chooser.selectedFile.getPath+".pgn");
+                            else
+                                game.getHistory.savePGN(chooser.selectedFile.getPath);
+                        }
                         game.resume
                     }
                 }
@@ -252,12 +257,18 @@ object MyApp extends SimpleSwingApplication {
                     if (game != null) game.suspend
                     if(chooser.showOpenDialog(null) == FileChooser.Result.Approve)
                     {
-                        val history = History.loadPGN(chooser.selectedFile.getPath)
-                        val player = new SimulatedPlayer(history, canvas)
-                        game = new Game(canvas, player, player, history.mode, clockSettings)
-                        switchToExploreMode
-                        currentSimulatedPlayer = player
-                        prev.enabled = false ; prev_final.enabled = false
+                        if (chooser.selectedFile.exists)
+                        {
+                            val history = History.loadPGN(chooser.selectedFile.getPath)
+                            if (history != null)
+                            {
+                                val player = new SimulatedPlayer(history, canvas)
+                                game = new Game(canvas, player, player, history.mode, clockSettings)
+                                switchToExploreMode
+                                currentSimulatedPlayer = player
+                                prev.enabled = false ; prev_final.enabled = false
+                            }
+                        }
                     }
                     else if (game != null) game.resume
                 }

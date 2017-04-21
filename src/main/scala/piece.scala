@@ -223,7 +223,7 @@ abstract class Piece(val team:Round.Round, protected val board:Board, protected 
 }
 
 /**
-A immutable structure that represent a piece at a given instant.
+An immutable structure that represents a piece at a given instant.
 
 Not every characteristic is specified : a PieceStruct is only characterized by its position, team and type.
 */
