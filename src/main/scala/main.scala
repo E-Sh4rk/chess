@@ -110,7 +110,14 @@ object MyApp extends SimpleSwingApplication {
             if (settingsPanel.white_is_human)
                 return canvas
             else
-                return new PrimitiveAI
+            {
+                settingsPanel.whiteAiType match
+                {
+                    case AI_Type.GNU_Chess => return new CECP_AI
+                    case AI_Type.AlphaBeta => return new AlphaBetaAI
+                    case _ => return new PrimitiveAI
+                }
+            }
         }
         private def newBlackPlayer () : Player =
         {
@@ -119,7 +126,14 @@ object MyApp extends SimpleSwingApplication {
             if (settingsPanel.black_is_human)
                 return canvas
             else
-                return new PrimitiveAI
+            {
+                settingsPanel.blackAiType match
+                {
+                    case AI_Type.GNU_Chess => return new CECP_AI
+                    case AI_Type.AlphaBeta => return new AlphaBetaAI
+                    case _ => return new PrimitiveAI
+                }
+            }
         }
         private def clockSettings () : TimePeriod =
         {
