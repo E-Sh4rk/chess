@@ -1,4 +1,6 @@
 import java.io.PrintWriter
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import scala.io.Source
 
 /**
@@ -9,38 +11,53 @@ Only gnuchess is supported for now !
 class CECP_AI extends Player with Runnable
 {
     private var game:Game = null
+    private var _stop = false
     private var play:Boolean = false
     private var thread:Thread = null
 
     override def run : Unit =
     {
-        var proc:Process = null
-        try
+        var proc = Runtime.getRuntime.exec(Array("gnuchess", "-x"))
+        val out = new PrintWriter(proc.getOutputStream)
+        val err = new BufferedReader(new InputStreamReader(proc.getErrorStream))
+        val in = new BufferedReader(new InputStreamReader(proc.getInputStream))
+
+        // Initializing game
+        sendCommand(out,"new")
+        // TODO : pgn load
+        purge(in);purge(err)
+
+        while (!_stop)
         {
-            proc = Runtime.getRuntime.exec(Array("gnuchess -x"))
-            val out = new PrintWriter(proc.getOutputStream)
-            val err = Source.fromInputStream(proc.getErrorStream)
-            val in = Source.fromInputStream(proc.getInputStream)
-
-            // Initializing game
-            out.println("new")
-            // TODO : pgn load
-
-            while (true)
+            if (play)
             {
-
-                if (play)
-                {
-                    play = false
-                    
-                }
+                play = false
+                purge(in)
+                sendCommand(out,"go")
+                getNextLine(in) ; getNextLine(in) // TimeLimits
+                println(getNextLine(in)) // Move. TODO : Parse and send
             }
-
-            out.close()
+            Thread.sleep(10)
         }
-        catch { case  ex : InterruptedException => { } }
+
+        out.close()
         if (proc != null)
             proc.destroy
+        _stop = false
+    }
+    private def sendCommand(out:PrintWriter,s:String) : Unit =
+    {
+        out.println(s)
+        out.flush
+    }
+    private def purge(s:BufferedReader) : Unit =
+    {
+        while (s.ready)
+            s.read
+    }
+    private def getNextLine(s:BufferedReader) : String =
+    {
+        return s.readLine
     }
 
     def init (g:Game) : Unit =
@@ -50,11 +67,16 @@ class CECP_AI extends Player with Runnable
         play = false
         game = g
         thread = new Thread(this)
+        thread.start
     }
     def stop : Unit =
     {
         play = false
-        if (thread != null){ thread.interrupt ; thread = null }
+        if (thread != null)
+        {
+            _stop = true
+            thread = null
+        }
         game = null
     }
     def mustPlay : Unit =

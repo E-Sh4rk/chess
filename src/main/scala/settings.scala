@@ -28,8 +28,11 @@ class Settings extends GridBagPanel
     p2_human.selected = true
     private val player2 : ButtonGroup = new ButtonGroup(p2_human, p2_ai)
 
-    private val labelAI : Label = new Label("AI type (for both players)")
-    private val aiType : ComboBox[String] = new ComboBox[String](List("Random","Alpha-Beta","GNU Chess"))
+    private val labelAI1 : Label = new Label("AI type (White Player)")
+    private val aiType1 : ComboBox[String] = new ComboBox[String](List("Random","Alpha-Beta","GNU Chess"))
+    private val labelAI2 : Label = new Label("AI type (Black Player)")
+    private val aiType2 : ComboBox[String] = new ComboBox[String](List("Random","Alpha-Beta","GNU Chess"))
+
 
     private val label : Label = new Label("Settings below only apply to a new game :")
 
@@ -46,6 +49,7 @@ class Settings extends GridBagPanel
     add(new Label, c)
     
     // White player
+    c.ipady = 10
     c.gridx = 0; c.gridy = 0
     add(p1_human, c)
     c.gridx = 2; c.gridy = 0
@@ -60,39 +64,49 @@ class Settings extends GridBagPanel
     c.gridx = 2; c.gridy = 2
     add(p2_ai, c)
 
-    // AI
-    c.gridx = 0; c.gridy = 3
-    add(labelAI, c)
+    c.gridx = 1; c.gridy = 3
+    add(new Label, c)
+
+    // AI1
+    c.gridx = 0; c.gridy = 4
+    add(labelAI1, c)
     c.gridwidth = 1; c.ipady = 0
-    c.gridx = 2; c.gridy = 3
-    add(aiType, c)
+    c.gridx = 2; c.gridy = 4
+    add(aiType1, c)
+
+    // AI2
+    c.gridx = 0; c.gridy = 5
+    add(labelAI2, c)
+    c.gridwidth = 1; c.ipady = 0
+    c.gridx = 2; c.gridy = 5
+    add(aiType2, c)
 
     // Label
     c.gridwidth = 3; c.ipady = 100
-    c.gridx = 0; c.gridy = 4
+    c.gridx = 0; c.gridy = 6
     add(label, c)
 
     // Variant
     c.gridwidth = 1; c.ipady = 25
-    c.gridx = 0; c.gridy = 5
+    c.gridx = 0; c.gridy = 7
     add(labelVariant, c)
     c.gridwidth = 1; c.ipady = 0
-    c.gridx = 2; c.gridy = 5
+    c.gridx = 2; c.gridy = 7
     add(variant, c)
 
     // Clock
     c.gridwidth = 3; c.ipady = 25
-    c.gridx = 0; c.gridy = 6
+    c.gridx = 0; c.gridy = 8
     add(clock, c)
-    c.gridx = 0; c.gridy = 7
+    c.gridx = 0; c.gridy = 9
     add(clockText, c)
 
     def white_is_human () : Boolean = { lastWhite = p1_human.selected ; return p1_human.selected }
     def black_is_human () : Boolean = { lastBlack = p2_human.selected ; return p2_human.selected }
     def whiteAiType () : AI_Type.AI_Type =
     {
-        lastWhiteAiType = aiType.selection.item
-        return aiType.selection.item match
+        lastWhiteAiType = aiType1.selection.item
+        return aiType1.selection.item match
         {
             case "Random" => AI_Type.Random
             case "Alpha-Beta" => AI_Type.AlphaBeta
@@ -102,8 +116,8 @@ class Settings extends GridBagPanel
     }
     def blackAiType () : AI_Type.AI_Type =
     {
-        lastBlackAiType = aiType.selection.item
-        return aiType.selection.item match
+        lastBlackAiType = aiType2.selection.item
+        return aiType2.selection.item match
         {
             case "Random" => AI_Type.Random
             case "Alpha-Beta" => AI_Type.AlphaBeta
@@ -112,12 +126,12 @@ class Settings extends GridBagPanel
         }
     }
 
-    private var lastWhiteAiType = aiType.selection.item
+    private var lastWhiteAiType = aiType1.selection.item
     private var lastWhite = p1_human.selected
-    def white_player_has_changed () : Boolean = { return lastWhite != p1_human.selected || (p1_ai.selected && lastWhiteAiType != aiType.selection.item) }
-    private var lastBlackAiType = aiType.selection.item
+    def white_player_has_changed () : Boolean = { return lastWhite != p1_human.selected || (p1_ai.selected && lastWhiteAiType != aiType1.selection.item) }
+    private var lastBlackAiType = aiType2.selection.item
     private var lastBlack = p2_human.selected
-    def black_player_has_changed () : Boolean = { return lastBlack != p2_human.selected || (p2_ai.selected && lastBlackAiType != aiType.selection.item)  }
+    def black_player_has_changed () : Boolean = { return lastBlack != p2_human.selected || (p2_ai.selected && lastBlackAiType != aiType2.selection.item)  }
 
     def clockEnabled () : Boolean = { return clock.selected }
     def clockSettings () : String = { return clockText.text }
