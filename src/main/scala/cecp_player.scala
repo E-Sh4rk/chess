@@ -1,4 +1,5 @@
 import java.io.PrintWriter
+import scala.io.Source
 
 /**
 An AI that is played by an external engine supporting the CECP protocol.
