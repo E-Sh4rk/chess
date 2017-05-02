@@ -47,22 +47,20 @@ class AlphaBetaAI extends SynchPlayer
     private var maxProf = 6
     private var maxNodes = 1000
     
-    def computeMinimax(game:Game,isMyTurn:bool,prof:Int,nbNodesEvaluated:Int) : Int =
+    def computeMinimax(game:Game,isMyTurn:Boolean,prof:Int,nbNodesEvaluated:Int) : Int =
     {
         if (prof > maxProf || nbNodesEvaluated > maxNodes)
             return eval(game)
         else
         {
             var moves = game.possibleMoves.toArray
-            var moveChosenValue = (if isMyTurn then minEval -1 else maxEval + 1)
-            moves.foreach
-            { moveTest =>
-                nbNodesEvaluated += 1
-                moveTestValue = computeMinimax(game, !isMyTurn, prof + 1, nbNodesEvaluated)  // TODO : here, game = (simulate moveTest in game)
+            var moveChosenValue = (if (isMyTurn) minEval -1 else maxEval + 1)
+            for (moveTest <- moves)
+            {
+                // TODO : nbNodesEvaluated
+                var moveTestValue = computeMinimax(game, !isMyTurn, prof + 1, nbNodesEvaluated)  // TODO : here, game = (simulate moveTest in game)
                 if ((isMyTurn && moveTestValue > moveChosenValue) || (!isMyTurn && moveTestValue < moveChosenValue))
                     moveChosenValue = moveTestValue
-                if (nbNodesEvaluated > maxNodes)
-                    break
             }
             return moveChosenValue
         }
