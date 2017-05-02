@@ -2,30 +2,15 @@
 import javax.swing.SwingUtilities
 
 /**
-Represents a period for the clock.
-
-@param time The time limit, in seconds. If negative, no time limit.
-@param moves The duration of the period, in number of rounds. If non-positive, period duration is infinite.
-@param increment The additional number of seconds given after each move.
-*/
-class TimePeriod(val time:Int, val moves:Int, val increment:Int);
-
-/**
-Implements a chessboard with all rules (logic of moves, rounds, clock, etc).
+Implements a chessboard with all rules about movements and rounds.
 
 All methods are thread-safe.
 
-@param canvas The canvas that will display the game.
-@param playerWhite The player of the white team.
-@param playerBlack The player of the black team.
 @param gameMode The game mode.
-@param clockSettings The settings for the clock.
 */
-class Game(private val canvas:Canvas, private var playerWhite:Player, private var playerBlack:Player,
-           private val gameMode:GameMode.GameMode, private val clockSettings:TimePeriod) extends Board(gameMode)
+class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extends Board(gameMode) // TODO : Constructor for copy, use this class in Game.
 {
     private var round = Round.Black
-    private var suspended = false
     private var opponentRequestedDraw = false
     private var enPassantPosition : Option[(Int,Int)] = None
     private var history:History = new History
@@ -40,50 +25,12 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]
     = scala.collection.mutable.Map
     [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]()
-    // Clock
-    // clockSettings should be Array[TimePeriod] in order to support multiple periods. But for now...
-    private var clock:scala.collection.mutable.Map[Round.Round,Int] = scala.collection.mutable.Map(Round.White -> 0, Round.Black -> 0, Round.Finished -> 0)
-    private var timer : java.util.Timer = null
-
 
     history.mode = gameMode
     history.dim_x = dim_x
     history.dim_y = dim_y
 
     changeRoundAndUpdateConfiguration
-    clock(Round.White) = clockSettings.time
-    clock(Round.Black) = clockSettings.time
-
-    canvas.newGame(this)
-    playerWhite.init(this)
-    playerBlack.init(this)
-    callPlayers
-    scheduleTimer
-
-    private def callPlayers():Unit =
-    {
-        SwingUtilities.invokeLater(new Runnable() {
-            override def run  : Unit =
-            {
-                round.synchronized
-                {
-                    if (suspended || round == Round.Finished)
-                        return
-
-                    if (round == Round.White)
-                        playerWhite.mustPlay
-                    if (round == Round.Black)
-                        playerBlack.mustPlay
-                }
-            }
-        });
-    }
-    private def scheduleTimer() : Unit =
-    {
-        val timerTask = new java.util.TimerTask { def run() = {round.synchronized{updateClock}} }
-        timer = new java.util.Timer()
-        timer.schedule(timerTask, 1000L, 1000L)
-    }
 
     private def changeRoundAndUpdateConfiguration() : Unit =
     {
@@ -126,78 +73,11 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
         }
         return set
     }
-    private def gameFinished() : Unit =
-    {
-        round = Round.Finished
-        playerWhite.stop
-        playerBlack.stop
-        timer.cancel
-    }
-    private def updateClock() : Unit =
-    {
-        val old = clock(round)
-        if (clock(round) > 0)
-            clock(round) -= 1
-        if (clock(round) == 0)
-        {
-            canvas.setMessage ("Time elapsed ! " + Round.adv(round) + " wins !")
-            gameFinished
-        }
-        if (old != clock(round))
-            canvas.repaint
-    }
-    /**
-    Gets the current clock of the player.
-    */
-    def getClock (t:Round.Round) = { round.synchronized{ clock(t) } }
-
-    /**
-    Suspends the game and every running thread. Game can be resumed later.
-    */
-    def suspend =
-    {
-        round.synchronized
-        {
-            if (!suspended && round != Round.Finished)
-            {
-                suspended = true
-                playerWhite.stop
-                playerBlack.stop
-                timer.cancel
-            }
-        }
-    }
-    /**
-    Resumes a suspended game.
-    */
-    def resume =
-    {
-        round.synchronized
-        {
-            if (suspended && round != Round.Finished)
-            {
-                suspended = false
-                playerWhite.init(this)
-                playerBlack.init(this)
-                callPlayers
-                scheduleTimer
-            }
-        }
-    }
 
     /**
     Returns the history of the current game.
     */
     def getHistory() = { round.synchronized{ history } }
-    /**
-    Changes the current white player. Only works if the game is suspended.
-    */
-    def setWhitePlayer(p:Player) : Unit = { round.synchronized { if (suspended) playerWhite = p } }
-    /**
-    Changes the current black player. Only works if the game is suspended.
-    */
-    def setBlackPlayer(p:Player) : Unit = { round.synchronized { if (suspended) playerBlack = p } }
-
     /**
     Returns the current round.
     */
@@ -389,23 +269,13 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     */
     def requestDraw():Unit =
     {
-        SwingUtilities.invokeLater(new Runnable() {
-            override def run  : Unit = { _requestDraw }
-        });
-    }
-    private def _requestDraw():Unit =
-    {
         round.synchronized
         {
-            if (suspended || round == Round.Finished)
+            if (round == Round.Finished)
                 return
-
             if (!canRequestDraw)
                 return
-            
-            canvas.setMessage ("Draw !")
-            gameFinished
-            canvas.repaint
+            round = Round.Finished
         }
     }
     /**
@@ -413,20 +283,11 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     */
     def resign():Unit =
     {
-        SwingUtilities.invokeLater(new Runnable() {
-            override def run  : Unit = { _resign }
-        });
-    }
-    private def _resign():Unit =
-    {
         round.synchronized
         {
-            if (suspended || round == Round.Finished)
+            if (round == Round.Finished)
                 return
-            
-            canvas.setMessage ("Resignation ! " + Round.adv(round) + " wins !")
-            gameFinished
-            canvas.repaint
+            round = Round.Finished
         }
     }
 
@@ -435,20 +296,11 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
 
     The last optional parameter is the type of piece wanted in the case of a promotion (default is queen).
     */
-    def move(fromX:Int,fromY:Int,toX:Int,toY:Int, promotionType:PieceType.PieceType, drawAfterMove:Boolean = false):Unit =
-    {
-        // We must be on the main thread before making some modifications.
-        // if (!SwingUtilities.isEventDispatchThread())
-        // Even if we are already on the main thread, we must reinvoke this function later (avoid interlaced turns).
-        SwingUtilities.invokeLater(new Runnable() {
-            override def run  : Unit = { _move(fromX,fromY,toX,toY,promotionType, drawAfterMove) }
-        });
-    }
-    private def _move(fromX:Int,fromY:Int,toX:Int,toY:Int,promotionType:PieceType.PieceType, drawAfterMove:Boolean):Unit =
+    def move(fromX:Int,fromY:Int,toX:Int,toY:Int,promotionType:PieceType.PieceType, drawAfterMove:Boolean = false):Unit =
     {
         round.synchronized
         {
-            if (suspended || round == Round.Finished)
+            if (round == Round.Finished)
                 return
             
             if (!canMove(fromX,fromY,toX,toY))
@@ -473,7 +325,6 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             if (fmRule == 0) // Clears the threefoldCounter if possible
                 threefoldCounter.clear
             roundNumber += 1
-            clock(round) += clockSettings.increment
 
             // Do the move !!!
             castlingMove(fromX,fromY,toX,toY) match
@@ -512,11 +363,6 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             changeRoundAndUpdateConfiguration
             opponentRequestedDraw = false
 
-            // Reinitializes clock if new period
-            if (clockSettings.moves > 0)
-                if ((getRoundNumber - 1) % clockSettings.moves == 0)
-                    clock(round) = clockSettings.time
-
             // Check/Checkmate/Stalemate detection
             val check = getKing(round).isCheck
             val noMove = possibleMoves.isEmpty
@@ -531,26 +377,13 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
 
             // Preparing next round
             if (drawAfterMove && canRequestDraw)
-                _requestDraw
+                requestDraw
             else
             {
                 if (drawAfterMove)
                     opponentRequestedDraw = true
-
-                if (check && noMove)
-                    canvas.setMessage ("Checkmate ! " + Round.adv(round).toString + " wins !")
-                else if (check)
-                    canvas.setMessage ("Check !")
-                else if (noMove)
-                    canvas.setMessage ("Stalemate !")
-                else
-                    canvas.clearMessage
-
                 if (noMove)
-                    gameFinished
-
-                canvas.repaint
-                callPlayers
+                    round = Round.Finished
             }
         }
     }
