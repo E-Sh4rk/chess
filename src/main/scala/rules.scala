@@ -318,8 +318,8 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
                 return false
             if (!canRequestDraw)
                 return false
-            round = Round.Finished
             message = "Draw !"
+            round = Round.Finished
             return true
         }
     }
@@ -332,8 +332,8 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
         {
             if (round == Round.Finished)
                 return false
-            round = Round.Finished
             message = "Resignation ! " + Round.adv(round) + " wins !"
+            round = Round.Finished
             return true
         }
     }
@@ -347,8 +347,8 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
         {
             if (round == Round.Finished)
                 return false
-            round = Round.Finished
             message = msg
+            round = Round.Finished
             return true
         }
     }
@@ -440,16 +440,13 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
             // Preparing next round
             if (drawAfterMove && canRequestDraw)
             {
-                round = Round.Finished
                 message = "Resignation ! " + Round.adv(round) + " wins !"
+                round = Round.Finished
             }
             else
             {
                 if (drawAfterMove)
                 opponentRequestedDraw = true
-
-                if (noMove)
-                    round = Round.Finished
 
                 if (check && noMove)
                     message = "Checkmate ! " + Round.adv(round).toString + " wins !"
@@ -459,6 +456,9 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
                     message = "Stalemate !"
                 else
                     message = null  
+
+                if (noMove)
+                    round = Round.Finished
             }
                         
             return true
