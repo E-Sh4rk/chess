@@ -8,7 +8,7 @@ All methods are thread-safe.
 
 @param gameMode The game mode.
 */
-class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extends Board(gameMode) // TODO : Constructor for copy, use this class in Game.
+class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extends Board(gameMode) // TODO : Use this class in Game.
 {
     private var round = Round.Black
     private var opponentRequestedDraw = false
@@ -26,11 +26,47 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
     = scala.collection.mutable.Map
     [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]()
 
+    private def copyConfiguration(_conf:(scala.collection.mutable.Set[PieceStruct],Round.Round,
+    scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]))
+    : (scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]) =
+    {
+        val (_pieces,_round,_moves1,_moves2) = _conf
+        var pieces = scala.collection.mutable.Set[PieceStruct]()
+        for (_p <- _pieces)
+            pieces += new PieceStruct(_p.pieceType, _p.team, _p.pos)
+        var moves1 = scala.collection.mutable.Set[(Int,Int,Int,Int)]()
+        for (_m <- _moves1)
+            moves1 += _m
+        var moves2 = scala.collection.mutable.Set[(Int,Int,Int,Int)]()
+        for (_m <- _moves2)
+            moves2 += _m
+        return  (pieces,_round,moves1,moves2)
+    }
+
     history.mode = gameMode
     history.dim_x = dim_x
     history.dim_y = dim_y
 
-    changeRoundAndUpdateConfiguration
+    if (_r == null)
+        changeRoundAndUpdateConfiguration
+    else
+    {
+        round = _r.round
+        opponentRequestedDraw = _r.opponentRequestedDraw
+        enPassantPosition = _r.enPassantPosition
+
+        // NOTE : History is not copied (no need for that)
+        currentConfiguration = copyConfiguration(_r.currentConfiguration)
+        for (_k <- _r.threefoldCounter.keys)
+            threefoldCounter(copyConfiguration(_k)) = _r.threefoldCounter(_k)
+
+        roundNumber = _r.roundNumber
+        fmRule = _r.fmRule
+
+    }
+    def this (_r:Rules) = { this (_r, GameMode.Vanilla) }
+    def this (gameMode:GameMode.GameMode) = { this (null, gameMode) }
+    def this () = { this (GameMode.Vanilla) }
 
     private def changeRoundAndUpdateConfiguration() : Unit =
     {
