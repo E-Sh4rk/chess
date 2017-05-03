@@ -8,8 +8,9 @@ All methods are thread-safe.
 
 @param gameMode The game mode.
 */
-class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extends Board(gameMode) // TODO : Use this class in Game.
+class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extends Board(gameMode)
 {
+    private var message:String = null
     private var round = Round.Black
     private var opponentRequestedDraw = false
     private var enPassantPosition : Option[(Int,Int)] = None
@@ -113,33 +114,39 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
     /**
     Returns the history of the current game.
     */
-    def getHistory() = { round.synchronized{ history } }
+    def getHistory() = { this.synchronized{ history } }
+
+    /**
+    Returns informations about the game. If there is nothing special, return null.
+    */
+    def getMessage = { this.synchronized{ message } }
+
     /**
     Returns the current round.
     */
-    def getRound = { round.synchronized{ round } }
+    def getRound = { this.synchronized{ round } }
 
     /**
     Returns the current round number.
     */
-    def getRoundNumber = { round.synchronized{ roundNumber/2 + 1 } }
+    def getRoundNumber = { this.synchronized{ roundNumber/2 + 1 } }
 
     /**
     Returns the current move number.
     */
-    def getMoveNumber = { round.synchronized{ roundNumber } }
+    def getMoveNumber = { this.synchronized{ roundNumber } }
 
     /**
     Returns the current round counter in the context of the 50-move rule.
     */
-    def getFiftyMoveRuleCounter = { round.synchronized{ fmRule/2 } }
+    def getFiftyMoveRuleCounter = { this.synchronized{ fmRule/2 } }
 
     /**
     Gets threefold repetion counter.
     */
     def getThreefoldRepetitionCounter() : Int =
     { 
-        round.synchronized
+        this.synchronized
         {
             return (threefoldCounter getOrElse (currentConfiguration, 0)) + 1
         }
@@ -150,7 +157,7 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
     */
     def canMove(x:Int,y:Int):Boolean =
     {
-        round.synchronized
+        this.synchronized
         {
             val piece = pieceAtPosition(x,y)
             if (piece != null)
@@ -165,7 +172,7 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
     */
     def enPassantMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Option[(Int,Int)] =
     {
-        round.synchronized
+        this.synchronized
         {
             enPassantPosition match
             {
@@ -198,7 +205,7 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
     */
     def castlingMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Option[(Int,Int,Int,Int)] =
     {
-        round.synchronized
+        this.synchronized
         {
             // 1. King and rook have not moved previously in this game
             if (!canMove(fromX,fromY))
@@ -247,7 +254,7 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
     */
     def canMove(fromX:Int,fromY:Int,toX:Int,toY:Int):Boolean =
     {
-        round.synchronized
+        this.synchronized
         {
             if (!canMove(fromX,fromY))
                 return false
@@ -276,7 +283,7 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
     */
     def possibleMoves : scala.collection.mutable.Set[(Int,Int,Int,Int)] =
     {
-        round.synchronized
+        this.synchronized
         {
             val (_,_,p1moves,_) = currentConfiguration
             return p1moves
@@ -287,7 +294,7 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
     */
     def canRequestDraw():Boolean =
     {
-        round.synchronized
+        this.synchronized
         {
             if (round == Round.Finished)
                 return false
@@ -303,27 +310,46 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
     /**
     Draw requested. The request must be legit (50-move rule...)
     */
-    def requestDraw():Unit =
+    def requestDraw():Boolean =
     {
-        round.synchronized
+        this.synchronized
         {
             if (round == Round.Finished)
-                return
+                return false
             if (!canRequestDraw)
-                return
+                return false
             round = Round.Finished
+            message = "Draw !"
+            return true
         }
     }
     /**
     Resignation of the player. The opponent will win the game.
     */
-    def resign():Unit =
+    def resign():Boolean =
     {
-        round.synchronized
+        this.synchronized
         {
             if (round == Round.Finished)
-                return
+                return false
             round = Round.Finished
+            message = "Resignation ! " + Round.adv(round) + " wins !"
+            return true
+        }
+    }
+
+    /**
+    Terminate the game for a reason not implemented in this class (clock...). Give the reason as parameter.
+    */
+    protected def endForAnotherReason(msg:String) : Boolean =
+    {
+        this.synchronized
+        {
+            if (round == Round.Finished)
+                return false
+            round = Round.Finished
+            message = msg
+            return true
         }
     }
 
@@ -332,15 +358,15 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
 
     The last optional parameter is the type of piece wanted in the case of a promotion (default is queen).
     */
-    def move(fromX:Int,fromY:Int,toX:Int,toY:Int,promotionType:PieceType.PieceType, drawAfterMove:Boolean = false):Unit =
+    def move(fromX:Int,fromY:Int,toX:Int,toY:Int,promotionType:PieceType.PieceType, drawAfterMove:Boolean = false):Boolean =
     {
-        round.synchronized
+        this.synchronized
         {
             if (round == Round.Finished)
-                return
+                return false
             
             if (!canMove(fromX,fromY,toX,toY))
-                return
+                return false
 
             // Vars for history
             var h_type:PieceType.PieceType = pieceAtPosition(fromX,fromY).pieceType
@@ -413,14 +439,29 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
 
             // Preparing next round
             if (drawAfterMove && canRequestDraw)
-                requestDraw
+            {
+                round = Round.Finished
+                message = "Resignation ! " + Round.adv(round) + " wins !"
+            }
             else
             {
                 if (drawAfterMove)
-                    opponentRequestedDraw = true
+                opponentRequestedDraw = true
+
                 if (noMove)
                     round = Round.Finished
+
+                if (check && noMove)
+                    message = "Checkmate ! " + Round.adv(round).toString + " wins !"
+                else if (check)
+                    message = "Check !"
+                else if (noMove)
+                    message = "Stalemate !"
+                else
+                    message = null  
             }
+                        
+            return true
         }
     }
 

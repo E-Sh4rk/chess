@@ -26,7 +26,6 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
 
     private var game : Game = null
     private var canPlay : Boolean = false
-    private var message : String = null
     private var selectedCase : Option[(Int,Int)] = None
     private var selectedCase2 : Option[(Int,Int)] = None // Used for promotion
     private var drawAfterMove : Boolean = false
@@ -39,25 +38,12 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     {
         game = g
         canPlay = false
-        message = null
         selectedCase = None
         selectedCase2 = None
         drawAfterMove = false
         interfaceStatus = InterfaceStatus.Default
         resize(this.size.width, this.size.height)
     }
-    /**
-    Prints a message in the center of the chessboard.
-
-    repaint must be called after.
-    */
-    def setMessage (s:String) : Unit = { message = s }
-    /**
-    Clears the message.
-    
-    repaint must be called after.
-    */
-    def clearMessage : Unit = { message = null }
 
     // Player methods
     def init (g:Game) : Unit = { } // The canvas use the same game for drawing as for playing
@@ -303,10 +289,10 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
             g.drawLine(0,j*height/game.dim_y,width,j*height/game.dim_y);
 
         // Prints a message !
-        if (message != null)
+        if (game.getMessage != null)
         {
             g.setColor(Color.red)
-            drawCenteredString(g, message, new Rectangle(0,0,width,height), g.getFont().deriveFont(7F * width / 100F))
+            drawCenteredString(g, game.getMessage, new Rectangle(0,0,width,height), g.getFont().deriveFont(7F * width / 100F))
         }
     }
     private def timeToString(t:Int) : String =

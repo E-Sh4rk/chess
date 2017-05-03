@@ -137,7 +137,7 @@ class Board (private val _b:Board, private val _gm:GameMode.GameMode)
     */
     def pieceAtPosition(x:Int,y:Int) : Piece =
     {
-        board.synchronized
+        this.synchronized
         {
             if (x < 0 || y < 0 || x >= dim_x || y >= dim_y)
                 return null
@@ -149,7 +149,7 @@ class Board (private val _b:Board, private val _gm:GameMode.GameMode)
     */
     def move(fromX:Int,fromY:Int,toX:Int,toY:Int) : Unit =
     {
-        board.synchronized
+        this.synchronized
         {
             val piece = board(fromX)(fromY)
             if (piece != null)
@@ -166,21 +166,21 @@ class Board (private val _b:Board, private val _gm:GameMode.GameMode)
     */
     def add(p:Piece):Unit =
     {
-        board.synchronized { addPiece(p) }
+        this.synchronized { addPiece(p) }
     }
     /**
     Remove the piece at a given position.
     */
     def remove(fromX:Int,fromY:Int) : Unit =
     {
-        board.synchronized { board(fromX)(fromY) = null }
+        this.synchronized { board(fromX)(fromY) = null }
     }
     /**
     Returns the king of the given team. Return null if not found.
     */
     def getKing(t:Round.Round):Piece =
     {
-        board.synchronized
+        this.synchronized
         {
             val pieces = getPieces(t,PieceType.King)
             if(pieces.length > 0)
@@ -193,7 +193,7 @@ class Board (private val _b:Board, private val _gm:GameMode.GameMode)
     */
     def getPieces(t:Round.Round,ptype:PieceType.PieceType):scala.collection.mutable.MutableList[Piece] =
     {
-        board.synchronized
+        this.synchronized
         {
             val res = new scala.collection.mutable.MutableList[Piece]()
             for (i<-0 to dim_x-1)

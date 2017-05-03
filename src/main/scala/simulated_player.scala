@@ -34,7 +34,7 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
                 disableAutoPlay
                 return false
             }
-            if (game.getMoveNumber >= autoPlayUntil || game.getMoveNumber >= history.moves.length-1)
+            if (game.getMoveNumber >= autoPlayUntil || game.getMoveNumber+1 >= history.moves.length)
                 disableAutoPlay
         
             val m = history.moves(game.getMoveNumber)
@@ -76,7 +76,7 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
                     canvas.repaint
                 return false
             }
-            return game.getMoveNumber < history.moves.length-1
+            return game.getMoveNumber < history.moves.length
         }
         return false
     }
