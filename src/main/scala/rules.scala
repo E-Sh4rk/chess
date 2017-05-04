@@ -440,13 +440,13 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
             // Preparing next round
             if (drawAfterMove && canRequestDraw)
             {
-                message = "Resignation ! " + Round.adv(round) + " wins !"
+                message = "Draw !"
                 round = Round.Finished
             }
             else
             {
                 if (drawAfterMove)
-                opponentRequestedDraw = true
+                    opponentRequestedDraw = true
 
                 if (check && noMove)
                     message = "Checkmate ! " + Round.adv(round).toString + " wins !"
