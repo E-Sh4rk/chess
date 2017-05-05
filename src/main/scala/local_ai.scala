@@ -27,14 +27,14 @@ class AlphaBetaAI extends SynchPlayer
         PieceType.ArchBishop -> 7,
         PieceType.Chancellor -> 7
     )
-    def eval (game:Game) : Int =
+    def eval (rules:Rules) : Int =
     {
         var diffPieceVals = 0
-        for (i <- 0 to game.dim_x-1)
+        for (i <- 0 to rules.dim_x-1)
         {
-            for (j <- 0 to game.dim_y-1)
+            for (j <- 0 to rules.dim_y-1)
             {
-                var p = game.pieceAtPosition(i, j)
+                var p = rules.pieceAtPosition(i, j)
                 if (p != null)
                     diffPieceVals += i + j + pieceVal(p.pieceType)
             }
@@ -44,38 +44,67 @@ class AlphaBetaAI extends SynchPlayer
 
     val minEval = 0
     val maxEval = 1000
-    private var maxProf = 6
-    private var maxNodes = 1000
-    
-    def computeMinimax(game:Game,isMyTurn:Boolean,prof:Int,nbNodesEvaluated:Int) : Int =
+    private var maxProf = 4
+
+    def computeAlphaBeta(rules:Rules,isMyTurn:Boolean,alpha:Int,beta:Int,prof:Int) : Int =
     {
-        if (prof > maxProf || nbNodesEvaluated > maxNodes)
-            return eval(game)
+        if (alpha > beta)
+            return (if (isMyTurn) maxEval else minEval)
+        else if (prof > maxProf)
+            return eval(rules)
         else
         {
-            var moves = game.possibleMoves.toArray
-            var moveChosenValue = (if (isMyTurn) minEval -1 else maxEval + 1)
-            for (moveTest <- moves)
+            var moves = rules.possibleMoves
+            var bestVal = (if (isMyTurn) minEval else maxEval)
+            var alphaCurrent = alpha
+            var betaCurrent = beta
+            for ((fromX, fromY, toX, toY) <- moves)
             {
-                // TODO : nbNodesEvaluated
-                var moveTestValue = computeMinimax(game, !isMyTurn, prof + 1, nbNodesEvaluated)  // TODO : here, game = (simulate moveTest in game)
-                if ((isMyTurn && moveTestValue > moveChosenValue) || (!isMyTurn && moveTestValue < moveChosenValue))
-                    moveChosenValue = moveTestValue
+                var rulesTest = new Rules(rules, rules.getHistory.mode)
+                rulesTest.move(fromX, fromY, toX, toY)
+                var valTest = computeAlphaBeta(rules, !isMyTurn, alphaCurrent, betaCurrent, prof + 1)
+                if (isMyTurn)
+                {
+                    if (valTest > bestVal)
+                    {
+                        bestVal = valTest
+                        //beta pruning
+                        if (bestVal >= beta)
+                            return bestVal
+                    }
+                    if (bestVal > alphaCurrent)
+                        alphaCurrent = bestVal
+                }
+                else
+                {
+                    if (valTest < bestVal)
+                    {
+                        bestVal = valTest
+                        //alpha pruning
+                        if (bestVal >= beta)
+                            return bestVal
+                    }
+                    if (bestVal < betaCurrent)
+                        betaCurrent = bestVal
+                }
             }
-            return moveChosenValue
+            return bestVal
         }
     }
     
-    def miniMax(game:Game) : (Int,Int,Int,Int) =
+    def alphaBeta(rules:Rules) : (Int,Int,Int,Int) =
     {
-        var moves = game.possibleMoves.toArray
-        var moveChosen = moves(0)
-        var moveChosenValue = minEval - 1
+        val moves = rules.possibleMoves
+        var moveChosen = moves.head
+        var moveChosenValue = minEval
         var moveTestValue = 0
-        moves.foreach
-        { moveTest =>
-            moveTestValue = computeMinimax(game,false,1,1)  // TODO : here, game = (simulate moveTest in game)
-            if (moveTestValue > moveChosenValue)
+        for (moveTest <- moves)
+        {
+            val (fromX, fromY, toX, toY) = moveTest
+            var rulesTest = new Rules(rules, rules.getHistory.mode)
+            rulesTest.move(fromX, fromY, toX, toY)
+            moveTestValue = computeAlphaBeta(rulesTest, false, moveChosenValue, maxEval, 1)
+            if (moveTestValue >= moveChosenValue)
             {
                 moveChosen = moveTest
                 moveChosenValue = moveTestValue
@@ -84,8 +113,8 @@ class AlphaBetaAI extends SynchPlayer
         return moveChosen
     }
 
-    override def synchPlay (game:Game) : (Int,Int,Int,Int) =
+    override def synchPlay (rules:Game) : (Int,Int,Int,Int) =
     {
-        return miniMax(game)
+        return alphaBeta(rules)
     }
 }
