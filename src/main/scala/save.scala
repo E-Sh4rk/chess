@@ -105,7 +105,7 @@ class History()
   
   @param fileName The desired name for the PGN file.
   */
-  def savePGN(fileName:String) =
+  def savePGN(fileName:String, algebricNotation:Boolean=false) =
   {
     try
     {
@@ -138,7 +138,8 @@ class History()
           stringOfMove += "O-O-O"
         else
         {
-          stringOfMove += History.pieceTypeAbv(move.pieceType)
+          if (!algebricNotation)
+            stringOfMove += History.pieceTypeAbv(move.pieceType)
           if (move.fromX >= 0)
             stringOfMove += xToColumn(move.fromX)
           if (move.fromY >= 0)

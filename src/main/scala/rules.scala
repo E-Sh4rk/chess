@@ -386,7 +386,7 @@ class Rules(private val _r:Rules, private val _gm:GameMode.GameMode) extends Boa
             threefoldCounter(currentConfiguration) = (threefoldCounter getOrElse (currentConfiguration, 0)) + 1
             if (pieceAtPosition(fromX,fromY).pieceType == PieceType.Pawn) // Detects if the piece moved is a pawn
                 fmRule = 0
-            else if (pieceAtPosition(toX,toY) != null) // Detects if a piece is eaten
+            if (pieceAtPosition(toX,toY) != null) // Detects if a piece is eaten
                 { h_catch = true ; fmRule = 0 }
             else if (enPassantMove(fromX,fromY,toX,toY) != None) // Detects if a piece is eaten 'en passant'
                 { h_catch = true ; fmRule = 0 }

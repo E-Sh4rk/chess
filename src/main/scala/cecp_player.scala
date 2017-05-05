@@ -2,6 +2,7 @@ import java.io.PrintWriter
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import scala.io.Source
+import java.nio.file.Files
 
 /**
 An AI that is played by an external engine supporting the CECP protocol.
@@ -25,8 +26,15 @@ class CECP_AI extends Player with Runnable
 
         // Initializing game
         sendCommand(out,"new")
-        // TODO : pgn load
-        purgeMin(in,2);purge(err)
+        // TODO : pgn load : FIX freeze after Waiting...
+        if (game.getHistory.moves.length > 0)
+        {
+            purge(in);purge(err)
+            val temp = Files.createTempFile("gnuchess", ".pgn")
+            game.getHistory.savePGN(temp.toString, true)
+            sendCommand(out,"pgnload "+temp.toString)
+            purgeMin(in,11);purge(err)
+        }
 
         while (!_stop)
         {
@@ -43,9 +51,9 @@ class CECP_AI extends Player with Runnable
                         val Some (p) = advPlay
                         advPlay = None
                         play = false
-                        // TODO : Support promoting
+                        // TODO : Support promoting (read&write)
                         sendCommand(out,game.getHistory.moveToAlgebricNotation(p))
-                        purgeMin(in,3) // Time Limits + Print move
+                        purgeMin(in,1) // Print move
                         move = parseMove(getNextLine(in))
                         purgeMin(in,1) // My move is...
                     }
@@ -53,8 +61,9 @@ class CECP_AI extends Player with Runnable
                     if (move == None)
                     {
                         sendCommand(out,"go")
-                        purgeMin(in,2) // Time Limits
+                        println("Waiting...")
                         move = parseMove(getNextLine(in)) // Move.
+                        println("OK!")
                         purgeMin(in,1) // My move is...
                     }
                     
@@ -89,7 +98,11 @@ class CECP_AI extends Player with Runnable
     }
     private def getNextLine(s:BufferedReader) : String =
     {
-        return s.readLine
+        var str = s.readLine
+        while (str.startsWith("TimeLimit") || str.isEmpty)
+            str = s.readLine
+        println(str)
+        return str
     }
     private def parseMove(str:String) : Option[(Int,Int,Int,Int)] =
     {
