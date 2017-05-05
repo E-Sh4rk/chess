@@ -47,7 +47,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
 
     // Player methods
     def init (g:Game) : Unit = { } // The canvas use the same game for drawing as for playing
-    def mustPlay : Unit = { canPlay = true ; repaint }
+    def mustPlay (advMove:Option[(Int,Int,Int,Int)]): Unit = { canPlay = true ; repaint }
     def stop : Unit = { hasPlayed ; repaint }
 
     // Drawing (output)

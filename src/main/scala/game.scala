@@ -36,10 +36,10 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     canvas.newGame(this)
     playerWhite.init(this)
     playerBlack.init(this)
-    callPlayers
+    callPlayers(None)
     scheduleTimer
 
-    private def callPlayers():Unit =
+    private def callPlayers(lastMove:Option[(Int,Int,Int,Int)]):Unit =
     {
         SwingUtilities.invokeLater(new Runnable() {
             override def run  : Unit =
@@ -48,11 +48,10 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                 {
                     if (suspended || getRound == Round.Finished)
                         return
-
                     if (getRound == Round.White)
-                        playerWhite.mustPlay
+                        playerWhite.mustPlay(lastMove)
                     if (getRound == Round.Black)
-                        playerBlack.mustPlay
+                        playerBlack.mustPlay(lastMove)
                 }
             }
         });
@@ -127,7 +126,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                 suspended = false
                 playerWhite.init(this)
                 playerBlack.init(this)
-                callPlayers
+                callPlayers(None)
                 scheduleTimer
             }
         }
@@ -203,7 +202,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                     gameFinished
 
                 refreshCanvas
-                callPlayers
+                callPlayers(Some((fromX,fromY,toX,toY)))
                 return true
             }
             return false

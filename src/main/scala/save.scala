@@ -52,6 +52,28 @@ class History()
   var dim_x = 8
   var dim_y = 8
 
+  def moveFromAlgebricNotation (str:String) : Option[(Int,Int,Int,Int)] =
+  {
+    try
+    {
+      if (str.length == 4)
+        return Some ((columnToX(str(0)),rowToY(str(1).toString),columnToX(str(2)),rowToY(str(3).toString)))
+    }
+    catch { case  ex : Exception => { } }
+    return None
+  }
+
+  def moveToAlgebricNotation (move:(Int,Int,Int,Int)) : String =
+  {
+    try
+    {
+       val (fromX,fromY,toX,toY) = move
+       return xToColumn(fromX) + yToRow(fromY) + xToColumn(toX) + yToRow(toY)
+    }
+    catch { case  ex : Exception => { } }
+    return null
+  }
+
   private def xToColumn (x:Int) : String =
   {
     if (x >= dim_x || x < 0)

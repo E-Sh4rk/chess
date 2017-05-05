@@ -17,7 +17,7 @@ trait Player {
     This function must terminate QUICLKY. Then Game.move must be called by the player (on the current thread or on another thread).
     Game.resign or Game.requestDraw can also be called instead of Game.move.
     */
-    def mustPlay : Unit
+    def mustPlay (advMove:Option[(Int,Int,Int,Int)]): Unit
 
     /**
     Indicates to the player that the game has been suspended.
@@ -45,7 +45,7 @@ abstract class SynchPlayer extends Player with Runnable {
     private var game:Game = null
     private var thread : Thread = null
     def init (g:Game) : Unit = { game = g }
-    def mustPlay : Unit = { if (thread == null) {thread = new Thread(this) ; thread.start} }
+    def mustPlay (advMove:Option[(Int,Int,Int,Int)]) : Unit = { if (thread == null) {thread = new Thread(this) ; thread.start} }
     override def run : Unit =
     {
         try
