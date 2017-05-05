@@ -6,9 +6,10 @@ Implements a chessboard with all rules about movements and rounds.
 
 All methods are thread-safe.
 
-@param gameMode The game mode.
+@param _r The instance of Rule to copy.
+@param _gm The game mode.
 */
-class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extends Board(gameMode)
+class Rules(private val _r:Rules, private val _gm:GameMode.GameMode) extends Board(_r, _gm)
 {
     private var message:String = null
     private var round = Round.Black
@@ -27,6 +28,36 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
     = scala.collection.mutable.Map
     [(scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]),Int]()
 
+    if (_r == null)
+    {
+        history.mode = _gm
+        history.dim_x = dim_x
+        history.dim_y = dim_y
+        changeRoundAndUpdateConfiguration
+    }
+    else
+    {
+        history.mode = _r.history.mode
+        history.dim_x = _r.history.dim_x
+        history.dim_y = _r.history.dim_y
+
+        round = _r.round
+        opponentRequestedDraw = _r.opponentRequestedDraw
+        enPassantPosition = _r.enPassantPosition
+
+        // NOTE : History is not copied (no need for that)
+        currentConfiguration = copyConfiguration(_r.currentConfiguration)
+        for (_k <- _r.threefoldCounter.keys)
+            threefoldCounter(copyConfiguration(_k)) = _r.threefoldCounter(_k)
+
+        roundNumber = _r.roundNumber
+        fmRule = _r.fmRule
+
+    }
+    def this (_r:Rules) = { this (_r, GameMode.Vanilla) }
+    def this (_gm:GameMode.GameMode) = { this (null, _gm) }
+    def this () = { this (GameMode.Vanilla) }
+
     private def copyConfiguration(_conf:(scala.collection.mutable.Set[PieceStruct],Round.Round,
     scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]))
     : (scala.collection.mutable.Set[PieceStruct],Round.Round,scala.collection.mutable.Set[(Int,Int,Int,Int)],scala.collection.mutable.Set[(Int,Int,Int,Int)]) =
@@ -43,31 +74,6 @@ class Rules(private val _r:Rules, private val gameMode:GameMode.GameMode) extend
             moves2 += _m
         return  (pieces,_round,moves1,moves2)
     }
-
-    history.mode = gameMode
-    history.dim_x = dim_x
-    history.dim_y = dim_y
-
-    if (_r == null)
-        changeRoundAndUpdateConfiguration
-    else
-    {
-        round = _r.round
-        opponentRequestedDraw = _r.opponentRequestedDraw
-        enPassantPosition = _r.enPassantPosition
-
-        // NOTE : History is not copied (no need for that)
-        currentConfiguration = copyConfiguration(_r.currentConfiguration)
-        for (_k <- _r.threefoldCounter.keys)
-            threefoldCounter(copyConfiguration(_k)) = _r.threefoldCounter(_k)
-
-        roundNumber = _r.roundNumber
-        fmRule = _r.fmRule
-
-    }
-    def this (_r:Rules) = { this (_r, GameMode.Vanilla) }
-    def this (gameMode:GameMode.GameMode) = { this (null, gameMode) }
-    def this () = { this (GameMode.Vanilla) }
 
     private def changeRoundAndUpdateConfiguration() : Unit =
     {
