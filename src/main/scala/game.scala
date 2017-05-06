@@ -34,24 +34,39 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
     clock(Round.Black) = clockSettings.time
 
     canvas.newGame(this)
-    playerWhite.init(this)
-    playerBlack.init(this)
-    callPlayers(None)
+    initPlayers
+    callPlayers(null)
     scheduleTimer
 
-    private def callPlayers(lastMove:Option[(Int,Int,Int,Int)]):Unit =
+    private def initPlayers():Unit =
+    {
+        playerWhite.init(this)
+        if (playerBlack ne playerWhite)
+            playerBlack.init(this)
+    }
+    private def stopPlayers():Unit =
+    {
+        playerWhite.stop
+        if (playerBlack ne playerWhite)
+            playerBlack.stop
+    }
+    private def callPlayers(lastMove:Move):Unit =
     {
         SwingUtilities.invokeLater(new Runnable() {
             override def run  : Unit =
             {
                 this.synchronized
                 {
+                    var lm = lastMove
+                    if (playerWhite eq playerBlack)
+                        lm = null
+                        
                     if (suspended || getRound == Round.Finished)
                         return
                     if (getRound == Round.White)
-                        playerWhite.mustPlay(lastMove)
+                        playerWhite.mustPlay(lm)
                     if (getRound == Round.Black)
-                        playerBlack.mustPlay(lastMove)
+                        playerBlack.mustPlay(lm)
                 }
             }
         });
@@ -76,8 +91,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
 
     private def gameFinished() : Unit =
     {
-        playerWhite.stop
-        playerBlack.stop
+        stopPlayers
         timer.cancel
     }
     private def updateClock() : Unit =
@@ -108,8 +122,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             if (!suspended && getRound != Round.Finished)
             {
                 suspended = true
-                playerWhite.stop
-                playerBlack.stop
+                stopPlayers
                 timer.cancel
             }
         }
@@ -124,9 +137,8 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             if (suspended && getRound != Round.Finished)
             {
                 suspended = false
-                playerWhite.init(this)
-                playerBlack.init(this)
-                callPlayers(None)
+                initPlayers
+                callPlayers(null)
                 scheduleTimer
             }
         }
@@ -202,7 +214,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                     gameFinished
 
                 refreshCanvas
-                callPlayers(Some((fromX,fromY,toX,toY)))
+                callPlayers(getHistory.moves.last)
                 return true
             }
             return false

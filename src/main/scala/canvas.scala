@@ -47,7 +47,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
 
     // Player methods
     def init (g:Game) : Unit = { } // The canvas use the same game for drawing as for playing
-    def mustPlay (advMove:Option[(Int,Int,Int,Int)]): Unit = { canPlay = true ; repaint }
+    def mustPlay (advMove:Move): Unit = { canPlay = true ; repaint }
     def stop : Unit = { hasPlayed ; repaint }
 
     // Drawing (output)
@@ -146,153 +146,155 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         }
 
         // DRAWING THE IG INTERFACE
-
-        if (panel_width > 0)
+        game.synchronized
         {
-            // Round info display
-            g.setColor(Color.black)
-            if (game.getRound == Round.White)
-                g.drawImage(whiteTrait,width+0*panel_width/5,height/2-panel_width/10,panel_width/5,panel_width/5,null)
-            if (game.getRound == Round.Black)
-                g.drawImage(blackTrait,width+0*panel_width/5,height/2-panel_width/10,panel_width/5,panel_width/5,null)
-            drawCenteredString(g, game.getRoundNumber.toString, new Rectangle(width+1*panel_width/5,0,panel_width/5,height),
-            g.getFont().deriveFont(10F * panel_width / 100F))
-            drawCenteredString(g, "("+game.getThreefoldRepetitionCounter.toString+"/3, "+game.getFiftyMoveRuleCounter.toString+"/50)", new Rectangle(width+3*panel_width/5,0,panel_width/5,height),
-            g.getFont().deriveFont(7F * panel_width / 100F))
-            // Clock
-            if (game.getClock(Round.Black) >= 0)
-                drawCenteredString(g, timeToString(game.getClock(Round.Black)), new Rectangle(width+2*panel_width/5,height/2-panel_width/2,panel_width/5,panel_width/2),
-                g.getFont().deriveFont(10F * panel_width / 100F))
-            if (game.getClock(Round.White) >= 0)
-                drawCenteredString(g, timeToString(game.getClock(Round.White)), new Rectangle(width+2*panel_width/5,height/2,panel_width/5,panel_width/2),
-                g.getFont().deriveFont(10F * panel_width / 100F))
-            // Piece counter
-            val whiteIcons = Array(w_pawn,w_rook,w_knight,w_bishop,w_queen)
-            val whiteCount = countRemainingPieces(Round.White)
-            val blackIcons = Array(b_pawn,b_rook,b_knight,b_bishop,b_queen)
-            val blackCount = countRemainingPieces(Round.Black)
-            for (i<-0 to 4)
+            if (panel_width > 0)
             {
-                drawCenteredString(g, whiteCount(i).toString, new Rectangle(width+i*panel_width/5,height-2*panel_width/5,panel_width/5,panel_width/5),
-                g.getFont().deriveFont(10F * panel_width / 100F))
-                g.drawImage(whiteIcons(i),width+i*panel_width/5,height-1*panel_width/5,panel_width/5,panel_width/5,null)
-                drawCenteredString(g, blackCount(i).toString, new Rectangle(width+i*panel_width/5,panel_width/5,panel_width/5,panel_width/5),
-                g.getFont().deriveFont(10F * panel_width / 100F))
-                g.drawImage(blackIcons(i),width+i*panel_width/5,0,panel_width/5,panel_width/5,null)
-            }
-            // Buttons
-            if (canPlay && game.getRound != Round.Finished)
-            {
-                var buttons_y = height/2 - panel_width/10
-                var label_y = buttons_y
+                // Round info display
+                g.setColor(Color.black)
                 if (game.getRound == Round.White)
-                {
-                    buttons_y = 3*height/4 - panel_width/10
-                    label_y = buttons_y-panel_width/5
-                }
+                    g.drawImage(whiteTrait,width+0*panel_width/5,height/2-panel_width/10,panel_width/5,panel_width/5,null)
                 if (game.getRound == Round.Black)
+                    g.drawImage(blackTrait,width+0*panel_width/5,height/2-panel_width/10,panel_width/5,panel_width/5,null)
+                drawCenteredString(g, game.getRoundNumber.toString, new Rectangle(width+1*panel_width/5,0,panel_width/5,height),
+                g.getFont().deriveFont(10F * panel_width / 100F))
+                drawCenteredString(g, "("+game.getThreefoldRepetitionCounter.toString+"/3, "+game.getFiftyMoveRuleCounter.toString+"/50)", new Rectangle(width+3*panel_width/5,0,panel_width/5,height),
+                g.getFont().deriveFont(7F * panel_width / 100F))
+                // Clock
+                if (game.getClock(Round.Black) >= 0)
+                    drawCenteredString(g, timeToString(game.getClock(Round.Black)), new Rectangle(width+2*panel_width/5,height/2-panel_width/2,panel_width/5,panel_width/2),
+                    g.getFont().deriveFont(10F * panel_width / 100F))
+                if (game.getClock(Round.White) >= 0)
+                    drawCenteredString(g, timeToString(game.getClock(Round.White)), new Rectangle(width+2*panel_width/5,height/2,panel_width/5,panel_width/2),
+                    g.getFont().deriveFont(10F * panel_width / 100F))
+                // Piece counter
+                val whiteIcons = Array(w_pawn,w_rook,w_knight,w_bishop,w_queen)
+                val whiteCount = countRemainingPieces(Round.White)
+                val blackIcons = Array(b_pawn,b_rook,b_knight,b_bishop,b_queen)
+                val blackCount = countRemainingPieces(Round.Black)
+                for (i<-0 to 4)
                 {
-                    buttons_y = 1*height/4 - panel_width/10
-                    label_y = buttons_y+panel_width/5
+                    drawCenteredString(g, whiteCount(i).toString, new Rectangle(width+i*panel_width/5,height-2*panel_width/5,panel_width/5,panel_width/5),
+                    g.getFont().deriveFont(10F * panel_width / 100F))
+                    g.drawImage(whiteIcons(i),width+i*panel_width/5,height-1*panel_width/5,panel_width/5,panel_width/5,null)
+                    drawCenteredString(g, blackCount(i).toString, new Rectangle(width+i*panel_width/5,panel_width/5,panel_width/5,panel_width/5),
+                    g.getFont().deriveFont(10F * panel_width / 100F))
+                    g.drawImage(blackIcons(i),width+i*panel_width/5,0,panel_width/5,panel_width/5,null)
                 }
-                if (game.canRequestDraw)
-                    drawCenteredString(g, "You can request a draw immediatly.", new Rectangle(width,label_y,panel_width,panel_width/5),
-                    g.getFont().deriveFont(5F * panel_width / 100F))
-                if (interfaceStatus == InterfaceStatus.Default)
+                // Buttons
+                if (canPlay && game.getRound != Round.Finished)
                 {
-                    if (!drawAfterMove)
+                    var buttons_y = height/2 - panel_width/10
+                    var label_y = buttons_y
+                    if (game.getRound == Round.White)
                     {
-                        button_r = new Rectangle(width+1*panel_width/5,buttons_y,panel_width/5,panel_width/5)
-                        button_d = new Rectangle(width+3*panel_width/5,buttons_y,panel_width/5,panel_width/5)
-                        g.drawImage(r_button,button_r.x,button_r.y,button_r.width,button_r.height,null)
-                        g.drawImage(d_button,button_d.x,button_d.y,button_d.width,button_d.height,null)
+                        buttons_y = 3*height/4 - panel_width/10
+                        label_y = buttons_y-panel_width/5
+                    }
+                    if (game.getRound == Round.Black)
+                    {
+                        buttons_y = 1*height/4 - panel_width/10
+                        label_y = buttons_y+panel_width/5
+                    }
+                    if (game.canRequestDraw)
+                        drawCenteredString(g, "You can request a draw immediatly.", new Rectangle(width,label_y,panel_width,panel_width/5),
+                        g.getFont().deriveFont(5F * panel_width / 100F))
+                    if (interfaceStatus == InterfaceStatus.Default)
+                    {
+                        if (!drawAfterMove)
+                        {
+                            button_r = new Rectangle(width+1*panel_width/5,buttons_y,panel_width/5,panel_width/5)
+                            button_d = new Rectangle(width+3*panel_width/5,buttons_y,panel_width/5,panel_width/5)
+                            g.drawImage(r_button,button_r.x,button_r.y,button_r.width,button_r.height,null)
+                            g.drawImage(d_button,button_d.x,button_d.y,button_d.width,button_d.height,null)
+                        }
+                        else
+                        {
+                            drawCenteredString(g, "You have requested a draw.", new Rectangle(width,buttons_y,panel_width,panel_width/5),
+                            g.getFont().deriveFont(5F * panel_width / 100F))
+                        }
+                    }
+                    if (interfaceStatus == InterfaceStatus.ConfirmResign)
+                    {
+                        button_resign = new Rectangle(width+3*panel_width/10,buttons_y,2*panel_width/5,panel_width/5)
+                        g.drawImage(resign_button,button_resign.x,button_resign.y,button_resign.width,button_resign.height,null)
+                    }
+                    if (interfaceStatus == InterfaceStatus.ConfirmDraw)
+                    {
+                        button_draw = new Rectangle(width+3*panel_width/10,buttons_y,2*panel_width/5,panel_width/5)
+                        g.drawImage(draw_button,button_draw.x,button_draw.y,button_draw.width,button_draw.height,null)
+                    }
+                }
+            }
+
+            // DRAWING THE GAME
+
+            if (selectedCase2 != None)
+            {
+                // Promotion !
+                val max_height = math.min(height,width*3/2)
+                val max_width = max_height*2/3
+                g.drawImage(promoQueen,(width-(max_width/2))/2,0,max_width/2,max_height/2,null)
+                g.drawImage(promoRook,(width/3-(max_width/3))/2,height/2,max_width/3,max_height/3,null)
+                g.drawImage(promoKnight,width/3+(width/3-(max_width/3))/2,height/2,max_width/3,max_height/3,null)
+                g.drawImage(promoBishop,2*width/3+(width/3-(max_width/3))/2,height/2,max_width/3,max_height/3,null)
+                return
+            }
+            
+            // Coloring the board
+            val possibleMoves = game.possibleMoves
+            for (i<-0 to game.dim_x-1)
+            {
+                for (j<-0 to game.dim_y-1)
+                {
+                    if ((i+j) % 2 == 0)
+                    {
+                        // White case
+                        g.setColor(Color.white);
+                        g.fillRect(i*width/game.dim_x,j*height/game.dim_y,width/game.dim_x,height/game.dim_y);
                     }
                     else
                     {
-                        drawCenteredString(g, "You have requested a draw.", new Rectangle(width,buttons_y,panel_width,panel_width/5),
-                        g.getFont().deriveFont(5F * panel_width / 100F))
+                        // 'Black' case
+                        g.setColor(new Color(220,220,220));
+                        g.fillRect(i*width/game.dim_x,j*height/game.dim_y,width/game.dim_x,height/game.dim_y);
                     }
-                }
-                if (interfaceStatus == InterfaceStatus.ConfirmResign)
-                {
-                    button_resign = new Rectangle(width+3*panel_width/10,buttons_y,2*panel_width/5,panel_width/5)
-                    g.drawImage(resign_button,button_resign.x,button_resign.y,button_resign.width,button_resign.height,null)
-                }
-                if (interfaceStatus == InterfaceStatus.ConfirmDraw)
-                {
-                    button_draw = new Rectangle(width+3*panel_width/10,buttons_y,2*panel_width/5,panel_width/5)
-                    g.drawImage(draw_button,button_draw.x,button_draw.y,button_draw.width,button_draw.height,null)
+                    if (Some(i,j) == selectedCase)
+                    {
+                        // Selected case : yellow
+                        g.setColor(/*Color.yellow*/new Color(0xFF,0xFF,0x66));
+                        g.fillRect(i*width/game.dim_x,j*height/game.dim_y,width/game.dim_x,height/game.dim_y);
+                    }
+                    // Coloring cases we can move to : green
+                    g.setColor(/*Color.green*/new Color(0x62,0xDD,0x62));
+                    selectedCase match
+                    {
+                        case None => {}
+                        case Some ((x,y)) if possibleMoves contains (x,y,i,j) => g.fillRect(i*width/game.dim_x,j*height/game.dim_y,width/game.dim_x,height/game.dim_y);
+                        case _ => {}
+                    }
+                    // Drawing the piece
+                    val piece = game.pieceAtPosition(i,j)
+                    val min = math.min(width/game.dim_x,height/game.dim_y)
+                    if (piece != null)
+                        g.drawImage(piece.getImage,i*width/game.dim_x+(width/game.dim_x-min)/2,j*height/game.dim_y+(height/game.dim_y-min)/2,min,min,null)
                 }
             }
-        }
 
-        // DRAWING THE GAME
+            // Drawing the grid
+            g.setColor(new Color(100,100,100));
+            g.setStroke(new BasicStroke(2));
+            for (i<-0 to game.dim_x)
+                g.drawLine(i*width/game.dim_x,0,i*width/game.dim_x,height);
+            for (j<-0 to game.dim_y)
+                g.drawLine(0,j*height/game.dim_y,width,j*height/game.dim_y);
 
-        if (selectedCase2 != None)
-        {
-            // Promotion !
-            val max_height = math.min(height,width*3/2)
-            val max_width = max_height*2/3
-            g.drawImage(promoQueen,(width-(max_width/2))/2,0,max_width/2,max_height/2,null)
-            g.drawImage(promoRook,(width/3-(max_width/3))/2,height/2,max_width/3,max_height/3,null)
-            g.drawImage(promoKnight,width/3+(width/3-(max_width/3))/2,height/2,max_width/3,max_height/3,null)
-            g.drawImage(promoBishop,2*width/3+(width/3-(max_width/3))/2,height/2,max_width/3,max_height/3,null)
-            return
-        }
-        
-        // Coloring the board
-        val possibleMoves = game.possibleMoves
-        for (i<-0 to game.dim_x-1)
-        {
-            for (j<-0 to game.dim_y-1)
+            // Prints a message !
+            if (game.getMessage != null)
             {
-                if ((i+j) % 2 == 0)
-                {
-                    // White case
-                    g.setColor(Color.white);
-                    g.fillRect(i*width/game.dim_x,j*height/game.dim_y,width/game.dim_x,height/game.dim_y);
-                }
-                else
-                {
-                    // 'Black' case
-                    g.setColor(new Color(220,220,220));
-                    g.fillRect(i*width/game.dim_x,j*height/game.dim_y,width/game.dim_x,height/game.dim_y);
-                }
-                if (Some(i,j) == selectedCase)
-                {
-                    // Selected case : yellow
-                    g.setColor(/*Color.yellow*/new Color(0xFF,0xFF,0x66));
-                    g.fillRect(i*width/game.dim_x,j*height/game.dim_y,width/game.dim_x,height/game.dim_y);
-                }
-                // Coloring cases we can move to : green
-                g.setColor(/*Color.green*/new Color(0x62,0xDD,0x62));
-                selectedCase match
-                {
-                    case None => {}
-                    case Some ((x,y)) if possibleMoves contains (x,y,i,j) => g.fillRect(i*width/game.dim_x,j*height/game.dim_y,width/game.dim_x,height/game.dim_y);
-                    case _ => {}
-                }
-                // Drawing the piece
-                val piece = game.pieceAtPosition(i,j)
-                val min = math.min(width/game.dim_x,height/game.dim_y)
-                if (piece != null)
-                    g.drawImage(piece.getImage,i*width/game.dim_x+(width/game.dim_x-min)/2,j*height/game.dim_y+(height/game.dim_y-min)/2,min,min,null)
+                g.setColor(Color.red)
+                drawCenteredString(g, game.getMessage, new Rectangle(0,0,width,height), g.getFont().deriveFont(7F * width / 100F))
             }
-        }
-
-        // Drawing the grid
-        g.setColor(new Color(100,100,100));
-        g.setStroke(new BasicStroke(2));
-        for (i<-0 to game.dim_x)
-            g.drawLine(i*width/game.dim_x,0,i*width/game.dim_x,height);
-        for (j<-0 to game.dim_y)
-            g.drawLine(0,j*height/game.dim_y,width,j*height/game.dim_y);
-
-        // Prints a message !
-        if (game.getMessage != null)
-        {
-            g.setColor(Color.red)
-            drawCenteredString(g, game.getMessage, new Rectangle(0,0,width,height), g.getFont().deriveFont(7F * width / 100F))
         }
     }
     private def timeToString(t:Int) : String =
@@ -332,84 +334,87 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
         case MouseClicked(src, pt, mod, clicks, pops) => {
             if (game != null && canPlay)
             {
-                interfaceStatus = InterfaceStatus.Default
-                if (pt.x >= 0 && pt.y >= 0 && pt.x < width && pt.y < height)
+                game.synchronized
                 {
-                    val x = pt.x * game.dim_x / width
-                    val y = pt.y * game.dim_y / height
+                    interfaceStatus = InterfaceStatus.Default
+                    if (pt.x >= 0 && pt.y >= 0 && pt.x < width && pt.y < height)
+                    {
+                        val x = pt.x * game.dim_x / width
+                        val y = pt.y * game.dim_y / height
 
-                    if (selectedCase2 != None)
-                    {
-                        var ptype = PieceType.Unknown
-                        // Promotion ! Choosing a piece type
-                        if (pt.y <= height/2)
-                            ptype = PieceType.Queen
-                        else if (pt.x <= width/3)
-                            ptype = PieceType.Rook
-                        else if (pt.x <= 2*width/3)
-                            ptype = PieceType.Knight
-                        else if (pt.x <= width)
-                            ptype = PieceType.Bishop
-                        // Do the promotion move
-                        val Some ((sel_x, sel_y)) = selectedCase
-                        val Some ((sel_x2, sel_y2)) = selectedCase2
-                        val dam = drawAfterMove
-                        hasPlayed
-                        game.move(sel_x, sel_y, sel_x2, sel_y2, ptype, dam)
-                    }
-                    else if (selectedCase == Some(x,y))
-                        selectedCase = None
-                    else
-                    {
-                        if (game.canMove(x,y))
-                            selectedCase = Some(x,y)
-                        else if (selectedCase != None)
+                        if (selectedCase2 != None)
                         {
-                            // Playing the move if possible
+                            var ptype = PieceType.Unknown
+                            // Promotion ! Choosing a piece type
+                            if (pt.y <= height/2)
+                                ptype = PieceType.Queen
+                            else if (pt.x <= width/3)
+                                ptype = PieceType.Rook
+                            else if (pt.x <= 2*width/3)
+                                ptype = PieceType.Knight
+                            else if (pt.x <= width)
+                                ptype = PieceType.Bishop
+                            // Do the promotion move
                             val Some ((sel_x, sel_y)) = selectedCase
-                            if (game.canMove(sel_x, sel_y, x, y))
+                            val Some ((sel_x2, sel_y2)) = selectedCase2
+                            val dam = drawAfterMove
+                            hasPlayed
+                            game.move(sel_x, sel_y, sel_x2, sel_y2, ptype, dam)
+                        }
+                        else if (selectedCase == Some(x,y))
+                            selectedCase = None
+                        else
+                        {
+                            if (game.canMove(x,y))
+                                selectedCase = Some(x,y)
+                            else if (selectedCase != None)
                             {
-                                if (game.pieceAtPosition(sel_x,sel_y).pieceType == PieceType.Pawn && (y == 0 || y == game.dim_y-1))
-                                    // Promotion move
-                                    selectedCase2 = Some(x, y)
-                                else
+                                // Playing the move if possible
+                                val Some ((sel_x, sel_y)) = selectedCase
+                                if (game.canMove(sel_x, sel_y, x, y))
                                 {
-                                    // Not a promotion move
-                                    val dam = drawAfterMove
-                                    hasPlayed
-                                    game.move(sel_x, sel_y, x, y, PieceType.Unknown, dam)
-                                } 
+                                    if (game.pieceAtPosition(sel_x,sel_y).pieceType == PieceType.Pawn && (y == 0 || y == game.dim_y-1))
+                                        // Promotion move
+                                        selectedCase2 = Some(x, y)
+                                    else
+                                    {
+                                        // Not a promotion move
+                                        val dam = drawAfterMove
+                                        hasPlayed
+                                        game.move(sel_x, sel_y, x, y, PieceType.Unknown, dam)
+                                    } 
+                                }
                             }
                         }
                     }
-                }
-                else if (pt.x >= width && pt.y >= 0 && pt.x < width+panel_width && pt.y < height)
-                {
-                    if (button_d != null)
-                        if (button_d.contains(pt.x,pt.y))
-                            interfaceStatus = InterfaceStatus.ConfirmDraw
-                    if (button_r != null)
-                        if (button_r.contains(pt.x,pt.y))
-                            interfaceStatus = InterfaceStatus.ConfirmResign
-                    if (button_draw != null)
-                        if (button_draw.contains(pt.x,pt.y))
-                        {
-                            if (game.canRequestDraw)
+                    else if (pt.x >= width && pt.y >= 0 && pt.x < width+panel_width && pt.y < height)
+                    {
+                        if (button_d != null)
+                            if (button_d.contains(pt.x,pt.y))
+                                interfaceStatus = InterfaceStatus.ConfirmDraw
+                        if (button_r != null)
+                            if (button_r.contains(pt.x,pt.y))
+                                interfaceStatus = InterfaceStatus.ConfirmResign
+                        if (button_draw != null)
+                            if (button_draw.contains(pt.x,pt.y))
+                            {
+                                if (game.canRequestDraw)
+                                {
+                                    hasPlayed
+                                    game.requestDraw
+                                }
+                                else
+                                    drawAfterMove = true
+                            } 
+                        if (button_resign != null)
+                            if (button_resign.contains(pt.x,pt.y))
                             {
                                 hasPlayed
-                                game.requestDraw
-                            }
-                            else
-                                drawAfterMove = true
-                        } 
-                    if (button_resign != null)
-                        if (button_resign.contains(pt.x,pt.y))
-                        {
-                            hasPlayed
-                            game.resign
-                        }   
+                                game.resign
+                            }   
+                    }
+                    repaint
                 }
-                repaint
             }
         }
     }

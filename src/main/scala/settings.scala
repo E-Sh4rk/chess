@@ -125,6 +125,10 @@ class Settings extends GridBagPanel
             case _ => AI_Type.Random
         }
     }
+    def AI_are_gnuchess () : Boolean =
+    {
+        return p1_ai.selected && p2_ai.selected && aiType1.selection.item == "GNU Chess" && aiType2.selection.item == "GNU Chess"
+    }
 
     private var lastWhiteAiType = aiType1.selection.item
     private var lastWhite = p1_human.selected

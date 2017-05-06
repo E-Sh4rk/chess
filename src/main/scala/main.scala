@@ -103,8 +103,21 @@ object MyApp extends SimpleSwingApplication {
         contents = content
 
         // Utilitary functions
+        var current_cecp:CECP_AI = null
+        // TODO : New function in settings to update "...HasChanged", instead of ..._is_... and ...AiType
         private def newWhitePlayer () : Player =
         {
+            // Avoid multiple instance of gnuchess : it causes issues
+            if (!explore_mode && settingsPanel.AI_are_gnuchess)
+            {
+                settingsPanel.white_is_human ; settingsPanel.whiteAiType
+                if (current_cecp == null)
+                    current_cecp = new CECP_AI
+                return current_cecp
+            }
+            else
+                current_cecp = null
+
             if (explore_mode)
                 return currentSimulatedPlayer
             if (settingsPanel.white_is_human)
@@ -121,6 +134,17 @@ object MyApp extends SimpleSwingApplication {
         }
         private def newBlackPlayer () : Player =
         {
+            // Avoid multiple instance of gnuchess : it causes issues
+            if (!explore_mode && settingsPanel.AI_are_gnuchess)
+            {
+                settingsPanel.black_is_human ; settingsPanel.blackAiType
+                if (current_cecp == null)
+                    current_cecp = new CECP_AI
+                return current_cecp
+            }
+            else
+                current_cecp = null
+
             if (explore_mode)
                 return currentSimulatedPlayer
             if (settingsPanel.black_is_human)

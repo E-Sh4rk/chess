@@ -3,6 +3,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import scala.io.Source
 import java.nio.file.Files
+import java.nio.file.Paths
 
 /**
 An AI that is played by an external engine supporting the CECP protocol.
@@ -14,26 +15,33 @@ class CECP_AI extends Player with Runnable
     private var game:Game = null
     private var _stop = false
     private var play:Boolean = false
-    private var advPlay:Option[(Int,Int,Int,Int)] = None
+    private var advMove:Move = null
     private var thread:Thread = null
+    private var proc:Process = null
 
     override def run : Unit =
     {
-        var proc = Runtime.getRuntime.exec(Array("gnuchess", "-x"))
+        // Clean former gnuchess cache file (may cause issues)
+        var temp = Paths.get(".tmp.epd")
+        Files.deleteIfExists(temp)
+
+        proc = Runtime.getRuntime.exec(Array("gnuchess", "-x"))
         val out = new PrintWriter(proc.getOutputStream)
         val err = new BufferedReader(new InputStreamReader(proc.getErrorStream))
         val in = new BufferedReader(new InputStreamReader(proc.getInputStream))
 
         // Initializing game
+        purgeMin(in,1);purge(err)
         sendCommand(out,"new")
-        // TODO : pgn load : FIX freeze after Waiting...
+        // PGN Load
         if (game.getHistory.moves.length > 0)
         {
             purge(in);purge(err)
-            val temp = Files.createTempFile("gnuchess", ".pgn")
+            temp = Files.createTempFile("gnuchess", ".pgn")
             game.getHistory.savePGN(temp.toString, true)
             sendCommand(out,"pgnload "+temp.toString)
-            purgeMin(in,11);purge(err)
+            purgeMin(in,10);purge(err)
+            Files.delete(temp);
         }
 
         while (!_stop)
@@ -44,31 +52,25 @@ class CECP_AI extends Player with Runnable
                 if (play)
                 {
                     play = false
+                    var move:Move = null
 
-                    var move:Option[(Int,Int,Int,Int)] = None
-                    if (advPlay != None)
+                    if (advMove != null)
                     {
-                        val Some (p) = advPlay
-                        advPlay = None
-                        play = false
-                        // TODO : Support promoting (read&write)
-                        sendCommand(out,game.getHistory.moveToAlgebricNotation(p))
+                        sendCommand(out,game.getHistory.moveToAlgebricNotation(advMove))
+                        advMove = null
                         purgeMin(in,1) // Print move
                         move = parseMove(getNextLine(in))
                         purgeMin(in,1) // My move is...
                     }
 
-                    if (move == None)
+                    if (move == null)
                     {
                         sendCommand(out,"go")
-                        println("Waiting...")
                         move = parseMove(getNextLine(in)) // Move.
-                        println("OK!")
                         purgeMin(in,1) // My move is...
                     }
                     
-                    val Some ((fromX,fromY,toX,toY)) = move
-                    game.move(fromX,fromY,toX,toY)
+                    game.move(move.fromX,move.fromY,move.toX,move.toY,move.promotion)
                 }
                 Thread.sleep(10)
             }
@@ -78,6 +80,7 @@ class CECP_AI extends Player with Runnable
         out.close()
         if (proc != null)
             proc.destroy
+        proc = null
         _stop = false
     }
     private def sendCommand(out:PrintWriter,s:String) : Unit =
@@ -101,10 +104,9 @@ class CECP_AI extends Player with Runnable
         var str = s.readLine
         while (str.startsWith("TimeLimit") || str.isEmpty)
             str = s.readLine
-        println(str)
         return str
     }
-    private def parseMove(str:String) : Option[(Int,Int,Int,Int)] =
+    private def parseMove(str:String) : Move =
     {
         println(str);
         val algNotationMove:String = str.split(" ... ")(1)
@@ -128,18 +130,21 @@ class CECP_AI extends Player with Runnable
     def stop : Unit =
     {
         play = false
+        game = null
         if (thread != null)
         {
             _stop = true
             thread = null
         }
-        game = null
+        if (proc != null)
+            proc.destroy
+        proc = null
     }
-    def mustPlay (advMove:Option[(Int,Int,Int,Int)]) : Unit =
+    def mustPlay (_advMove:Move) : Unit =
     {
         if (game == null)
             return
-        advPlay = advMove
+        advMove = _advMove
         play = true
     }
 

@@ -52,23 +52,32 @@ class History()
   var dim_x = 8
   var dim_y = 8
 
-  def moveFromAlgebricNotation (str:String) : Option[(Int,Int,Int,Int)] =
+  def moveFromAlgebricNotation (str:String) : Move =
   {
     try
     {
-      if (str.length == 4)
-        return Some ((columnToX(str(0)),rowToY(str(1).toString),columnToX(str(2)),rowToY(str(3).toString)))
+      if (str.length == 4 || str.length == 5)
+      {
+        val m = new Move(PieceType.Unknown,-1,-1,-1,-1,false,CastleType.NoCastle,PieceType.Unknown,GameEvent.NoEvent)
+        m.fromX = columnToX(str(0)) ; m.fromY = rowToY(str(1).toString)
+        m.toX = columnToX(str(2)) ; m.toY = rowToY(str(3).toString)
+        if (str.length == 5)
+          m.promotion = History.pieceOfAbv(Character.toUpperCase(str(4)))
+        return m
+      }
     }
     catch { case  ex : Exception => { } }
-    return None
+    return null
   }
 
-  def moveToAlgebricNotation (move:(Int,Int,Int,Int)) : String =
+  def moveToAlgebricNotation (move:Move) : String =
   {
     try
     {
-       val (fromX,fromY,toX,toY) = move
-       return xToColumn(fromX) + yToRow(fromY) + xToColumn(toX) + yToRow(toY)
+       var str:String = xToColumn(move.fromX) + yToRow(move.fromY) + xToColumn(move.toX) + yToRow(move.toY)
+       if (move.promotion != PieceType.Unknown)
+        str += History.pieceTypeAbv(move.promotion).toLowerCase
+       return str
     }
     catch { case  ex : Exception => { } }
     return null
@@ -144,12 +153,14 @@ class History()
             stringOfMove += xToColumn(move.fromX)
           if (move.fromY >= 0)
             stringOfMove += yToRow(move.fromY)
-          if (move.isCatch)
+          if (move.isCatch && !algebricNotation)
             stringOfMove += "x"
           stringOfMove += xToColumn(move.toX)
           stringOfMove += yToRow(move.toY)
-          if (move.promotion != PieceType.Unknown)
+          if (move.promotion != PieceType.Unknown && !algebricNotation)
             stringOfMove += "=" + History.pieceTypeAbv(move.promotion)
+          if (move.promotion != PieceType.Unknown && algebricNotation)
+            stringOfMove += History.pieceTypeAbv(move.promotion).toLowerCase
         }
         if (move.event == GameEvent.Check)
           stringOfMove += "+"

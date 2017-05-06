@@ -11,7 +11,7 @@ class SimulatedPlayer(val history:History, private val canvas : Canvas = null) e
 
     def init (g:Game) : Unit = { game = g }
     def stop : Unit = { canPlay = false ; game = null }
-    def mustPlay (advMove:Option[(Int,Int,Int,Int)]) : Unit =
+    def mustPlay (advMove:Move) : Unit =
     {
         if (game == null)
             return
