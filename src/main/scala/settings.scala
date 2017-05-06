@@ -101,11 +101,20 @@ class Settings extends GridBagPanel
     c.gridx = 0; c.gridy = 9
     add(clockText, c)
 
-    def white_is_human () : Boolean = { lastWhite = p1_human.selected ; return p1_human.selected }
-    def black_is_human () : Boolean = { lastBlack = p2_human.selected ; return p2_human.selected }
+    def checkWhite () : Unit =
+    {
+        lastWhite = p1_human.selected
+        lastWhiteAiType = aiType1.selection.item
+    }
+    def checkBlack () : Unit =
+    {
+        lastBlack = p2_human.selected
+        lastBlackAiType = aiType2.selection.item
+    }
+    def white_is_human () : Boolean = { return p1_human.selected }
+    def black_is_human () : Boolean = { return p2_human.selected }
     def whiteAiType () : AI_Type.AI_Type =
     {
-        lastWhiteAiType = aiType1.selection.item
         return aiType1.selection.item match
         {
             case "Random" => AI_Type.Random
@@ -116,7 +125,6 @@ class Settings extends GridBagPanel
     }
     def blackAiType () : AI_Type.AI_Type =
     {
-        lastBlackAiType = aiType2.selection.item
         return aiType2.selection.item match
         {
             case "Random" => AI_Type.Random
@@ -124,10 +132,6 @@ class Settings extends GridBagPanel
             case "GNU Chess" => AI_Type.GNU_Chess
             case _ => AI_Type.Random
         }
-    }
-    def AI_are_gnuchess () : Boolean =
-    {
-        return p1_ai.selected && p2_ai.selected && aiType1.selection.item == "GNU Chess" && aiType2.selection.item == "GNU Chess"
     }
 
     private var lastWhiteAiType = aiType1.selection.item

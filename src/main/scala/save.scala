@@ -141,9 +141,9 @@ class History()
           stringOfMove += (roundNumber/2 + 1).toString + ". "
         
         // Move
-        if (move.castle == CastleType.Kingside)
+        if (move.castle == CastleType.Kingside && !algebricNotation)
           stringOfMove += "O-O"
-        else if (move.castle == CastleType.Queenside)
+        else if (move.castle == CastleType.Queenside && !algebricNotation)
           stringOfMove += "O-O-O"
         else
         {
@@ -162,12 +162,12 @@ class History()
           if (move.promotion != PieceType.Unknown && algebricNotation)
             stringOfMove += History.pieceTypeAbv(move.promotion).toLowerCase
         }
-        if (move.event == GameEvent.Check)
+        if (move.event == GameEvent.Check && !algebricNotation)
           stringOfMove += "+"
-        if (move.event == GameEvent.Checkmate)
+        if (move.event == GameEvent.Checkmate && !algebricNotation)
           stringOfMove += "#"
 
-        // Adds move to the file
+        // Append move to the file
         stringOfMove += " "
         if (nbCharsInLine + stringOfMove.length > 80)
         {

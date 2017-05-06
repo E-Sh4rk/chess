@@ -104,13 +104,13 @@ object MyApp extends SimpleSwingApplication {
 
         // Utilitary functions
         var current_cecp:CECP_AI = null
-        // TODO : New function in settings to update "...HasChanged", instead of ..._is_... and ...AiType
         private def newWhitePlayer () : Player =
         {
+            settingsPanel.checkWhite
             // Avoid multiple instance of gnuchess : it causes issues
-            if (!explore_mode && settingsPanel.AI_are_gnuchess)
+            if (!explore_mode && !settingsPanel.black_is_human && !settingsPanel.white_is_human
+            && settingsPanel.whiteAiType == AI_Type.GNU_Chess && settingsPanel.blackAiType == AI_Type.GNU_Chess)
             {
-                settingsPanel.white_is_human ; settingsPanel.whiteAiType
                 if (current_cecp == null)
                     current_cecp = new CECP_AI
                 return current_cecp
@@ -134,10 +134,11 @@ object MyApp extends SimpleSwingApplication {
         }
         private def newBlackPlayer () : Player =
         {
+            settingsPanel.checkBlack
             // Avoid multiple instance of gnuchess : it causes issues
-            if (!explore_mode && settingsPanel.AI_are_gnuchess)
+            if (!explore_mode && !settingsPanel.black_is_human && !settingsPanel.white_is_human
+            && settingsPanel.whiteAiType == AI_Type.GNU_Chess && settingsPanel.blackAiType == AI_Type.GNU_Chess)
             {
-                settingsPanel.black_is_human ; settingsPanel.blackAiType
                 if (current_cecp == null)
                     current_cecp = new CECP_AI
                 return current_cecp

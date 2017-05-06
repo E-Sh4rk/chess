@@ -25,6 +25,7 @@ class CECP_AI extends Player with Runnable
         var temp = Paths.get(".tmp.epd")
         Files.deleteIfExists(temp)
 
+        // Start process
         proc = Runtime.getRuntime.exec(Array("gnuchess", "-x"))
         val out = new PrintWriter(proc.getOutputStream)
         val err = new BufferedReader(new InputStreamReader(proc.getErrorStream))

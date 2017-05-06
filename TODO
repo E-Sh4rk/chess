@@ -5,7 +5,7 @@ TODO 6 : another color (red ?) to highlight the eating moves
 TODO 7 : Clock : support multiple periods
 TODO 8 : Support clock in explore mode
 TODO 9 : Support game result in history
-
+TODO 10 : Write "Adversary is playing..." in canvas when necessary
 
 --- DONE ---
 TODO 4 : Image in panel when no game
