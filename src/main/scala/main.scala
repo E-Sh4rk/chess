@@ -160,8 +160,9 @@ object MyApp extends SimpleSwingApplication {
                 }
             }
         }
-        private def clockSettings () : TimePeriod =
+        private def clockSettings () : Array[TimePeriod] =
         {
+            val res = new scala.collection.mutable.MutableList[TimePeriod]()
             if (settingsPanel.clockEnabled)
             {
                 var time = 0 ; var rounds = 0 ; var inc = 0
@@ -178,14 +179,14 @@ object MyApp extends SimpleSwingApplication {
                                 time = values(0).toInt
                                 rounds = values(1).toInt
                                 inc = values(2).toInt
-                                return new TimePeriod(time, rounds, inc)
+                                res += new TimePeriod(time, rounds, inc)
                             }
                         }
                     }
                     catch { case e:Exception => {} }
                 }
             }
-            return new TimePeriod(-1, 0, 0)
+            return res.toArray
         }
         private def switchToExploreMode() =
         {

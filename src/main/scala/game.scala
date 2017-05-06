@@ -22,21 +22,53 @@ All methods are thread-safe.
 @param clockSettings The settings for the clock.
 */
 class Game(private val canvas:Canvas, private var playerWhite:Player, private var playerBlack:Player,
-           private val gameMode:GameMode.GameMode, private val clockSettings:TimePeriod) extends Rules(gameMode)
+           private val gameMode:GameMode.GameMode, private val clockSettings:Array[TimePeriod]) extends Rules(gameMode)
 {
     private var suspended = false
     // Clock
-    // clockSettings should be Array[TimePeriod] in order to support multiple periods. But for now...
     private var clock:scala.collection.mutable.Map[Round.Round,Int] = scala.collection.mutable.Map(Round.White -> 0, Round.Black -> 0, Round.Finished -> 0)
     private var timer : java.util.Timer = null
+    private var roundCycle : Int = computeRoundCycle
 
-    clock(Round.White) = clockSettings.time
-    clock(Round.Black) = clockSettings.time
+    clock(Round.White) = getNewTime(-1)
+    clock(Round.Black) = getNewTime(-1)
 
     canvas.newGame(this)
     initPlayers
     callPlayers(null)
     scheduleTimer
+
+    private def computeRoundCycle() : Int =
+    {
+        var n:Int = 0
+        for (i <- 0 to clockSettings.length - 1)
+        {
+            if (clockSettings(i).moves <= 0)
+                return 0
+            n += clockSettings(i).moves
+        }
+        return n
+    }
+    private def getNewTime(current:Int) : Int =
+    {
+        var round = getRoundNumber-1
+        if (roundCycle > 0)
+            round = round % roundCycle
+        for (i <- 0 to clockSettings.length -1)
+        {
+            // We are not in this period yet
+            if (round < 0)
+                return current + clockSettings(i-1).increment
+            // We have just entered this period
+            if (round == 0)
+                return clockSettings(i).time
+            // Testing next period, if any
+            if (clockSettings(i).moves <= 0 || i >= clockSettings.length-1)
+                return current + clockSettings(i).increment
+            round -= clockSettings(i).moves
+        }
+        return -1
+    }
 
     private def initPlayers():Unit =
     {
@@ -204,11 +236,7 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                 return false
             if (super.move(fromX,fromY,toX,toY,promotionType, drawAfterMove))
             {
-                clock(getRound) += clockSettings.increment
-                // Reinitializes clock if new period
-                if (clockSettings.moves > 0)
-                    if ((getRoundNumber - 1) % clockSettings.moves == 0)
-                        clock(getRound) = clockSettings.time
+                clock(getRound) = getNewTime(clock(getRound))
 
                 if (getRound == Round.Finished)
                     gameFinished

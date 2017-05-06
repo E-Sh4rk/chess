@@ -37,7 +37,7 @@ class Settings extends GridBagPanel
     private val label : Label = new Label("Settings below only apply to a new game :")
 
     private val clock : CheckBox = new CheckBox("Activate game clock")
-    private val clockText : TextArea = new TextArea("#SECONDS NB_OF_ROUNDS INCREMENT\n3600 0 5\n#Only one period is supported for now...",5,25)
+    private val clockText : TextArea = new TextArea("#SECONDS NB_OF_ROUNDS INCREMENT\n3600 0 5",5,25)
     clockText.enabled = false
 
     private val labelVariant : Label = new Label("Game mode (variant)")
