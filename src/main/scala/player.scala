@@ -16,7 +16,7 @@ trait Player {
 
     This function must terminate QUICLKY. Then Game.move must be called by the player (on the current thread or on another thread).
     Game.resign or Game.requestDraw can also be called instead of Game.move.
-    If a different player has moved just before this call, its move is passed as argument.
+    If a different player has moved before the last call to this players's mustPlay or init, its move is passed as argument.
     */
     def mustPlay (advMove:Move): Unit
 

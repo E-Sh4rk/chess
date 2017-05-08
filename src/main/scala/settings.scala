@@ -9,9 +9,9 @@ import scala.swing.Label
 import java.awt.Dimension
 import swing.event._
 
-object AI_Type extends Enumeration {
-    type AI_Type = Value
-    val Random, AlphaBeta, GNU_Chess = Value
+object Player_Type extends Enumeration {
+    type Player_Type = Value
+    val Human, PrimitiveAI, AlphaBeta, GNU_Chess = Value
 }
 
 /**
@@ -19,19 +19,10 @@ A panel for the settings (players, game mode, clock...)
 */
 class Settings extends GridBagPanel
 {
-    private val p1_ai : /*CheckBox*/ToggleButton = new /*CheckBox*/ToggleButton ("White player is AI")
-    private val p1_human : /*CheckBox*/ToggleButton = new /*CheckBox*/ToggleButton ("White player is human")
-    p1_human.selected = true
-    private val player1 : ButtonGroup = new ButtonGroup(p1_human, p1_ai)
-    private val p2_ai : /*CheckBox*/ToggleButton = new /*CheckBox*/ToggleButton ("Black player is AI")
-    private val p2_human : /*CheckBox*/ToggleButton = new /*CheckBox*/ToggleButton ("Black player is human")
-    p2_human.selected = true
-    private val player2 : ButtonGroup = new ButtonGroup(p2_human, p2_ai)
-
-    private val labelAI1 : Label = new Label("AI type (White Player)")
-    private val aiType1 : ComboBox[String] = new ComboBox[String](List("Random","Alpha-Beta","GNU Chess"))
-    private val labelAI2 : Label = new Label("AI type (Black Player)")
-    private val aiType2 : ComboBox[String] = new ComboBox[String](List("Random","Alpha-Beta","GNU Chess"))
+    private val labelP1 : Label = new Label("White Player")
+    private val pType1 : ComboBox[String] = new ComboBox[String](List("Local Human","Primitive AI","Alpha-Beta","GNU Chess"))
+    private val labelP2 : Label = new Label("Black Player")
+    private val pType2 : ComboBox[String] = new ComboBox[String](List("Local Human","Primitive AI","Alpha-Beta","GNU Chess"))
 
 
     private val label : Label = new Label("Settings below only apply to a new game :")
@@ -48,38 +39,19 @@ class Settings extends GridBagPanel
     c.gridx = 1; c.gridy = 0
     add(new Label, c)
     
-    // White player
-    c.ipady = 10
-    c.gridx = 0; c.gridy = 0
-    add(p1_human, c)
-    c.gridx = 2; c.gridy = 0
-    add(p1_ai, c)
-
-    c.gridx = 1; c.gridy = 1
-    add(new Label, c)
-
-    // Black player
-    c.gridx = 0; c.gridy = 2
-    add(p2_human, c)
-    c.gridx = 2; c.gridy = 2
-    add(p2_ai, c)
-
-    c.gridx = 1; c.gridy = 3
-    add(new Label, c)
-
-    // AI1
+    // P1
     c.gridx = 0; c.gridy = 4
-    add(labelAI1, c)
+    add(labelP1, c)
     c.gridwidth = 1; c.ipady = 0
     c.gridx = 2; c.gridy = 4
-    add(aiType1, c)
+    add(pType1, c)
 
-    // AI2
+    // P2
     c.gridx = 0; c.gridy = 5
-    add(labelAI2, c)
+    add(labelP2, c)
     c.gridwidth = 1; c.ipady = 0
     c.gridx = 2; c.gridy = 5
-    add(aiType2, c)
+    add(pType2, c)
 
     // Label
     c.gridwidth = 3; c.ipady = 100
@@ -101,45 +73,26 @@ class Settings extends GridBagPanel
     c.gridx = 0; c.gridy = 9
     add(clockText, c)
 
-    def checkWhite () : Unit =
+    def whitePlayerType () : Player_Type.Player_Type =
     {
-        lastWhite = p1_human.selected
-        lastWhiteAiType = aiType1.selection.item
-    }
-    def checkBlack () : Unit =
-    {
-        lastBlack = p2_human.selected
-        lastBlackAiType = aiType2.selection.item
-    }
-    def white_is_human () : Boolean = { return p1_human.selected }
-    def black_is_human () : Boolean = { return p2_human.selected }
-    def whiteAiType () : AI_Type.AI_Type =
-    {
-        return aiType1.selection.item match
+        return pType1.selection.item match
         {
-            case "Random" => AI_Type.Random
-            case "Alpha-Beta" => AI_Type.AlphaBeta
-            case "GNU Chess" => AI_Type.GNU_Chess
-            case _ => AI_Type.Random
+            case "Primitive AI" => Player_Type.PrimitiveAI
+            case "Alpha-Beta" => Player_Type.AlphaBeta
+            case "GNU Chess" => Player_Type.GNU_Chess
+            case _ => Player_Type.Human
         }
     }
-    def blackAiType () : AI_Type.AI_Type =
+    def blackPlayerType () : Player_Type.Player_Type =
     {
-        return aiType2.selection.item match
+        return pType2.selection.item match
         {
-            case "Random" => AI_Type.Random
-            case "Alpha-Beta" => AI_Type.AlphaBeta
-            case "GNU Chess" => AI_Type.GNU_Chess
-            case _ => AI_Type.Random
+            case "Primitive AI" => Player_Type.PrimitiveAI
+            case "Alpha-Beta" => Player_Type.AlphaBeta
+            case "GNU Chess" => Player_Type.GNU_Chess
+            case _ => Player_Type.Human
         }
     }
-
-    private var lastWhiteAiType = aiType1.selection.item
-    private var lastWhite = p1_human.selected
-    def white_player_has_changed () : Boolean = { return lastWhite != p1_human.selected || (p1_ai.selected && lastWhiteAiType != aiType1.selection.item) }
-    private var lastBlackAiType = aiType2.selection.item
-    private var lastBlack = p2_human.selected
-    def black_player_has_changed () : Boolean = { return lastBlack != p2_human.selected || (p2_ai.selected && lastBlackAiType != aiType2.selection.item)  }
 
     def clockEnabled () : Boolean = { return clock.selected }
     def clockSettings () : String = { return clockText.text }

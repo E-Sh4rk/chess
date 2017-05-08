@@ -32,16 +32,15 @@ class CECP_AI extends Player with Runnable
         val in = new BufferedReader(new InputStreamReader(proc.getInputStream))
 
         // Initializing game
-        purgeMin(in,1);purge(err)
+        purgeMin(in,1)
         sendCommand(out,"new")
         // PGN Load
         if (game.getHistory.moves.length > 0)
         {
-            purge(in);purge(err)
             temp = Files.createTempFile("gnuchess", ".pgn")
             game.getHistory.savePGN(temp.toString, true)
             sendCommand(out,"pgnload "+temp.toString)
-            purgeMin(in,10);purge(err)
+            purgeMin(in,10)
             Files.delete(temp);
         }
 

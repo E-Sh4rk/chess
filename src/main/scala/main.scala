@@ -106,10 +106,8 @@ object MyApp extends SimpleSwingApplication {
         var current_cecp:CECP_AI = null
         private def newWhitePlayer () : Player =
         {
-            settingsPanel.checkWhite
             // Avoid multiple instance of gnuchess : it causes issues
-            if (!explore_mode && !settingsPanel.black_is_human && !settingsPanel.white_is_human
-            && settingsPanel.whiteAiType == AI_Type.GNU_Chess && settingsPanel.blackAiType == AI_Type.GNU_Chess)
+            if (!explore_mode && settingsPanel.whitePlayerType == Player_Type.GNU_Chess && settingsPanel.blackPlayerType == Player_Type.GNU_Chess)
             {
                 if (current_cecp == null)
                     current_cecp = new CECP_AI
@@ -120,24 +118,22 @@ object MyApp extends SimpleSwingApplication {
 
             if (explore_mode)
                 return currentSimulatedPlayer
-            if (settingsPanel.white_is_human)
+            if (settingsPanel.whitePlayerType == Player_Type.Human)
                 return canvas
             else
             {
-                settingsPanel.whiteAiType match
+                settingsPanel.whitePlayerType match
                 {
-                    case AI_Type.GNU_Chess => return new CECP_AI
-                    case AI_Type.AlphaBeta => return new AlphaBetaAI
+                    case Player_Type.GNU_Chess => return new CECP_AI
+                    case Player_Type.AlphaBeta => return new AlphaBetaAI
                     case _ => return new PrimitiveAI
                 }
             }
         }
         private def newBlackPlayer () : Player =
         {
-            settingsPanel.checkBlack
             // Avoid multiple instance of gnuchess : it causes issues
-            if (!explore_mode && !settingsPanel.black_is_human && !settingsPanel.white_is_human
-            && settingsPanel.whiteAiType == AI_Type.GNU_Chess && settingsPanel.blackAiType == AI_Type.GNU_Chess)
+            if (!explore_mode && settingsPanel.whitePlayerType == Player_Type.GNU_Chess && settingsPanel.blackPlayerType == Player_Type.GNU_Chess)
             {
                 if (current_cecp == null)
                     current_cecp = new CECP_AI
@@ -148,14 +144,14 @@ object MyApp extends SimpleSwingApplication {
 
             if (explore_mode)
                 return currentSimulatedPlayer
-            if (settingsPanel.black_is_human)
+            if (settingsPanel.blackPlayerType == Player_Type.Human)
                 return canvas
             else
             {
-                settingsPanel.blackAiType match
+                settingsPanel.blackPlayerType match
                 {
-                    case AI_Type.GNU_Chess => return new CECP_AI
-                    case AI_Type.AlphaBeta => return new AlphaBetaAI
+                    case Player_Type.GNU_Chess => return new CECP_AI
+                    case Player_Type.AlphaBeta => return new AlphaBetaAI
                     case _ => return new PrimitiveAI
                 }
             }
@@ -232,10 +228,8 @@ object MyApp extends SimpleSwingApplication {
                     content.switch
                     if (game != null && !content.settingsDisplayed)
                     {
-                        if (settingsPanel.white_player_has_changed)
-                            game.setWhitePlayer(newWhitePlayer)
-                        if (settingsPanel.black_player_has_changed)
-                            game.setBlackPlayer(newBlackPlayer)
+                        game.setWhitePlayer(newWhitePlayer)
+                        game.setBlackPlayer(newBlackPlayer)
                         game.resume
                     }
                 }
