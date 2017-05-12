@@ -125,7 +125,7 @@ object MyApp extends SimpleSwingApplication {
                 settingsPanel.whitePlayerType match
                 {
                     case Player_Type.GNU_Chess => return new CECP_AI
-                    case Player_Type.AlphaBeta => return new AlphaBetaAI
+                    case Player_Type.AlphaBeta => return new AlphaBetaAI(new EvalToy(), 2)
                     case _ => return new PrimitiveAI
                 }
             }
@@ -151,7 +151,7 @@ object MyApp extends SimpleSwingApplication {
                 settingsPanel.blackPlayerType match
                 {
                     case Player_Type.GNU_Chess => return new CECP_AI
-                    case Player_Type.AlphaBeta => return new AlphaBetaAI
+                    case Player_Type.AlphaBeta => return new AlphaBetaAI(new EvalToy(), 2)
                     case _ => return new PrimitiveAI
                 }
             }

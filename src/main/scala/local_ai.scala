@@ -12,14 +12,12 @@ class PrimitiveAI extends SynchPlayer
     }
 }
 
-abstract class evalFunc()
+abstract class EvalFunc()
 {
     def eval(rules:Rules) : Int
 }
 
-abstract class alphaBetaEvalFunc(minEval:Int,maxEval:Int) extends evalFunc {}
-
-class evalToy(minEval:Int,maxEval:Int) extends alphaBetaEvalFunc(minEval, maxEval)
+class EvalToy() extends EvalFunc()
 {
     val pieceVal = scala.collection.mutable.Map[PieceType.PieceType, Int](
         PieceType.Pawn -> 1,
@@ -51,19 +49,16 @@ class evalToy(minEval:Int,maxEval:Int) extends alphaBetaEvalFunc(minEval, maxEva
 /**
 An Alpha-Beta AI.
 */
-class AlphaBetaAI extends SynchPlayer
+class AlphaBetaAI(private val evalFunc:EvalFunc, private val maxDepth:Int) extends SynchPlayer
 {
-    def evalFunc = new evalToy(0, 10000)
-
-    val minEval = 0
-    val maxEval = 1000
-    private var maxProf = 3
+    val minEval = Int.MinValue
+    val maxEval = Int.MaxValue
 
     def computeAlphaBeta(rules:Rules,isMyTurn:Boolean,alpha:Int,beta:Int,prof:Int) : Int =
     {
         if (alpha > beta)
             return (if (isMyTurn) maxEval else minEval)
-        else if (prof > maxProf)
+        else if (prof > maxDepth)
             return evalFunc.eval(rules)
         else
         {
