@@ -12,11 +12,12 @@ class PrimitiveAI extends SynchPlayer
     }
 }
 
+
+
 abstract class EvalFunc()
 {
-    def eval(rules:Rules) : Int
+    def eval(rules:Rules,team:Round.Round) : Int
 }
-
 
 /**
 A dumb evaluation function to check the correctness of the AIs
@@ -34,7 +35,7 @@ class EvalToy() extends EvalFunc()
         PieceType.Chancellor -> 7,
         PieceType.Unknown -> 0
     )
-    def eval(rules:Rules) : Int =
+    def eval(rules:Rules,team:Round.Round) : Int =
     {
         var diffPieceVals = 0
         for (i <- 0 to rules.dim_x-1)
@@ -53,14 +54,14 @@ class EvalToy() extends EvalFunc()
 class EvalStd() extends EvalFunc()
 {
     val pieceVal = Map[PieceType.PieceType, Int](
-        PieceType.Pawn -> 1,
-        PieceType.Knight -> 3,
-        PieceType.Bishop -> 3,
-        PieceType.Rook -> 5,
-        PieceType.Queen -> 9,
-        PieceType.King -> 20,
-        PieceType.ArchBishop -> 7,
-        PieceType.Chancellor -> 7,
+        PieceType.Pawn -> 100,
+        PieceType.Knight -> 320,
+        PieceType.Bishop -> 330,
+        PieceType.Rook -> 500,
+        PieceType.Queen -> 900,
+        PieceType.King -> 20000,
+        PieceType.ArchBishop -> 700,
+        PieceType.Chancellor -> 700,
         PieceType.Unknown -> 0
     )
     /*
@@ -193,16 +194,17 @@ class EvalStd() extends EvalFunc()
                 }
             }
         }
-        return (noQueenW && noQueenB) || ((noQueenW || (nbOtherPiecesW <= 3)) && (noQueenB || (nbOtherPiecesB <= 3)))
+        return (noQueenW && noQueenB) || ((noQueenW || nbOtherPiecesW <= 3) && (noQueenB || nbOtherPiecesB <= 3))
     }
 
-    def eval(rules:Rules) : Int =
+    def eval(rules:Rules,team:Round.Round) : Int =
     {
         var res = 0
-        var valToAdd = 0
         var squareVal = squareValMid
         if (isEndGame(rules))
             squareVal = squareValEnd
+        val x_diff = (rules.dim_x - 8)/2
+        val y_diff = (rules.dim_y - 8)/2
 
         for (i <- 0 to rules.dim_x-1)
         {
@@ -211,12 +213,25 @@ class EvalStd() extends EvalFunc()
                 var p = rules.pieceAtPosition(i, j)
                 if (p != null)
                 {
+                    // Converting x,y positions if chessboard has not standard dimensions
+                    var i2 = i-x_diff
+                    var j2 = j-y_diff
+                    if (i2 < 0)
+                        i2 = 0
+                    if (i2 > 7)
+                        i2 = 7
+                    if (j2 < 0)
+                        j2 = 0
+                    if (j2 > 7)
+                        j2 = 7
+                        
+                    var valToAdd = 0
                     valToAdd = pieceVal(p.pieceType)
                     if (p.team == Round.White)
-                        valToAdd *= squareVal(p.pieceType)(i)(rules.dim_y - j - 1)
+                        valToAdd += squareVal(p.pieceType)(j2)(i2)
                     else
-                        valToAdd *= squareVal(p.pieceType)(i)(j)
-                    if (p.team == Round.adv(rules.getRound))
+                        valToAdd += squareVal(p.pieceType)(rules.dim_y - j2 - 1)(i2)
+                    if (p.team != team)
                         valToAdd *= -1
                     res += valToAdd
                 }
@@ -237,10 +252,8 @@ class AlphaBetaAI(private val evalFunc:EvalFunc, private val maxDepth:Int) exten
 
     def computeAlphaBeta(rules:Rules,isMyTurn:Boolean,alpha:Int,beta:Int,prof:Int) : Int =
     {
-        if (alpha > beta)
-            return (if (isMyTurn) maxEval else minEval)
-        else if (prof > maxDepth)
-            return evalFunc.eval(rules)
+        if (prof > maxDepth)
+            return evalFunc.eval(rules,if (isMyTurn) rules.getRound else Round.adv(rules.getRound))
         else
         {
             var moves = rules.possibleMoves
@@ -249,32 +262,26 @@ class AlphaBetaAI(private val evalFunc:EvalFunc, private val maxDepth:Int) exten
             var betaCurrent = beta
             for ((fromX, fromY, toX, toY) <- moves)
             {
-                var rulesTest = new Rules(rules, rules.getHistory.mode)
+                var rulesTest = new Rules(rules)
                 rulesTest.move(fromX, fromY, toX, toY)
-                var valTest = computeAlphaBeta(rules, !isMyTurn, alphaCurrent, betaCurrent, prof + 1)
+                var valTest = computeAlphaBeta(rulesTest, !isMyTurn, alphaCurrent, betaCurrent, prof + 1)
                 if (isMyTurn)
                 {
                     if (valTest > bestVal)
-                    {
                         bestVal = valTest
-                        //beta pruning
-                        if (bestVal >= beta)
-                            return bestVal
-                    }
                     if (bestVal > alphaCurrent)
                         alphaCurrent = bestVal
+                    if (alphaCurrent >= betaCurrent)
+                        return bestVal
                 }
                 else
                 {
                     if (valTest < bestVal)
-                    {
                         bestVal = valTest
-                        //alpha pruning
-                        if (bestVal >= beta)
-                            return bestVal
-                    }
                     if (bestVal < betaCurrent)
                         betaCurrent = bestVal
+                    if (alphaCurrent >= betaCurrent)
+                        return bestVal
                 }
             }
             return bestVal
@@ -290,7 +297,7 @@ class AlphaBetaAI(private val evalFunc:EvalFunc, private val maxDepth:Int) exten
         for (moveTest <- moves)
         {
             val (fromX, fromY, toX, toY) = moveTest
-            var rulesTest = new Rules(rules, rules.getHistory.mode)
+            var rulesTest = new Rules(rules)
             rulesTest.move(fromX, fromY, toX, toY)
             moveTestValue = computeAlphaBeta(rulesTest, false, moveChosenValue, maxEval, 1)
             if (moveTestValue >= moveChosenValue)

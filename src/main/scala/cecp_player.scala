@@ -41,7 +41,7 @@ class CECP_AI(var max_think_time:Int) extends Player with Runnable
             game.getHistory.savePGN(temp.toString, true)
             sendCommand(out,"pgnload "+temp.toString)
             purgeMin(in,10)
-            Files.delete(temp);
+            Files.delete(temp)
         }
 
         while (!_stop)
