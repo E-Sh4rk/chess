@@ -10,7 +10,7 @@ An AI that is played by an external engine supporting the CECP protocol.
 
 Only gnuchess is supported for now !
 */
-class CECP_AI(val max_think_time:Int) extends Player with Runnable
+class CECP_AI(var max_think_time:Int) extends Player with Runnable
 {
     private var game:Game = null
     private var _stop = false
