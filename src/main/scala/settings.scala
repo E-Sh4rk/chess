@@ -5,6 +5,7 @@ import scala.swing.ToggleButton
 import scala.swing.ButtonGroup
 import scala.swing.TextArea
 import scala.swing.ComboBox
+import scala.swing.TextField
 import scala.swing.Label
 import java.awt.Dimension
 import swing.event._
@@ -24,6 +25,13 @@ class Settings extends GridBagPanel
     private val labelP2 : Label = new Label("Black Player")
     private val pType2 : ComboBox[String] = new ComboBox[String](List("Local Human","Primitive AI","Alpha-Beta","GNU Chess"))
 
+    private val AI_label : Label = new Label("AI settings :")
+
+    private val GNU_timeLabel : Label = new Label("GNU-Chess time limit (sec)")
+    private val GNU_time : TextField = new TextField("60")
+
+    private val AB_depthLabel : Label = new Label("Alpha-Beta depth")
+    private val AB_depth : TextField = new TextField("3")
 
     private val label : Label = new Label("Settings below only apply to a new game :")
 
@@ -40,26 +48,44 @@ class Settings extends GridBagPanel
     add(new Label, c)
     
     // P1
-    c.gridx = 0; c.gridy = 4
+    c.gridx = 0; c.gridy = 1
     add(labelP1, c)
     c.gridwidth = 1; c.ipady = 0
-    c.gridx = 2; c.gridy = 4
+    c.gridx = 2; c.gridy = 1
     add(pType1, c)
 
     // P2
-    c.gridx = 0; c.gridy = 5
+    c.gridx = 0; c.gridy = 2
     add(labelP2, c)
     c.gridwidth = 1; c.ipady = 0
-    c.gridx = 2; c.gridy = 5
+    c.gridx = 2; c.gridy = 2
     add(pType2, c)
 
+    // AI Settings
+    c.gridwidth = 3; c.ipady = 50
+    c.gridx = 0; c.gridy = 3
+    add(AI_label, c)
+
+    c.gridwidth = 1; c.ipady = 0
+    c.gridx = 0; c.gridy = 4
+    add(GNU_timeLabel, c)
+    c.gridwidth = 1; c.ipady = 0
+    c.gridx = 2; c.gridy = 4
+    add(GNU_time, c)
+
+    c.gridx = 0; c.gridy = 5
+    add(AB_depthLabel, c)
+    c.gridwidth = 1; c.ipady = 0
+    c.gridx = 2; c.gridy = 5
+    add(AB_depth, c)
+
     // Label
-    c.gridwidth = 3; c.ipady = 100
+    c.gridwidth = 3; c.ipady = 75
     c.gridx = 0; c.gridy = 6
     add(label, c)
 
     // Variant
-    c.gridwidth = 1; c.ipady = 25
+    c.gridwidth = 1; c.ipady = 0
     c.gridx = 0; c.gridy = 7
     add(labelVariant, c)
     c.gridwidth = 1; c.ipady = 0
@@ -94,6 +120,9 @@ class Settings extends GridBagPanel
         }
     }
 
+    def gnuChessTimeLimit () : Int = { return toInt(GNU_time.text).getOrElse(60) }
+    def alphaBetaDepth () : Int = { return toInt(AB_depth.text).getOrElse(3) }
+
     def clockEnabled () : Boolean = { return clock.selected }
     def clockSettings () : String = { return clockText.text }
 
@@ -121,6 +150,15 @@ class Settings extends GridBagPanel
                 else
                     clockText.enabled = false
             }
+        }
+    }
+
+
+    def toInt(s: String): Option[Int] = {
+        try {
+            Some(s.toInt)
+        } catch {
+            case e: Exception => None
         }
     }
 }

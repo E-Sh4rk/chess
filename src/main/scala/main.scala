@@ -110,7 +110,7 @@ object MyApp extends SimpleSwingApplication {
             if (!explore_mode && settingsPanel.whitePlayerType == Player_Type.GNU_Chess && settingsPanel.blackPlayerType == Player_Type.GNU_Chess)
             {
                 if (current_cecp == null)
-                    current_cecp = new CECP_AI
+                    current_cecp = new CECP_AI(settingsPanel.gnuChessTimeLimit)
                 return current_cecp
             }
             else
@@ -124,7 +124,7 @@ object MyApp extends SimpleSwingApplication {
             {
                 settingsPanel.whitePlayerType match
                 {
-                    case Player_Type.GNU_Chess => return new CECP_AI
+                    case Player_Type.GNU_Chess => return new CECP_AI(settingsPanel.gnuChessTimeLimit)
                     case Player_Type.AlphaBeta => return new AlphaBetaAI
                     case _ => return new PrimitiveAI
                 }
@@ -136,7 +136,7 @@ object MyApp extends SimpleSwingApplication {
             if (!explore_mode && settingsPanel.whitePlayerType == Player_Type.GNU_Chess && settingsPanel.blackPlayerType == Player_Type.GNU_Chess)
             {
                 if (current_cecp == null)
-                    current_cecp = new CECP_AI
+                    current_cecp = new CECP_AI(settingsPanel.gnuChessTimeLimit)
                 return current_cecp
             }
             else
@@ -150,7 +150,7 @@ object MyApp extends SimpleSwingApplication {
             {
                 settingsPanel.blackPlayerType match
                 {
-                    case Player_Type.GNU_Chess => return new CECP_AI
+                    case Player_Type.GNU_Chess => return new CECP_AI(settingsPanel.gnuChessTimeLimit)
                     case Player_Type.AlphaBeta => return new AlphaBetaAI
                     case _ => return new PrimitiveAI
                 }

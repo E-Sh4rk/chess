@@ -10,7 +10,7 @@ An AI that is played by an external engine supporting the CECP protocol.
 
 Only gnuchess is supported for now !
 */
-class CECP_AI extends Player with Runnable
+class CECP_AI(val max_think_time:Int) extends Player with Runnable
 {
     private var game:Game = null
     private var _stop = false
@@ -52,24 +52,29 @@ class CECP_AI extends Player with Runnable
                 if (play)
                 {
                     play = false
-                    var move:Move = null
 
+                    // Indicate time remaining
+                    var time = game.getClock(game.getRound)
+                    if (time < 0 || time > max_think_time)
+                        time = max_think_time
+                    time *= 100
+                    sendCommand(out,"time " + time.toString)
+                    purgeMin(in,2) // Old/New time limit
+
+                    // Play !
+                    var move:Move = null
                     if (advMove != null)
                     {
-                        sendCommand(out,game.getHistory.moveToAlgebricNotation(advMove))
                         advMove = null
+                        sendCommand(out,game.getHistory.moveToAlgebricNotation(advMove))
                         purgeMin(in,1) // Print move
-                        move = parseMove(getNextLine(in))
-                        purgeMin(in,1) // My move is...
                     }
-
-                    if (move == null)
-                    {
+                    else
                         sendCommand(out,"go")
-                        move = parseMove(getNextLine(in)) // Move.
-                        purgeMin(in,1) // My move is...
-                    }
                     
+                    // Parse and play answer
+                    move = parseMove(getNextLine(in))
+                    purgeMin(in,1) // My move is...
                     game.move(move.fromX,move.fromY,move.toX,move.toY,move.promotion)
                 }
                 Thread.sleep(10)
