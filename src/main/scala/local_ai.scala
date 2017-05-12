@@ -24,7 +24,7 @@ A dumb evaluation function to check the correctness of the AIs
 */
 class EvalToy() extends EvalFunc()
 {
-    val pieceVal = scala.collection.mutable.Map[PieceType.PieceType, Int](
+    private val pieceVal = scala.collection.mutable.Map[PieceType.PieceType, Int](
         PieceType.Pawn -> 1,
         PieceType.Rook -> 5,
         PieceType.Knight -> 3,
@@ -53,7 +53,7 @@ class EvalToy() extends EvalFunc()
 
 class EvalStd() extends EvalFunc()
 {
-    val pieceVal = Map[PieceType.PieceType, Int](
+    private val pieceVal = Map[PieceType.PieceType, Int](
         PieceType.Pawn -> 100,
         PieceType.Knight -> 320,
         PieceType.Bishop -> 330,
@@ -69,7 +69,7 @@ class EvalStd() extends EvalFunc()
     for inspiration to the following piece-square tables.
     */
 
-    val squareValuesPawn:Array[Array[Int]] = Array(
+    private val squareValuesPawn:Array[Array[Int]] = Array(
         Array(  0,  0,  0,  0,  0,  0,  0,  0),
         Array( 50, 50, 50, 50, 50, 50, 50, 50),
         Array( 10, 10, 20, 30, 30, 20, 10, 10),
@@ -79,7 +79,7 @@ class EvalStd() extends EvalFunc()
         Array(  5, 10, 10,-20,-20, 10, 10,  5),
         Array(  0,  0,  0,  0,  0,  0,  0,  0)
     )
-    val squareValuesKnight:Array[Array[Int]] = Array(
+    private val squareValuesKnight:Array[Array[Int]] = Array(
         Array(-50,-40,-30,-30,-30,-30,-40,-50),
         Array(-40,-20,  0,  0,  0,  0,-20,-40),
         Array(-30,  0, 10, 15, 15, 10,  0,-30),
@@ -89,7 +89,7 @@ class EvalStd() extends EvalFunc()
         Array(-40,-20,  0,  5,  5,  0,-20,-40),
         Array(-50,-40,-30,-30,-30,-30,-40,-50)
     )
-    val squareValuesBishop:Array[Array[Int]] = Array(
+    private val squareValuesBishop:Array[Array[Int]] = Array(
         Array(-20,-10,-10,-10,-10,-10,-10,-20),
         Array(-10,  0,  0,  0,  0,  0,  0,-10),
         Array(-10,  0,  5, 10, 10,  5,  0,-10),
@@ -99,7 +99,7 @@ class EvalStd() extends EvalFunc()
         Array(-10,  5,  0,  0,  0,  0,  5,-10),
         Array(-20,-10,-10,-10,-10,-10,-10,-20)
     )
-    val squareValuesRook:Array[Array[Int]] = Array(
+    private val squareValuesRook:Array[Array[Int]] = Array(
         Array(  0,  0,  0,  0,  0,  0,  0,  0),
         Array(  5, 10, 10, 10, 10, 10, 10,  5),
         Array( -5,  0,  0,  0,  0,  0,  0, -5),
@@ -109,7 +109,7 @@ class EvalStd() extends EvalFunc()
         Array( -5,  0,  0,  0,  0,  0,  0, -5),
         Array(  0,  0,  0,  5,  5,  0,  0,  0)
     )
-    val squareValuesQueen:Array[Array[Int]] = Array(
+    private val squareValuesQueen:Array[Array[Int]] = Array(
         Array(-20,-10,-10, -5, -5,-10,-10,-20),
         Array(-10,  0,  0,  0,  0,  0,  0,-10),
         Array(-10,  0,  5,  5,  5,  5,  0,-10),
@@ -119,7 +119,7 @@ class EvalStd() extends EvalFunc()
         Array(-10,  0,  5,  0,  0,  0,  0,-10),
         Array(-20,-10,-10, -5, -5,-10,-10,-20)
     )
-    val squareValuesKingMid:Array[Array[Int]] = Array(
+    private val squareValuesKingMid:Array[Array[Int]] = Array(
         Array(-30,-40,-40,-50,-50,-40,-40,-30),
         Array(-30,-40,-40,-50,-50,-40,-40,-30),
         Array(-30,-40,-40,-50,-50,-40,-40,-30),
@@ -129,7 +129,7 @@ class EvalStd() extends EvalFunc()
         Array( 20, 20,  0,  0,  0,  0, 20, 20),
         Array( 20, 30, 10,  0,  0, 10, 30, 20)
     )
-    val squareValuesKingEnd:Array[Array[Int]] = Array(
+    private val squareValuesKingEnd:Array[Array[Int]] = Array(
         Array(-50,-40,-30,-20,-20,-30,-40,-50),
         Array(-30,-20,-10,  0,  0,-10,-20,-30),
         Array(-30,-10, 20, 30, 30, 20,-10,-30),
@@ -139,9 +139,9 @@ class EvalStd() extends EvalFunc()
         Array(-30,-30,  0,  0,  0,  0,-30,-30),
         Array(-50,-30,-30,-30,-30,-30,-30,-50)
     )
-    val squareValuesDefault:Array[Array[Int]] = Array.fill(8, 8)(0)
+    private val squareValuesDefault:Array[Array[Int]] = Array.fill(8, 8)(0)
 
-    val squareValMid = Map[PieceType.PieceType, Array[Array[Int]]] (
+    private val squareValMid = Map[PieceType.PieceType, Array[Array[Int]]] (
         PieceType.Pawn -> squareValuesPawn,
         PieceType.Knight -> squareValuesKnight,
         PieceType.Bishop -> squareValuesBishop,
@@ -152,7 +152,7 @@ class EvalStd() extends EvalFunc()
         PieceType.Chancellor -> squareValuesDefault,
         PieceType.Unknown -> squareValuesDefault
     )
-    val squareValEnd = Map[PieceType.PieceType, Array[Array[Int]]] (
+    private val squareValEnd = Map[PieceType.PieceType, Array[Array[Int]]] (
         PieceType.Pawn -> squareValuesPawn,
         PieceType.Knight -> squareValuesKnight,
         PieceType.Bishop -> squareValuesBishop,
@@ -164,7 +164,7 @@ class EvalStd() extends EvalFunc()
         PieceType.Unknown -> squareValuesDefault
     )
 
-    def isEndGame(rules:Rules) : Boolean =
+    private def isEndGame(rules:Rules) : Boolean =
     {
         var noQueenW = true
         var noQueenB = true
@@ -247,10 +247,10 @@ An Alpha-Beta AI.
 */
 class AlphaBetaAI(private val evalFunc:EvalFunc, private val maxDepth:Int) extends SynchPlayer
 {
-    val minEval = Int.MinValue
-    val maxEval = Int.MaxValue
+    private val minEval = Int.MinValue
+    private val maxEval = Int.MaxValue
 
-    def computeAlphaBeta(rules:Rules,isMyTurn:Boolean,alpha:Int,beta:Int,prof:Int) : Int =
+    private def computeAlphaBeta(rules:Rules,isMyTurn:Boolean,alpha:Int,beta:Int,prof:Int) : Int =
     {
         if (prof > maxDepth)
             return evalFunc.eval(rules,if (isMyTurn) rules.getRound else Round.adv(rules.getRound))
@@ -288,7 +288,7 @@ class AlphaBetaAI(private val evalFunc:EvalFunc, private val maxDepth:Int) exten
         }
     }
     
-    def alphaBeta(rules:Rules) : (Int,Int,Int,Int) =
+    private def alphaBeta(rules:Rules) : (Int,Int,Int,Int) =
     {
         val moves = rules.possibleMoves
         var moveChosen = moves.head
