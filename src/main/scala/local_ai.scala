@@ -52,11 +52,7 @@ class EvalToy() extends EvalFunc()
 
 class EvalStd() extends EvalFunc()
 {
-    val dim_x = 8
-    val dim_y = 8
-    private var isEndGame = false
-    
-    val pieceVal = scala.collection.mutable.Map[PieceType.PieceType, Int](
+    val pieceVal = Map[PieceType.PieceType, Int](
         PieceType.Pawn -> 1,
         PieceType.Knight -> 3,
         PieceType.Bishop -> 3,
@@ -67,23 +63,12 @@ class EvalStd() extends EvalFunc()
         PieceType.Chancellor -> 7,
         PieceType.Unknown -> 0
     )
-    val squareVal = scala.collection.mutable.Map[PieceType.PieceType, Array[Array[Int]]] (
-        PieceType.Pawn -> squareValuesPawn,
-        PieceType.Knight -> squareValuesKnight,
-        PieceType.Bishop -> squareValuesBishop,
-        PieceType.Rook -> squareValuesRook,
-        PieceType.Queen -> squareValuesQueen,
-        PieceType.King -> (if (isEndGame) squareValuesKingEnd else squareValuesKingMid), //TODO : évaluation non dynamique
-        PieceType.ArchBishop -> squareValuesDefault,
-        PieceType.Chancellor -> squareValuesDefault,
-        PieceType.Unknown -> squareValuesDefault
-    )
-    /**
+    /*
     Special thanks to : https://chessprogramming.wikispaces.com/Simplified+evaluation+function
     for inspiration to the following piece-square tables.
     */
 
-    val squareValuesPawn = Array(
+    val squareValuesPawn:Array[Array[Int]] = Array(
         Array(  0,  0,  0,  0,  0,  0,  0,  0),
         Array( 50, 50, 50, 50, 50, 50, 50, 50),
         Array( 10, 10, 20, 30, 30, 20, 10, 10),
@@ -93,7 +78,7 @@ class EvalStd() extends EvalFunc()
         Array(  5, 10, 10,-20,-20, 10, 10,  5),
         Array(  0,  0,  0,  0,  0,  0,  0,  0)
     )
-    val squareValuesKnight = Array(
+    val squareValuesKnight:Array[Array[Int]] = Array(
         Array(-50,-40,-30,-30,-30,-30,-40,-50),
         Array(-40,-20,  0,  0,  0,  0,-20,-40),
         Array(-30,  0, 10, 15, 15, 10,  0,-30),
@@ -103,7 +88,7 @@ class EvalStd() extends EvalFunc()
         Array(-40,-20,  0,  5,  5,  0,-20,-40),
         Array(-50,-40,-30,-30,-30,-30,-40,-50)
     )
-    val squareValuesBishop = Array(
+    val squareValuesBishop:Array[Array[Int]] = Array(
         Array(-20,-10,-10,-10,-10,-10,-10,-20),
         Array(-10,  0,  0,  0,  0,  0,  0,-10),
         Array(-10,  0,  5, 10, 10,  5,  0,-10),
@@ -113,7 +98,7 @@ class EvalStd() extends EvalFunc()
         Array(-10,  5,  0,  0,  0,  0,  5,-10),
         Array(-20,-10,-10,-10,-10,-10,-10,-20)
     )
-    val squareValuesRook = Array(
+    val squareValuesRook:Array[Array[Int]] = Array(
         Array(  0,  0,  0,  0,  0,  0,  0,  0),
         Array(  5, 10, 10, 10, 10, 10, 10,  5),
         Array( -5,  0,  0,  0,  0,  0,  0, -5),
@@ -123,7 +108,7 @@ class EvalStd() extends EvalFunc()
         Array( -5,  0,  0,  0,  0,  0,  0, -5),
         Array(  0,  0,  0,  5,  5,  0,  0,  0)
     )
-    val squareValuesQueen = Array(
+    val squareValuesQueen:Array[Array[Int]] = Array(
         Array(-20,-10,-10, -5, -5,-10,-10,-20),
         Array(-10,  0,  0,  0,  0,  0,  0,-10),
         Array(-10,  0,  5,  5,  5,  5,  0,-10),
@@ -133,7 +118,7 @@ class EvalStd() extends EvalFunc()
         Array(-10,  0,  5,  0,  0,  0,  0,-10),
         Array(-20,-10,-10, -5, -5,-10,-10,-20)
     )
-    val squareValuesKingMid = Array(
+    val squareValuesKingMid:Array[Array[Int]] = Array(
         Array(-30,-40,-40,-50,-50,-40,-40,-30),
         Array(-30,-40,-40,-50,-50,-40,-40,-30),
         Array(-30,-40,-40,-50,-50,-40,-40,-30),
@@ -143,7 +128,7 @@ class EvalStd() extends EvalFunc()
         Array( 20, 20,  0,  0,  0,  0, 20, 20),
         Array( 20, 30, 10,  0,  0, 10, 30, 20)
     )
-    val squareValuesKingEnd = Array(
+    val squareValuesKingEnd:Array[Array[Int]] = Array(
         Array(-50,-40,-30,-20,-20,-30,-40,-50),
         Array(-30,-20,-10,  0,  0,-10,-20,-30),
         Array(-30,-10, 20, 30, 30, 20,-10,-30),
@@ -153,9 +138,32 @@ class EvalStd() extends EvalFunc()
         Array(-30,-30,  0,  0,  0,  0,-30,-30),
         Array(-50,-30,-30,-30,-30,-30,-30,-50)
     )
-    val squareValuesDefault = Array.fill(dim_x, dim_y)(0)
+    val squareValuesDefault:Array[Array[Int]] = Array.fill(8, 8)(0)
 
-    def checkIfIsEndGame(rules:Rules) : Unit =
+    val squareValMid = Map[PieceType.PieceType, Array[Array[Int]]] (
+        PieceType.Pawn -> squareValuesPawn,
+        PieceType.Knight -> squareValuesKnight,
+        PieceType.Bishop -> squareValuesBishop,
+        PieceType.Rook -> squareValuesRook,
+        PieceType.Queen -> squareValuesQueen,
+        PieceType.King -> squareValuesKingMid,
+        PieceType.ArchBishop -> squareValuesDefault,
+        PieceType.Chancellor -> squareValuesDefault,
+        PieceType.Unknown -> squareValuesDefault
+    )
+    val squareValEnd = Map[PieceType.PieceType, Array[Array[Int]]] (
+        PieceType.Pawn -> squareValuesPawn,
+        PieceType.Knight -> squareValuesKnight,
+        PieceType.Bishop -> squareValuesBishop,
+        PieceType.Rook -> squareValuesRook,
+        PieceType.Queen -> squareValuesQueen,
+        PieceType.King -> squareValuesKingEnd,
+        PieceType.ArchBishop -> squareValuesDefault,
+        PieceType.Chancellor -> squareValuesDefault,
+        PieceType.Unknown -> squareValuesDefault
+    )
+
+    def isEndGame(rules:Rules) : Boolean =
     {
         var noQueenW = true
         var noQueenB = true
@@ -185,42 +193,31 @@ class EvalStd() extends EvalFunc()
                 }
             }
         }
-        isEndGame = ( (noQueenW && noQueenB) || ((noQueenW || (nbOtherPiecesW <= 3)) && (noQueenB || (nbOtherPiecesB <= 3))) )
+        return (noQueenW && noQueenB) || ((noQueenW || (nbOtherPiecesW <= 3)) && (noQueenB || (nbOtherPiecesB <= 3)))
     }
 
     def eval(rules:Rules) : Int =
     {
-        printf("Hey\n")
         var res = 0
         var valToAdd = 0
-        checkIfIsEndGame(rules)
+        var squareVal = squareValMid
+        if (isEndGame(rules))
+            squareVal = squareValEnd
+
         for (i <- 0 to rules.dim_x-1)
         {
             for (j <- 0 to rules.dim_y-1)
             {
-                printf("Hey_%d_%d\n", i, j)
                 var p = rules.pieceAtPosition(i, j)
                 if (p != null)
                 {
                     valToAdd = pieceVal(p.pieceType)
-                    printf("  %d\n", valToAdd)
                     if (p.team == Round.White)
                         valToAdd *= squareVal(p.pieceType)(i)(rules.dim_y - j - 1)
                     else
-                    {
-                        
-                        var tmp = squareVal(p.pieceType)
-                        printf("tmp1")
-                        var tmp2 = tmp(i)
-                        printf("tmp2")
-                        printf("  trouvé %d\n", tmp2(j))
                         valToAdd *= squareVal(p.pieceType)(i)(j)
-                        printf("  ah non\n")
-                    }
-                    printf("  inter\n")
                     if (p.team == Round.adv(rules.getRound))
                         valToAdd *= -1
-                    printf("  %d\n", valToAdd)
                     res += valToAdd
                 }
             }
