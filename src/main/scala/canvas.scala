@@ -30,6 +30,7 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
     private var selectedCase2 : Option[(Int,Int)] = None // Used for promotion
     private var drawAfterMove : Boolean = false
     private var interfaceStatus : InterfaceStatus.InterfaceStatus = InterfaceStatus.Default
+    var explore_mode : Boolean = false
 
     /**
     Initializes the canvas for a new game.
@@ -294,6 +295,16 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
             {
                 g.setColor(Color.red)
                 drawCenteredString(g, game.getMessage, new Rectangle(0,0,width,height), g.getFont().deriveFont(7F * width / 100F))
+            }
+            else if (!canPlay && !explore_mode)
+            {
+                g.setColor(Color.blue)
+                drawCenteredString(g, "AI is thinking...", new Rectangle(0,0,width,height), g.getFont().deriveFont(5F * width / 100F))
+            }
+            else if (!canPlay)
+            {
+                g.setColor(Color.black)
+                drawCenteredString(g, "Explore Mode", new Rectangle(0,0,width,height), g.getFont().deriveFont(5F * width / 100F))
             }
         }
     }

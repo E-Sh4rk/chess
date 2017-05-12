@@ -191,17 +191,21 @@ object MyApp extends SimpleSwingApplication {
             if (game != null)
             {
                 explore_mode = true
+                canvas.explore_mode = true
                 currentSimulatedPlayer = new SimulatedPlayer(game.getHistory, canvas)
                 switch_mode.text = "Switch to play mode"
                 exploreButtonsSetEnabled(true)
+                canvas.repaint
             }
         }
         private def switchToPlayMode() =
         {
             explore_mode = false
+            canvas.explore_mode = false
             currentSimulatedPlayer = null
             switch_mode.text = "Switch to explore mode"
             exploreButtonsSetEnabled(false)
+            canvas.repaint
         }
         private def exploreButtonsSetEnabled(b:Boolean) =
         {
