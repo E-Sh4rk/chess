@@ -65,8 +65,8 @@ class CECP_AI(var max_think_time:Int) extends Player with Runnable
                     var move:Move = null
                     if (advMove != null)
                     {
-                        advMove = null
                         sendCommand(out,game.getHistory.moveToAlgebricNotation(advMove))
+                        advMove = null
                         purgeMin(in,1) // Print move
                     }
                     else
