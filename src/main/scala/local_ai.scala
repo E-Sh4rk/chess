@@ -293,9 +293,9 @@ class AlphaBetaAI(private val evalFunc:EvalFunc, private val maxDepth:Int) exten
         val moves = rules.possibleMoves
         var moveChosen = moves.head
         var moveChosenValue = minEval
-        var moveTestValue = 0
         for (moveTest <- moves)
         {
+            var moveTestValue = 0
             val (fromX, fromY, toX, toY) = moveTest
             var rulesTest = new Rules(rules)
             rulesTest.move(fromX, fromY, toX, toY)
