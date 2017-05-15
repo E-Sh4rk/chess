@@ -1,0 +1,67 @@
+\documentclass[11pt]{article}
+\usepackage[francais]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools,amssymb,amsthm,thmtools}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\title{Projet Programmation 2}
+\author{Mickaël LAURENT, Maher MALLEM}
+\date{Mai 2017}
+%\author{}
+%\date{}
+\begin{document}
+\renewcommand{\labelitemi}{-}
+\maketitle
+
+\section{Fonctionnalités}
+
+Voici les fonctionnalités ajoutées :\newline
+\begin{itemize}
+\item Le jeu supporte maintenant un nombre quelconque de périodes pour la pendule (fonctionnalité pas encore implémentée la dernière fois).
+\item Quelques améliorations graphiques (texte dans le canvas pour informer l'utilisateur quand l'IA est en train de jouer, etc).
+\item Ajout de paramètres d'IA dans les options.
+\item Ajout d'une IA implémentant Alpha-Beta. Elle peut fonctionner sur les différentes variantes de jeu. Elle dispose d'une fonction d'évaluation prenant en compte les pièces restantes ainsi que leur position : pour chaque type de pièce, elle possède un tableau qui associe une valeur à chaque case de l'échiquier.
+\item Ajout d'une IA utilisant le moteur de GNU-Chess. Les limites de temps sont gérées, ainsi que la reprise de partie à n'importe quel moment. On peut faire s'affronter GNU-Chess contre lui-même, l'opposer à une autre IA ou alors jouer contre lui. Les variantes Janus et Capablanca ne sont cependant pas gérées par GNU-Chess.
+\end{itemize}
+
+\section{La classe Rules}
+Afin d'implémenter une IA plus avancé, il a été nécessaire d'ajouter une classe intermédiaire entre la classe \textit{Board} (qui s'occupe uniquement d'abstraire la structure de donnée utilisée pour représenter l'échiquier et de fournir des accès à ce dernier) et \textit{Game} (qui représente le jeu dans son ensemble, avec les règles, les joueurs, l'horloge). En effet, une classe \textit{Rules} a été ajoutée : elle représente l'échiquier muni des règles du jeu (déplacement, conditions de fin, mais pas de timer ni de joueur). C'était la classe \textit{Game} qui implémentait ces règles auparavant, mais désormais la classe \textit{Game} ne fait qu'hériter de ces règles. 
+
+\-
+
+Cette petite restructuration a été nécessaire afin de pouvoir simuler plusieurs coups en avance sans réellement modifier le jeu.
+En effet, il est nécessaire pour réaliser ces simulations de copier l'instance actuelle du jeu et de réaliser les mouvements à simuler sur cette copie, afin de ne pas modifier le jeu réel. Cependant, copier la classe \textit{Game} n'est pas une bonne idée :
+elle contient également les joueurs et le timer nécessaire pour l'horloge, et nous ne souhaitons pas copier ni modifier ces éléments !
+Grâce à la séparation de \textit{Game} et \textit{Rules}, on peut désormais copier uniquement une instance de \textit{Rules}, et donc ne pas s'encombrer des joueurs et de l'horloge.
+
+\section{L'IA Alpha-Beta}
+
+
+\section{La classe CECP\_Player}
+Cette classe implémente un \textit{Player} communiquant avec le protocole CECP. Seul GNU-Chess est supporté pour le moment.
+Un processus de \textsl{gnuchess} (avec l'option -x) est démarré lors de l'initialisation du joueur (méthode \textit{init}),
+puis \textit{CECP\_Player} maintient une communication avec ce processus sur un nouveau thread à travers trois pipes (input, output, error).
+
+\-
+
+Pour initialiser le jeu, la commande \textit{new} est envoyée. Si le jeu est déjà entamé (i.e. si on le jeu n'est pas dans la configuration initiale), un fichier pgn contenant l'historique des mouvements déjà réalisés est écrit dans un répertoire temporaire,
+sous un format un peu différent de la notation algébrique abrégée utilisée lors des sauvegardes car \textit{gnuchess} utilise une variante de ce format. Il est ensuite chargé dans \textit{gnuchess} via la commande \textit{pgnload}, puis le fichier pgn est supprimé.
+
+\-
+
+Lorsque c'est à \textit{CECP\_Player} de jouer, si un autre joueur vient de jouer son tour alors sont son coup est communiqué à \textit{gnuchess}, et ce dernier va jouer automatiquement son tour. Dans le cas inverse, on force \textit{gnuchess} à jouer grâce à la commande \textit{go}. On parse ensuite le résultat et on le communique à la classe \textit{Game}.
+
+\-
+
+\textit{GNU-Chess} est également informé du temps qu'il lui reste pour jouer grâce à la commande \textit{time}. Le temps que lui indique \textit{CECP\_Player} est le minimum entre le temps réel qu'il reste (si l'horloge est activée pour le jeu en cours) et le temps limite de réflexion accordé à \textit{gnuchess}, modifiable dans les options.
+
+\-
+
+Lorsque la partie est terminé ou qu'elle soit se suspendre (méthode \textit{stop}), le processus \textit{gnuchess} est tué et le thread
+s'arrète.
+
+\-
+
+\end{document}
