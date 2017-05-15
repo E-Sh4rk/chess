@@ -31,7 +31,7 @@ class Settings extends GridBagPanel
     private val GNU_time : TextField = new TextField("60")
 
     private val AB_depthLabel : Label = new Label("Alpha-Beta depth")
-    private val AB_depth : TextField = new TextField("3")
+    private val AB_depth : TextField = new TextField("2")
 
     private val label : Label = new Label("Settings below only apply to a new game :")
 
@@ -121,7 +121,7 @@ class Settings extends GridBagPanel
     }
 
     def gnuChessTimeLimit () : Int = { return toInt(GNU_time.text).getOrElse(60) }
-    def alphaBetaDepth () : Int = { return toInt(AB_depth.text).getOrElse(3) }
+    def alphaBetaDepth () : Int = { return toInt(AB_depth.text).getOrElse(2) }
 
     def clockEnabled () : Boolean = { return clock.selected }
     def clockSettings () : String = { return clockText.text }

@@ -89,12 +89,13 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             {
                 this.synchronized
                 {
+                    if (suspended || getRound == Round.Finished)
+                        return
+
                     var lm = lastMove
                     if (playerWhite eq playerBlack)
                         lm = null
-                        
-                    if (suspended || getRound == Round.Finished)
-                        return
+
                     if (getRound == Round.White)
                         playerWhite.mustPlay(lm)
                     if (getRound == Round.Black)
@@ -175,6 +176,10 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
             }
         }
     }
+    /**
+    Indicates whether a game is suspended or not.
+    */
+    def isSuspended : Boolean = { this.synchronized { return suspended } }
 
     /**
     Changes the current white player. Only works if the game is suspended.
@@ -241,8 +246,8 @@ class Game(private val canvas:Canvas, private var playerWhite:Player, private va
                 if (getRound == Round.Finished)
                     gameFinished
 
-                refreshCanvas
                 callPlayers(getHistory.moves.last)
+                refreshCanvas
                 return true
             }
             return false

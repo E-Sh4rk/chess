@@ -296,15 +296,15 @@ class Canvas(private var width:Int, private var height:Int) extends Panel with P
                 g.setColor(Color.red)
                 drawCenteredString(g, game.getMessage, new Rectangle(0,0,width,height), g.getFont().deriveFont(7F * width / 100F))
             }
-            else if (!canPlay && !explore_mode)
-            {
-                g.setColor(Color.blue)
-                drawCenteredString(g, "AI is thinking...", new Rectangle(0,0,width,height), g.getFont().deriveFont(5F * width / 100F))
-            }
-            else if (!canPlay)
+            else if (explore_mode)
             {
                 g.setColor(Color.black)
                 drawCenteredString(g, "Explore Mode", new Rectangle(0,0,width,height), g.getFont().deriveFont(5F * width / 100F))
+            }
+            else if (!canPlay && !game.isSuspended)
+            {
+                g.setColor(Color.blue)
+                drawCenteredString(g, "AI is thinking...", new Rectangle(0,0,width,height), g.getFont().deriveFont(5F * width / 100F))
             }
         }
     }
