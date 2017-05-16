@@ -52,13 +52,12 @@ class EvalToy() extends EvalFunc()
 }
 
 /**
-
-A standard evaluation function taking into account the pieces and their positions
+A standard evaluation function taking into account the pieces and their positions.
 
 Special thanks to : https://chessprogramming.wikispaces.com/Simplified+evaluation+function
-    for inspiration to the following piece-square tables.
+for inspiration to the following piece-square tables.
 */
-class EvalStd(attCoef:Int, defCoef:Int) extends EvalFunc()
+class EvalStd(val attCoef:Int, val defCoef:Int) extends EvalFunc()
 {
     private def attValue(rules:Rules, team:Round.Round) : Int =
     {
@@ -256,9 +255,7 @@ class EvalStd(attCoef:Int, defCoef:Int) extends EvalFunc()
                 }
             }
         }
-        println(res)
         res += attValue(rules, team) + defValue(rules, team)
-        println(res)
         return res
     }
 }
