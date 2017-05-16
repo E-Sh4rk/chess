@@ -271,12 +271,17 @@ class AlphaBetaAI(private val evalFunc:EvalFunc, private val maxDepth:Int) exten
 
     private def computeAlphaBeta(rules:Rules,isMyTurn:Boolean,alpha:Int,beta:Int,prof:Int) : Int =
     {
+        var bestVal = if (isMyTurn) minEval else maxEval
+        // Cas d'un CheckMate/StaleMate
+        if (rules.getRound == Round.Finished)
+            return bestVal
+        // Cas d'une feuille
         if (prof > maxDepth)
             return evalFunc.eval(rules,if (isMyTurn) rules.getRound else Round.adv(rules.getRound))
+        // Cas d'un noeud
         else
         {
             var moves = rules.possibleMoves
-            var bestVal = (if (isMyTurn) minEval else maxEval)
             var alphaCurrent = alpha
             var betaCurrent = beta
             for ((fromX, fromY, toX, toY) <- moves)
