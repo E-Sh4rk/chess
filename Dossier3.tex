@@ -38,8 +38,32 @@ Grâce à la séparation de \textit{Game} et \textit{Rules}, on peut désormais 
 
 \section{L'IA Alpha-Beta}
 
+L'IA Alpha-Beta développée est une sous-classe de SynchPlayer, donc un joueur comme un autre qui renvoie un coup lorsqu'on lui demande de jouer. Elle repose, comme on s'y attend, sur la combinaison de deux éléments distincts : un algorithme de parcours des configurations, et une fonction d'évaluation des positions de jeu.
+
+\-
+
+L'algorithme de parcours est directement implémenté comme une méthode de la classe. A ce jour, le parcours suit l'algorithme Minimax avec l'élagage Alpha-Bêta implémenté de manière fidèle - sans autre optimisation. Pour chaque coup possible, on copie l'instance courante de \textit{Rules}, on simule le coup dans la copie et on appelle récursivement la procédure dessus jusqu'à la profondeur indiquée, à laquelle on évalue alors la configuration.
+
+\-
+
+La fonction d'évaluation est donnée en paramètre de classe. De cette manière, on a une liberté importante sur la fonction d'évaluation choisie. Dans l'implémentation, une fonction d'évaluation quelconque est caractérisée par la classe abstraite EvalFunc, ayant une méthode qui prend une instance de Rules en entrée et renvoie un entier : la valeur de la configuration du jeu. Actuellement, l'accent a été mis sur une fonction d'évaluation en particulier : EvalStd.
+
+\-
+
+Cette fonction d'évaluation reprend les grandes lignes de la fonction d'évaluation \textit{simple} donnée en lien dans le sujet : la répartition des poids vient d'observations locales, par exemple éviter d'avoir des cavaliers le long des bords de l'échiquier et les préferer au centre. Notons que EvalStd distingue deux instants dans une partie : le milieu et la fin de partie. En effet, le roi se doit d'avoir une mobilité différente selon l'avancement de la partie. Cette distinction est opérée par la méthode \textit{isEndGame} : on est en fin de partie si et seulement si chaque joueur a perdu sa dame ou n'a qu'un nombre restreint d'autres pièces encore en jeu.
+
+\-
+
+Au niveau des performances réelles de l'IA :
+\begin{itemize}
+\item Profondeur 0 ou 1 : L'IA joue quasi-instantanement.
+\item Profondeur 2 : L'IA est rapide (en général pas plus de 5 secondes par coup). Son jeu n'est bien sûr pas parfait, mais on peut déjà observer la prise de pièces adverses non protégées, ainsi que la prise en compte de la promotion et du roque.
+\item Profondeur 3 : L'attente est plus longue, mais convenable par rapport au temps de jeu moyen aux échecs : en général moins de 50 secondes par coup, et jusqu'à 2 minutes pour le pire cas observé. Le jeu de l'IA est plus fort qu'en profondeur 2 : on observe notamment des protections de pièces.
+\item Profondeur $\geq$ 4 : L'IA est trop longue pour être jouable.
+\end{itemize}
 
 \section{La classe CECP\_Player}
+
 Cette classe implémente un \textit{Player} communiquant avec le protocole CECP. Seul GNU-Chess est supporté pour le moment.
 Un processus de \textsl{gnuchess} (avec l'option -x) est démarré lors de l'initialisation du joueur (méthode \textit{init}),
 puis \textit{CECP\_Player} maintient une communication avec ce processus sur un nouveau thread à travers trois pipes (input, output, error).
