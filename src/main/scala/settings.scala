@@ -32,6 +32,10 @@ class Settings extends GridBagPanel
 
     private val AB_depthLabel : Label = new Label("Alpha-Beta depth")
     private val AB_depth : TextField = new TextField("2")
+    private val AB_attackLabel : Label = new Label("Alpha-Beta attack coef (0-10)")
+    private val AB_attack : TextField = new TextField("0")
+    private val AB_defenseLabel : Label = new Label("Alpha-Beta defense coef (0-10)")
+    private val AB_defense : TextField = new TextField("0")
 
     private val label : Label = new Label("Settings below only apply to a new game :")
 
@@ -79,24 +83,36 @@ class Settings extends GridBagPanel
     c.gridx = 2; c.gridy = 5
     add(AB_depth, c)
 
+    c.gridx = 0; c.gridy = 6
+    add(AB_attackLabel, c)
+    c.gridwidth = 1; c.ipady = 0
+    c.gridx = 2; c.gridy = 6
+    add(AB_attack, c)
+
+    c.gridx = 0; c.gridy = 7
+    add(AB_defenseLabel, c)
+    c.gridwidth = 1; c.ipady = 0
+    c.gridx = 2; c.gridy = 7
+    add(AB_defense, c)
+
     // Label
     c.gridwidth = 3; c.ipady = 75
-    c.gridx = 0; c.gridy = 6
+    c.gridx = 0; c.gridy = 8
     add(label, c)
 
     // Variant
     c.gridwidth = 1; c.ipady = 0
-    c.gridx = 0; c.gridy = 7
+    c.gridx = 0; c.gridy = 9
     add(labelVariant, c)
     c.gridwidth = 1; c.ipady = 0
-    c.gridx = 2; c.gridy = 7
+    c.gridx = 2; c.gridy = 9
     add(variant, c)
 
     // Clock
     c.gridwidth = 3; c.ipady = 25
-    c.gridx = 0; c.gridy = 8
+    c.gridx = 0; c.gridy = 10
     add(clock, c)
-    c.gridx = 0; c.gridy = 9
+    c.gridx = 0; c.gridy = 11
     add(clockText, c)
 
     def whitePlayerType () : Player_Type.Player_Type =
@@ -121,6 +137,8 @@ class Settings extends GridBagPanel
     }
 
     def gnuChessTimeLimit () : Int = { return toInt(GNU_time.text).getOrElse(60) }
+    def alphaBetaAttack () : Int = { return toInt(AB_attack.text).getOrElse(0) }
+    def alphaBetaDefense () : Int = { return toInt(AB_defense.text).getOrElse(0) }
     def alphaBetaDepth () : Int = { return toInt(AB_depth.text).getOrElse(2) }
 
     def clockEnabled () : Boolean = { return clock.selected }
