@@ -51,8 +51,31 @@ class EvalToy() extends EvalFunc()
     }
 }
 
-class EvalStd() extends EvalFunc()
+/**
+
+A standard evaluation function taking into account the pieces and their positions
+
+Special thanks to : https://chessprogramming.wikispaces.com/Simplified+evaluation+function
+    for inspiration to the following piece-square tables.
+*/
+class EvalStd(attCoef:Int, defCoef:Int) extends EvalFunc()
 {
+    private def attValue(rules:Rules, team:Round.Round) : Int =
+    {
+        if (rules.getKing(Round.adv(team)).isCheck)
+            return 100 * attCoef
+        else
+            return 0
+    }
+    
+    private def defValue(rules:Rules, team:Round.Round) : Int =
+    {
+        if (rules.getKing(team).isCheck)
+            return -100 * defCoef
+        else
+            return 0
+    }
+    
     private val pieceVal = Map[PieceType.PieceType, Int](
         PieceType.Pawn -> 100,
         PieceType.Knight -> 320,
@@ -64,10 +87,6 @@ class EvalStd() extends EvalFunc()
         PieceType.Chancellor -> 700,
         PieceType.Unknown -> 0
     )
-    /*
-    Special thanks to : https://chessprogramming.wikispaces.com/Simplified+evaluation+function
-    for inspiration to the following piece-square tables.
-    */
 
     private val squareValuesPawn:Array[Array[Int]] = Array(
         Array(  0,  0,  0,  0,  0,  0,  0,  0),
@@ -194,7 +213,7 @@ class EvalStd() extends EvalFunc()
                 }
             }
         }
-        return (noQueenW && noQueenB) || ((noQueenW || nbOtherPiecesW <= 3) && (noQueenB || nbOtherPiecesB <= 3))
+        return (noQueenW || nbOtherPiecesW <= 5) && (noQueenB || nbOtherPiecesB <= 5)
     }
 
     def eval(rules:Rules,team:Round.Round) : Int =
@@ -237,6 +256,9 @@ class EvalStd() extends EvalFunc()
                 }
             }
         }
+        println(res)
+        res += attValue(rules, team) + defValue(rules, team)
+        println(res)
         return res
     }
 }

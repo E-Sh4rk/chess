@@ -50,7 +50,16 @@ La fonction d'évaluation est donnée en paramètre de classe. De cette manière
 
 \-
 
-Cette fonction d'évaluation reprend les grandes lignes de la fonction d'évaluation \textit{simple} donnée en lien dans le sujet : la répartition des poids vient d'observations locales, par exemple éviter d'avoir des cavaliers le long des bords de l'échiquier et les préferer au centre. Notons que EvalStd distingue deux instants dans une partie : le milieu et la fin de partie. En effet, le roi se doit d'avoir une mobilité différente selon l'avancement de la partie. Cette distinction est opérée par la méthode \textit{isEndGame} : on est en fin de partie si et seulement si chaque joueur a perdu sa dame ou n'a qu'un nombre restreint d'autres pièces encore en jeu.
+EvalStd reprend les grandes lignes de la fonction d'évaluation \textit{simple} donnée en lien dans le sujet : la répartition des poids vient d'observations locales, par exemple éviter d'avoir des cavaliers le long des bords de l'échiquier et les préferer au centre. Notons que EvalStd distingue deux instants dans une partie : le milieu et la fin de partie. En effet, le roi se doit d'avoir une mobilité différente selon l'avancement de la partie. Cette distinction est opérée par la méthode \textit{isEndGame} : on est en fin de partie si et seulement si chaque joueur a perdu sa dame ou n'a qu'un nombre restreint d'autres pièces encore en jeu.
+
+\-
+
+L'IA comporte trois paramètres, tous modifiables depuis le menu des options de l'interface graphique :
+\begin{itemize}
+\item \textit{maxDepth} : la profondeur de l'algorithme de recherche, qui peut se voir aussi comme le niveau de difficulté.
+\item \textit{attCoef} : plus ce coefficient est élevé, plus l'IA cherchera à mettre en echec son adversaire par tous les moyens. On l'observe particulièrement bien avec une profondeur de 0.
+\item \textit{defCoef} : plus ce coefficient est élevé, plus l'IA cherchera à éviter d'être mise en échec.
+\end{itemize}
 
 \-
 
