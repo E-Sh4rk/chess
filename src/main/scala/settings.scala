@@ -30,7 +30,7 @@ class Settings extends GridBagPanel
     private val GNU_timeLabel : Label = new Label("GNU-Chess time limit (sec)")
     private val GNU_time : TextField = new TextField("60")
 
-    private val AB_depthLabel : Label = new Label("Alpha-Beta depth")
+    private val AB_depthLabel : Label = new Label("Alpha-Beta depth (0-3)")
     private val AB_depth : TextField = new TextField("2")
     private val AB_attackLabel : Label = new Label("Alpha-Beta attack coef (0-10)")
     private val AB_attack : TextField = new TextField("0")
